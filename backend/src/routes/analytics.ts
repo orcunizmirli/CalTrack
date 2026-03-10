@@ -164,7 +164,7 @@ router.get('/micronutrients', async (req: AuthRequest, res: Response, next) => {
     const totals: Record<string, number> = {};
     for (const meal of meals) {
       if (!meal.food) continue;
-      const ratio = (meal.quantity || 0) / (meal.food.servingSizeG || 100);
+      const ratio = Number(meal.quantity || 0) / Number(meal.food.servingSizeG || 100);
       const fields = [
         'vitaminAMcg', 'vitaminCMg', 'vitaminDMcg', 'vitaminEMg', 'vitaminKMcg',
         'vitaminB1Mg', 'vitaminB2Mg', 'vitaminB3Mg', 'vitaminB6Mg',

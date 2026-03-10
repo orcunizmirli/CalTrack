@@ -52,10 +52,10 @@ router.get('/barcode/:code', async (req: Request, res: Response, next) => {
       // Try Open Food Facts API
       try {
         const response = await fetch(`https://world.openfoodfacts.org/api/v2/product/${code}.json`);
-        const data = await response.json();
+        const data = await response.json() as Record<string, any>;
 
         if (data.status === 1 && data.product) {
-          const p = data.product;
+          const p = data.product as Record<string, any>;
           const nutrients = p.nutriments || {};
 
           food = await prisma.food.create({

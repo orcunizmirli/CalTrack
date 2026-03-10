@@ -39,7 +39,7 @@ router.post('/analyze-food', aiRateLimiter, upload.single('image'), async (req: 
       throw new AppError('AI analiz servisi yanıt vermedi', 502);
     }
 
-    const result = await aiResponse.json();
+    const result = await aiResponse.json() as Record<string, any>;
     const processingMs = Date.now() - startTime;
 
     // Save scan record
@@ -80,7 +80,7 @@ router.post('/generate-recipes', aiRateLimiter, async (req: AuthRequest, res: Re
       throw new AppError('Tarif oluşturma servisi yanıt vermedi', 502);
     }
 
-    const recipes = await aiResponse.json();
+    const recipes = await aiResponse.json() as Record<string, any>[];
 
     // Save recipes to DB
     for (const recipe of recipes) {

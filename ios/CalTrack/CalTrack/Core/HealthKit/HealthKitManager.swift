@@ -21,7 +21,7 @@ class HealthKitManager: ObservableObject {
             HKQuantityType(.height),
             HKQuantityType(.bodyMass),
             HKQuantityType(.bodyFatPercentage),
-            HKQuantityType(.dateOfBirth),
+            HKCharacteristicType(.dateOfBirth),
             HKQuantityType(.stepCount),
             HKQuantityType(.activeEnergyBurned),
             HKQuantityType(.basalEnergyBurned),

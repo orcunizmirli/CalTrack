@@ -37,4 +37,4 @@ export const config = {
     clientId: process.env.APPLE_CLIENT_ID || '',
     teamId: process.env.APPLE_TEAM_ID || '',
   },
-} as const;
+};

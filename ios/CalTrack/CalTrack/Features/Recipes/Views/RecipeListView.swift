@@ -236,4 +236,3 @@ struct RecipeDetailView: View {
     }
 }
 
-extension RecipeResponse: Identifiable {}

@@ -13,7 +13,7 @@ struct WelcomeView: View {
             VStack(spacing: 16) {
                 Image(systemName: "fork.knife.circle.fill")
                     .font(.system(size: 80))
-                    .foregroundStyle(.accent)
+                    .foregroundStyle(Color.accentColor)
 
                 Text("CalTrack")
                     .font(.ctLargeTitle)
