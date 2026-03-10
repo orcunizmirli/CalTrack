@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: caltrack-db
+    environment:
+      POSTGRES_USER: caltrack
+      POSTGRES_PASSWORD: caltrack_dev_password
+      POSTGRES_DB: caltrack
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U caltrack"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: caltrack-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  # Main API (Node.js)
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: caltrack-api
+    environment:
+      DATABASE_URL: postgresql://caltrack:caltrack_dev_password@postgres:5432/caltrack
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: dev-jwt-secret-change-in-production
+      NODE_ENV: development
+      PORT: 3000
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    volumes:
+      - ./backend/src:/app/src
+
+  # AI Service (Python)
+  ai-service:
+    build:
+      context: ./ai-service
+      dockerfile: Dockerfile
+    container_name: caltrack-ai
+    environment:
+      DATABASE_URL: postgresql://caltrack:caltrack_dev_password@postgres:5432/caltrack
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+    ports:
+      - "8001:8001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  redis_data:

@@ -1,0 +1,223 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(uuid()) @db.Uuid
+  email         String?  @unique @db.VarChar(255)
+  passwordHash  String?  @map("password_hash") @db.VarChar(255)
+  appleId       String?  @unique @map("apple_id") @db.VarChar(255)
+  googleId      String?  @unique @map("google_id") @db.VarChar(255)
+  name          String   @db.VarChar(100)
+  gender        String?  @db.VarChar(10)
+  birthDate     DateTime? @map("birth_date") @db.Date
+  heightCm      Decimal? @map("height_cm") @db.Decimal(5, 1)
+  weightKg      Decimal? @map("weight_kg") @db.Decimal(5, 1)
+  bodyFatPct    Decimal? @map("body_fat_pct") @db.Decimal(4, 1)
+  activityLevel String?  @map("activity_level") @db.VarChar(20)
+  unitSystem    String   @default("metric") @map("unit_system") @db.VarChar(10)
+  language      String   @default("tr") @db.VarChar(5)
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+
+  goals         UserGoal[]
+  mealEntries   MealEntry[]
+  aiScans       AiScan[]
+  waterEntries  WaterEntry[]
+  weightLogs    WeightLog[]
+  customFoods   Food[]       @relation("CustomFoods")
+  savedRecipes  UserSavedRecipe[]
+  subscription  Subscription?
+
+  @@map("users")
+}
+
+model UserGoal {
+  id            String   @id @default(uuid()) @db.Uuid
+  userId        String   @map("user_id") @db.Uuid
+  goalType      String   @map("goal_type") @db.VarChar(20)
+  targetWeight  Decimal? @map("target_weight") @db.Decimal(5, 1)
+  weeklyChange  Decimal? @map("weekly_change") @db.Decimal(3, 2)
+  dailyCalories Int      @map("daily_calories")
+  proteinG      Int?     @map("protein_g")
+  carbsG        Int?     @map("carbs_g")
+  fatG          Int?     @map("fat_g")
+  isActive      Boolean  @default(true) @map("is_active")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_goals")
+}
+
+model Food {
+  id             String   @id @default(uuid()) @db.Uuid
+  name           String   @db.VarChar(255)
+  nameTr         String?  @map("name_tr") @db.VarChar(255)
+  brand          String?  @db.VarChar(255)
+  barcode        String?  @db.VarChar(50)
+  servingSizeG   Decimal  @map("serving_size_g") @db.Decimal(7, 1)
+  servingLabel   String?  @map("serving_label") @db.VarChar(50)
+  calories       Decimal  @db.Decimal(7, 1)
+  proteinG       Decimal? @map("protein_g") @db.Decimal(6, 1)
+  carbsG         Decimal? @map("carbs_g") @db.Decimal(6, 1)
+  fatG           Decimal? @map("fat_g") @db.Decimal(6, 1)
+  fiberG         Decimal? @map("fiber_g") @db.Decimal(6, 1)
+  sugarG         Decimal? @map("sugar_g") @db.Decimal(6, 1)
+  saturatedFatG  Decimal? @map("saturated_fat_g") @db.Decimal(6, 1)
+  sodiumMg       Decimal? @map("sodium_mg") @db.Decimal(7, 1)
+  // Vitamins
+  vitaminAMcg    Decimal? @map("vitamin_a_mcg") @db.Decimal(7, 1)
+  vitaminCMg     Decimal? @map("vitamin_c_mg") @db.Decimal(7, 1)
+  vitaminDMcg    Decimal? @map("vitamin_d_mcg") @db.Decimal(7, 1)
+  vitaminEMg     Decimal? @map("vitamin_e_mg") @db.Decimal(7, 1)
+  vitaminKMcg    Decimal? @map("vitamin_k_mcg") @db.Decimal(7, 1)
+  vitaminB1Mg    Decimal? @map("vitamin_b1_mg") @db.Decimal(7, 3)
+  vitaminB2Mg    Decimal? @map("vitamin_b2_mg") @db.Decimal(7, 3)
+  vitaminB3Mg    Decimal? @map("vitamin_b3_mg") @db.Decimal(7, 1)
+  vitaminB5Mg    Decimal? @map("vitamin_b5_mg") @db.Decimal(7, 1)
+  vitaminB6Mg    Decimal? @map("vitamin_b6_mg") @db.Decimal(7, 3)
+  vitaminB7Mcg   Decimal? @map("vitamin_b7_mcg") @db.Decimal(7, 1)
+  vitaminB9Mcg   Decimal? @map("vitamin_b9_mcg") @db.Decimal(7, 1)
+  vitaminB12Mcg  Decimal? @map("vitamin_b12_mcg") @db.Decimal(7, 3)
+  // Minerals
+  calciumMg      Decimal? @map("calcium_mg") @db.Decimal(7, 1)
+  ironMg         Decimal? @map("iron_mg") @db.Decimal(7, 1)
+  magnesiumMg    Decimal? @map("magnesium_mg") @db.Decimal(7, 1)
+  potassiumMg    Decimal? @map("potassium_mg") @db.Decimal(7, 1)
+  zincMg         Decimal? @map("zinc_mg") @db.Decimal(7, 1)
+  phosphorusMg   Decimal? @map("phosphorus_mg") @db.Decimal(7, 1)
+  // Meta
+  source         String?  @db.VarChar(20)
+  isVerified     Boolean  @default(false) @map("is_verified")
+  createdBy      String?  @map("created_by") @db.Uuid
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  creator        User?    @relation("CustomFoods", fields: [createdBy], references: [id])
+  mealEntries    MealEntry[]
+
+  @@index([barcode])
+  @@map("foods")
+}
+
+model MealEntry {
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String   @map("user_id") @db.Uuid
+  foodId      String?  @map("food_id") @db.Uuid
+  foodName    String?  @map("food_name") @db.VarChar(255)
+  mealType    String   @map("meal_type") @db.VarChar(20)
+  date        DateTime @db.Date
+  quantity    Decimal  @db.Decimal(7, 1)
+  calories    Decimal  @db.Decimal(7, 1)
+  proteinG    Decimal? @map("protein_g") @db.Decimal(6, 1)
+  carbsG      Decimal? @map("carbs_g") @db.Decimal(6, 1)
+  fatG        Decimal? @map("fat_g") @db.Decimal(6, 1)
+  aiScanId    String?  @map("ai_scan_id") @db.Uuid
+  photoUrl    String?  @map("photo_url") @db.VarChar(500)
+  notes       String?
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  food        Food?    @relation(fields: [foodId], references: [id])
+
+  @@index([userId, date])
+  @@map("meal_entries")
+}
+
+model AiScan {
+  id            String   @id @default(uuid()) @db.Uuid
+  userId        String   @map("user_id") @db.Uuid
+  photoUrl      String   @map("photo_url") @db.VarChar(500)
+  rawResponse   Json?    @map("raw_response")
+  detectedItems Json?    @map("detected_items")
+  modelUsed     String?  @map("model_used") @db.VarChar(50)
+  confidence    Decimal? @db.Decimal(3, 2)
+  processingMs  Int?     @map("processing_ms")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("ai_scans")
+}
+
+model WaterEntry {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  amountMl  Int      @map("amount_ml")
+  date      DateTime @db.Date
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("water_entries")
+}
+
+model WeightLog {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  weightKg   Decimal  @map("weight_kg") @db.Decimal(5, 1)
+  bodyFatPct Decimal? @map("body_fat_pct") @db.Decimal(4, 1)
+  date       DateTime @db.Date
+  source     String?  @db.VarChar(20)
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("weight_logs")
+}
+
+model Recipe {
+  id           String   @id @default(uuid()) @db.Uuid
+  title        String   @db.VarChar(255)
+  description  String?
+  ingredients  Json
+  instructions Json
+  prepTimeMin  Int?     @map("prep_time_min")
+  cookTimeMin  Int?     @map("cook_time_min")
+  servings     Int?
+  calories     Decimal? @db.Decimal(7, 1)
+  proteinG     Decimal? @map("protein_g") @db.Decimal(6, 1)
+  carbsG       Decimal? @map("carbs_g") @db.Decimal(6, 1)
+  fatG         Decimal? @map("fat_g") @db.Decimal(6, 1)
+  tags         String[]
+  photoUrl     String?  @map("photo_url") @db.VarChar(500)
+  aiGenerated  Boolean  @default(false) @map("ai_generated")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  savedBy      UserSavedRecipe[]
+
+  @@map("recipes")
+}
+
+model UserSavedRecipe {
+  userId   String   @map("user_id") @db.Uuid
+  recipeId String   @map("recipe_id") @db.Uuid
+  savedAt  DateTime @default(now()) @map("saved_at") @db.Timestamptz()
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipe   Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@id([userId, recipeId])
+  @@map("user_saved_recipes")
+}
+
+model Subscription {
+  id           String    @id @default(uuid()) @db.Uuid
+  userId       String    @unique @map("user_id") @db.Uuid
+  plan         String    @db.VarChar(20)
+  status       String    @db.VarChar(20)
+  appleReceipt String?   @map("apple_receipt")
+  startsAt     DateTime? @map("starts_at") @db.Timestamptz()
+  expiresAt    DateTime? @map("expires_at") @db.Timestamptz()
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("subscriptions")
+}
