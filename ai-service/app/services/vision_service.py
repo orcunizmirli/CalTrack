@@ -5,31 +5,43 @@ import anthropic
 from app.config import settings
 from app.models.schemas import RawVisionResult, FoodItem
 
-FOOD_ANALYSIS_PROMPT = """You are a nutrition expert AI. Analyze the food in this photo carefully.
+FOOD_ANALYSIS_PROMPT = """You are a professional nutrition expert AI specialized in Turkish cuisine. Analyze the food in this photo carefully.
 
 For each distinct food item visible:
-1. Identify the food item (use Turkish name primarily, with English name)
-2. Estimate the portion size in grams
-3. Calculate calories and macronutrients
+1. Identify the food item — use the most specific Turkish name (e.g., "Adana Kebap" not just "kebap")
+2. Also provide the English name for database matching
+3. Estimate the portion size in grams — use visual cues:
+   - Standard dinner plate ≈ 26cm diameter
+   - Tea glass (ince belli) ≈ 100ml
+   - Standard fork ≈ 19cm
+   - A closed fist ≈ 100g rice/pasta
+   - Palm of hand ≈ 85g meat
+   - Thumb tip ≈ 5g butter/oil
+4. Calculate calories and macronutrients per YOUR estimated portion
+5. Assign a confidence score (0.0-1.0) based on how clearly you can identify the food
 
-Be as accurate as possible with portion estimation. Consider plate size, utensils, and other visual cues.
+IMPORTANT RULES:
+- For Turkish dishes with sauce/oil (zeytinyağlı, sote), include the oil calories
+- For mixed dishes (karnıyarık, mantı), estimate each component's contribution
+- If multiple items share a plate, estimate each separately
+- For bread-wrapped items (dürüm, lahmacun), include the bread
 
 Return ONLY valid JSON in this exact format:
 {
   "items": [
     {
-      "name": "Izgara Tavuk Göğsü",
-      "name_en": "Grilled Chicken Breast",
-      "portion_g": 150,
-      "calories": 248,
-      "protein_g": 46.5,
-      "carbs_g": 0,
-      "fat_g": 5.4,
-      "fiber_g": 0,
-      "confidence": 0.92
+      "name": "Adana Kebap",
+      "name_en": "Adana Kebab",
+      "portion_g": 200,
+      "calories": 460,
+      "protein_g": 34.0,
+      "carbs_g": 4.0,
+      "fat_g": 35.0,
+      "fiber_g": 1.0,
+      "confidence": 0.90
     }
   ],
-  "meal_description": "Izgara tavuk göğsü yanında pilav ve salata"
+  "meal_description": "Adana kebap yanında lavaş, közlenmiş domates ve biber"
 }"""
 
 

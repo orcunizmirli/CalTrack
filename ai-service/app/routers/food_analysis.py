@@ -1,8 +1,11 @@
+import logging
 import time
-from fastapi import APIRouter, UploadFile, File, HTTPException
+from fastapi import APIRouter, UploadFile, File, HTTPException, Query
 from app.services.vision_service import VisionService
 from app.services.rag_service import RAGService
 from app.models.schemas import FoodAnalysisResponse, FoodItem
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 vision_service = VisionService()
@@ -76,3 +79,34 @@ async def analyze_food(
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Analiz hatası: {str(e)}")
+
+
+@router.get("/search-foods")
+async def search_foods(
+    q: str = Query(..., min_length=2, description="Food search query"),
+    limit: int = Query(5, ge=1, le=20),
+):
+    """
+    Semantic food search using RAG embeddings.
+    Searches the food database by name similarity using pgvector.
+    """
+    try:
+        results = await rag_service.search_foods_by_name(q, top_k=limit)
+        return {
+            "query": q,
+            "results": [
+                {
+                    "food_id": r["food_id"],
+                    "name": r["food_name"],
+                    "name_tr": r.get("food_name_tr"),
+                    "calories_per_100g": float(r["calories"]),
+                    "protein_g_per_100g": float(r.get("protein_g") or 0),
+                    "carbs_g_per_100g": float(r.get("carbs_g") or 0),
+                    "fat_g_per_100g": float(r.get("fat_g") or 0),
+                    "similarity": round(1 - r["distance"], 3),
+                }
+                for r in results
+            ],
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Arama hatası: {str(e)}")
