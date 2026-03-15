@@ -37,10 +37,12 @@
 		93CAC3F123B345FFC10E3248 /* BodyFatEstimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 363AB0E2663685A1FCDFDED8 /* BodyFatEstimator.swift */; };
 		978040481E8BF420E2940737 /* PersonalInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB291B7DAC19DFA649C45ADA /* PersonalInfoView.swift */; };
 		999847B58155D5EFDED4FC6C /* CameraManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A606C9D704EB87D999DD9F66 /* CameraManager.swift */; };
+		9A8D3BBF2DD1BA39FD0F0289 /* GlassComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8233CC59656E46F1E842135C /* GlassComponents.swift */; };
 		9C9BE806732D30B56263BA3B /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D69F88140C4224F6555A29C /* WelcomeView.swift */; };
 		A0559D2D41EE865706283673 /* OnboardingFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA2761CBEDD0A2F4DEF666D6 /* OnboardingFlowView.swift */; };
 		A410D9B289585E61D520F15E /* AIFoodScanViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77071557FD5250EB576649BD /* AIFoodScanViewModel.swift */; };
 		A7C8DEEA1D23F4D4A067E8C9 /* FoodSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CD727A36073064D5B5B5C70 /* FoodSearchView.swift */; };
+		ACEAB0517756CDEF022432BA /* RulerPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74B967C3E26983239D970D17 /* RulerPicker.swift */; };
 		B154A707A46C9251DBE2B2B5 /* AIFoodAnalysis.swift in Sources */ = {isa = PBXBuildFile; fileRef = 837C025F201245B82CE5A9E8 /* AIFoodAnalysis.swift */; };
 		B33D0D973DCEB895223C9D90 /* OnboardingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 542338EE89E17DFF25300903 /* OnboardingViewModel.swift */; };
 		BA94322F354ED37B1799BEBE /* AIFoodScanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8A9FD36A35D44F5C29E2A2C /* AIFoodScanView.swift */; };
@@ -74,9 +76,11 @@
 		67395850A72E6B7E9CB96EA2 /* ActivityLevelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityLevelView.swift; sourceTree = "<group>"; };
 		7044F575C7932121E64CB615 /* DashboardViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardViewModel.swift; sourceTree = "<group>"; };
 		71419EE27ECD325EC382FF4C /* MacroProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacroProgressView.swift; sourceTree = "<group>"; };
+		74B967C3E26983239D970D17 /* RulerPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RulerPicker.swift; sourceTree = "<group>"; };
 		75A57247282AFC7F72CC0A6D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		77071557FD5250EB576649BD /* AIFoodScanViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIFoodScanViewModel.swift; sourceTree = "<group>"; };
 		7DBC2247F42A6368621B5031 /* APIEndpoints.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIEndpoints.swift; sourceTree = "<group>"; };
+		8233CC59656E46F1E842135C /* GlassComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassComponents.swift; sourceTree = "<group>"; };
 		837C025F201245B82CE5A9E8 /* AIFoodAnalysis.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIFoodAnalysis.swift; sourceTree = "<group>"; };
 		8CCFDDCE0B270A1547D6CE97 /* MicroNutrientView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicroNutrientView.swift; sourceTree = "<group>"; };
 		8CD727A36073064D5B5B5C70 /* FoodSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodSearchView.swift; sourceTree = "<group>"; };
@@ -113,6 +117,7 @@
 			children = (
 				2F9114C2A58ECCDF87DE943F /* Color+Theme.swift */,
 				05F892ADAEDE9EE92F665B98 /* Date+Extensions.swift */,
+				8233CC59656E46F1E842135C /* GlassComponents.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -157,6 +162,14 @@
 				8AC743C7A4AE28F7FBA393A2 /* CalTrack */,
 				1671959463E91D08312E2B33 /* Products */,
 			);
+			sourceTree = "<group>";
+		};
+		23C14C688B5C059823D49D60 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				74B967C3E26983239D970D17 /* RulerPicker.swift */,
+			);
+			path = Components;
 			sourceTree = "<group>";
 		};
 		2EE2D68A88973FB7151F3768 /* Features */ = {
@@ -340,6 +353,7 @@
 			isa = PBXGroup;
 			children = (
 				F2C1794BDFBC4FAFF9CC4FE8 /* Camera */,
+				23C14C688B5C059823D49D60 /* Components */,
 				14FA48978682C0E192EB2E27 /* Extensions */,
 				205652D65F541D7C60ACEE01 /* HealthKit */,
 				B8F2B233F8FAB076C4E6506D /* Network */,
@@ -422,7 +436,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 1600;
+				LastUpgradeCheck = 2600;
 				TargetAttributes = {
 					13B10C59BC98F472EA77D409 = {
 						DevelopmentTeam = "";
@@ -476,6 +490,7 @@
 				D8E6E5C2ED1FE5F4D42200C1 /* FoodItem.swift in Sources */,
 				A7C8DEEA1D23F4D4A067E8C9 /* FoodSearchView.swift in Sources */,
 				12ADC49BCE3CA9153100394E /* FoodSearchViewModel.swift in Sources */,
+				9A8D3BBF2DD1BA39FD0F0289 /* GlassComponents.swift in Sources */,
 				039201B932B9D35D453DD754 /* GoalSelectionView.swift in Sources */,
 				FA336C012BF6381A12CEE4D6 /* GoalsOverviewView.swift in Sources */,
 				08537EB40856ECEDAABA3037 /* HealthKitManager.swift in Sources */,
@@ -494,6 +509,7 @@
 				2FF0E3781A84F7619AC4B0B1 /* RecipeRequestView.swift in Sources */,
 				D98D7ABAC555B3494C336C23 /* RecipeViewModel.swift in Sources */,
 				82D7652B1EC1B1C490515F0B /* RootView.swift in Sources */,
+				ACEAB0517756CDEF022432BA /* RulerPicker.swift in Sources */,
 				7588F7AB4A81739B740A8026 /* SettingsView.swift in Sources */,
 				5D7DB0678F4F145D445181D7 /* UserDefaultsManager.swift in Sources */,
 				715EA011382DBB73100B38D1 /* UserProfile.swift in Sources */,
@@ -574,7 +590,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -660,7 +676,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;

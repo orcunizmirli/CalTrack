@@ -4,7 +4,7 @@ struct SettingsView: View {
     @EnvironmentObject var appState: AppState
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             List {
                 // Profile Section
                 Section {
@@ -12,14 +12,14 @@ struct SettingsView: View {
                         HStack(spacing: 14) {
                             Image(systemName: "person.circle.fill")
                                 .font(.system(size: 44))
-                                .foregroundColor(.accentColor)
+                                .foregroundStyle(.ctAccent)
 
                             VStack(alignment: .leading, spacing: 2) {
                                 Text("Kullanıcı")
                                     .font(.ctHeadline)
                                 Text("Profil bilgilerini düzenle")
                                     .font(.ctCaption)
-                                    .foregroundColor(.secondary)
+                                    .foregroundStyle(.ctTextSecondary)
                             }
                         }
                         .padding(.vertical, 4)
@@ -63,14 +63,14 @@ struct SettingsView: View {
                         Label("Birim Sistemi", systemImage: "ruler")
                         Spacer()
                         Text("Metrik")
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.ctTextSecondary)
                     }
 
                     HStack {
                         Label("Dil", systemImage: "globe")
                         Spacer()
                         Text("Türkçe")
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.ctTextSecondary)
                     }
                 }
 
@@ -80,7 +80,7 @@ struct SettingsView: View {
                         Text("Versiyon")
                         Spacer()
                         Text("1.0.0")
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.ctTextSecondary)
                     }
 
                     Link(destination: URL(string: "https://caltrack.app/privacy")!) {
@@ -98,7 +98,7 @@ struct SettingsView: View {
                         appState.signOut()
                     }) {
                         Label("Çıkış Yap", systemImage: "rectangle.portrait.and.arrow.right")
-                            .foregroundColor(.ctError)
+                            .foregroundStyle(.ctError)
                     }
 
                     Button(role: .destructive, action: {}) {
@@ -106,6 +106,8 @@ struct SettingsView: View {
                     }
                 }
             }
+            .scrollContentBackground(.hidden)
+            .background(Color.ctBackground)
             .navigationTitle("Profil")
         }
     }
@@ -125,17 +127,19 @@ struct ProfileEditView: View {
                     Text("Boy")
                     Spacer()
                     Text("\(Int(height)) cm")
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.ctTextSecondary)
                 }
 
                 HStack {
                     Text("Kilo")
                     Spacer()
                     Text(String(format: "%.1f kg", weight))
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.ctTextSecondary)
                 }
             }
         }
+        .scrollContentBackground(.hidden)
+        .background(Color.ctBackground)
         .navigationTitle("Profil Düzenle")
     }
 }
@@ -143,7 +147,7 @@ struct ProfileEditView: View {
 struct SavedRecipesView: View {
     var body: some View {
         Text("Kayıtlı tarifler burada gösterilecek")
-            .foregroundColor(.secondary)
+            .foregroundStyle(.ctTextSecondary)
             .navigationTitle("Kayıtlı Tarifler")
     }
 }
@@ -156,11 +160,11 @@ struct HealthKitSettingsView: View {
             Section {
                 HStack {
                     Image(systemName: "heart.fill")
-                        .foregroundColor(.red)
+                        .foregroundStyle(.red)
                     Text("Apple Health Bağlantısı")
                     Spacer()
                     Text(healthKit.isAuthorized ? "Bağlı" : "Bağlı Değil")
-                        .foregroundColor(healthKit.isAuthorized ? .ctSuccess : .secondary)
+                        .foregroundStyle(healthKit.isAuthorized ? .ctSuccess : .ctTextSecondary)
                 }
 
                 if !healthKit.isAuthorized {
@@ -183,6 +187,8 @@ struct HealthKitSettingsView: View {
                 Label("Kilo Kaydı", systemImage: "scalemass")
             }
         }
+        .scrollContentBackground(.hidden)
+        .background(Color.ctBackground)
         .navigationTitle("Apple Health")
     }
 }
@@ -205,6 +211,8 @@ struct NotificationSettingsView: View {
                 Toggle("Su İçme Hatırlatması", isOn: $waterReminder)
             }
         }
+        .scrollContentBackground(.hidden)
+        .background(Color.ctBackground)
         .navigationTitle("Bildirimler")
     }
 }

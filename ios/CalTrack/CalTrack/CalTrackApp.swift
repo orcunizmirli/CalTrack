@@ -30,6 +30,8 @@ struct CalTrackApp: App {
         WindowGroup {
             RootView()
                 .environmentObject(appState)
+                .preferredColorScheme(.dark)
+                .tint(.ctAccent)
         }
         .modelContainer(sharedModelContainer)
     }

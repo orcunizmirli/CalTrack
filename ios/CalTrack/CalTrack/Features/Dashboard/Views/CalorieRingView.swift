@@ -16,29 +16,30 @@ struct CalorieRingView: View {
             ZStack {
                 // Background ring
                 Circle()
-                    .stroke(Color.ctCalories.opacity(0.15), lineWidth: 24)
-                    .frame(width: 180, height: 180)
+                    .stroke(Color.ctAccent.opacity(0.1), lineWidth: 20)
+                    .frame(width: 200, height: 200)
 
                 // Progress ring
                 Circle()
                     .trim(from: 0, to: progress)
                     .stroke(
-                        progress > 1.0 ? Color.ctError : Color.ctCalories,
-                        style: StrokeStyle(lineWidth: 24, lineCap: .round)
+                        progress > 1.0 ? Color.ctError : Color.ctAccent,
+                        style: StrokeStyle(lineWidth: 20, lineCap: .round)
                     )
-                    .frame(width: 180, height: 180)
+                    .frame(width: 200, height: 200)
                     .rotationEffect(.degrees(-90))
-                    .animation(.easeInOut(duration: 0.8), value: progress)
+                    .animation(Animation.ctRing, value: progress)
+                    .shadow(color: .ctAccent.opacity(0.3), radius: 20)
 
                 // Center text
                 VStack(spacing: 4) {
                     Text(String(format: "%.0f", max(remaining, 0)))
-                        .font(.ctCalorieDisplay)
-                        .foregroundColor(remaining >= 0 ? .primary : .ctError)
+                        .font(.ctHero)
+                        .foregroundStyle(remaining >= 0 ? .ctTextPrimary : .ctError)
 
                     Text("Kalan")
                         .font(.ctCaption)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.ctTextSecondary)
                 }
             }
 
@@ -55,7 +56,7 @@ struct CalorieRingView: View {
                     label: "Tüketilen",
                     value: String(format: "%.0f", consumed),
                     icon: "fork.knife",
-                    color: .ctCalories
+                    color: .ctAccent
                 )
 
                 CalorieStatItem(
@@ -66,9 +67,7 @@ struct CalorieRingView: View {
                 )
             }
         }
-        .padding()
-        .background(Color.ctSecondaryBg)
-        .cornerRadius(20)
+        .glassCard(padding: 20, cornerRadius: 20)
     }
 }
 
@@ -81,13 +80,13 @@ struct CalorieStatItem: View {
     var body: some View {
         VStack(spacing: 4) {
             Image(systemName: icon)
-                .foregroundColor(color)
+                .foregroundStyle(color)
                 .font(.callout)
             Text(value)
                 .font(.ctHeadline)
             Text(label)
                 .font(.ctCaption)
-                .foregroundColor(.secondary)
+                .foregroundStyle(.ctTextSecondary)
         }
     }
 }

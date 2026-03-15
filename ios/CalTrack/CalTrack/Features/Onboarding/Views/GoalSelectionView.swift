@@ -9,19 +9,19 @@ struct GoalSelectionView: View {
                 VStack(spacing: 8) {
                     Image(systemName: "target")
                         .font(.system(size: 48))
-                        .foregroundColor(.accentColor)
+                        .foregroundStyle(.ctAccent)
 
                     Text("Hedefini Belirle")
                         .font(.ctTitle)
 
                     Text("Ana hedefin nedir?")
                         .font(.ctSubheadline)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.ctTextSecondary)
                 }
                 .padding(.top, 20)
 
                 // Goal Type Selection
-                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
+                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
                     ForEach(GoalType.allCases, id: \.self) { goal in
                         GoalCard(
                             title: goal.displayName,
@@ -35,67 +35,59 @@ struct GoalSelectionView: View {
 
                 // Target Weight (for weight-related goals)
                 if viewModel.goalType != .maintain {
-                    VStack(spacing: 12) {
+                    VStack(spacing: 8) {
                         HStack {
                             Text("Hedef Kilo")
                                 .font(.ctHeadline)
                             Spacer()
                             Text(String(format: "%.1f kg", viewModel.targetWeight))
                                 .font(.ctMacroValue)
-                                .foregroundColor(.accentColor)
+                                .foregroundStyle(.ctAccent)
                         }
+                        .padding(.horizontal, 4)
 
-                        Slider(value: $viewModel.targetWeight, in: 35...180, step: 0.5)
-                            .tint(.accentColor)
+                        RulerPicker(
+                            value: $viewModel.targetWeight,
+                            range: 35...180,
+                            step: 0.1
+                        )
 
                         let diff = viewModel.targetWeight - viewModel.weightKg
                         Text(diff > 0 ? "+\(String(format: "%.1f", diff)) kg almak" : "\(String(format: "%.1f", abs(diff))) kg vermek")
                             .font(.ctFootnote)
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.ctTextSecondary)
                     }
-                    .padding()
-                    .background(Color.ctSecondaryBg)
-                    .cornerRadius(14)
+                    .glassCard(cornerRadius: 14)
 
                     // Weekly change rate
-                    VStack(spacing: 12) {
+                    VStack(spacing: 8) {
                         HStack {
-                            Text("Haftalık Değişim Hızı")
+                            Text("Haftalık Hız")
                                 .font(.ctHeadline)
                             Spacer()
-                            Text(String(format: "%.2f kg/hafta", viewModel.weeklyChangeKg))
-                                .font(.ctSubheadline)
-                                .foregroundColor(.accentColor)
+                            Text(String(format: "%.2f kg", viewModel.weeklyChangeKg))
+                                .font(.ctMacroValue)
+                                .foregroundStyle(.ctAccent)
                         }
 
-                        HStack(spacing: 8) {
-                            ForEach([0.25, 0.5, 0.75, 1.0], id: \.self) { rate in
-                                Button(action: { viewModel.weeklyChangeKg = rate }) {
-                                    Text("\(String(format: "%.2f", rate))")
-                                        .font(.ctFootnote)
-                                        .fontWeight(.medium)
-                                        .frame(maxWidth: .infinity)
-                                        .padding(.vertical, 10)
-                                        .background(viewModel.weeklyChangeKg == rate ? Color.accentColor : Color.ctSecondaryBg)
-                                        .foregroundColor(viewModel.weeklyChangeKg == rate ? .white : .primary)
-                                        .cornerRadius(8)
-                                }
-                            }
-                        }
+                        Slider(
+                            value: $viewModel.weeklyChangeKg,
+                            in: 0.10...1.0,
+                            step: 0.05
+                        )
+                        .tint(.ctAccent)
 
                         HStack {
                             Text("Yavaş & Sağlıklı")
                                 .font(.ctCaption)
-                                .foregroundColor(.secondary)
+                                .foregroundStyle(.ctTextSecondary)
                             Spacer()
-                            Text("Hızlı & Agresif")
+                            Text("Hızlı")
                                 .font(.ctCaption)
-                                .foregroundColor(.secondary)
+                                .foregroundStyle(.ctTextSecondary)
                         }
                     }
-                    .padding()
-                    .background(Color.ctSecondaryBg)
-                    .cornerRadius(14)
+                    .glassCard(cornerRadius: 14)
                 }
             }
             .padding(.horizontal)
@@ -112,23 +104,18 @@ struct GoalCard: View {
 
     var body: some View {
         Button(action: action) {
-            VStack(spacing: 12) {
+            HStack(spacing: 6) {
                 Image(systemName: icon)
-                    .font(.system(size: 32))
-                    .foregroundColor(isSelected ? .accentColor : .secondary)
+                    .font(.system(size: 16))
 
                 Text(title)
-                    .font(.ctHeadline)
-                    .foregroundColor(.primary)
+                    .font(.ctSubheadline)
             }
+            .foregroundStyle(isSelected ? .black : .ctTextPrimary)
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 24)
-            .background(isSelected ? Color.accentColor.opacity(0.15) : Color.ctSecondaryBg)
-            .cornerRadius(16)
-            .overlay(
-                RoundedRectangle(cornerRadius: 16)
-                    .stroke(isSelected ? Color.accentColor : Color.clear, lineWidth: 2)
-            )
+            .padding(.vertical, 12)
+            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .glassEffect(isSelected ? .regular.tint(.ctAccent) : .regular)
         }
     }
 }

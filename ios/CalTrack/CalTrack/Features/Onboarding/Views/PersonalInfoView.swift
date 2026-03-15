@@ -10,14 +10,14 @@ struct PersonalInfoView: View {
                 VStack(spacing: 8) {
                     Image(systemName: "person.fill")
                         .font(.system(size: 48))
-                        .foregroundColor(.accentColor)
+                        .foregroundStyle(.ctAccent)
 
                     Text("Kişisel Bilgiler")
                         .font(.ctTitle)
 
                     Text("Sana en uygun kalori hedefini hesaplayabilmemiz için bilgilerine ihtiyacımız var")
                         .font(.ctSubheadline)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.ctTextSecondary)
                         .multilineTextAlignment(.center)
                 }
                 .padding(.top, 20)
@@ -38,9 +38,7 @@ struct PersonalInfoView: View {
                         Image(systemName: viewModel.useHealthKit ? "checkmark.circle.fill" : "circle")
                             .foregroundColor(viewModel.useHealthKit ? .green : .secondary)
                     }
-                    .padding()
-                    .background(Color.ctSecondaryBg)
-                    .cornerRadius(14)
+                    .glassCard(cornerRadius: 14)
                 }
 
                 // Name
@@ -86,7 +84,7 @@ struct PersonalInfoView: View {
 
                     Text("Yaş: \(viewModel.age)")
                         .font(.ctFootnote)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.ctTextSecondary)
                 }
             }
             .padding(.horizontal)
@@ -103,21 +101,17 @@ struct GenderButton: View {
 
     var body: some View {
         Button(action: action) {
-            VStack(spacing: 8) {
+            HStack(spacing: 8) {
                 Image(systemName: icon)
-                    .font(.title)
+                    .font(.body)
                 Text(title)
                     .font(.ctSubheadline)
             }
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 20)
-            .background(isSelected ? Color.accentColor.opacity(0.15) : Color.ctSecondaryBg)
-            .foregroundColor(isSelected ? .accentColor : .primary)
-            .cornerRadius(14)
-            .overlay(
-                RoundedRectangle(cornerRadius: 14)
-                    .stroke(isSelected ? Color.accentColor : Color.clear, lineWidth: 2)
-            )
+            .padding(.vertical, 12)
+            .foregroundStyle(isSelected ? .black : .ctTextPrimary)
+            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .glassEffect(isSelected ? .regular.tint(.ctAccent) : .regular)
         }
     }
 }

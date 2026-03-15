@@ -6,7 +6,7 @@ struct AIFoodScanView: View {
     @Environment(\.modelContext) private var modelContext
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack {
                 if viewModel.isAnalyzing {
                     analyzingView
@@ -16,6 +16,7 @@ struct AIFoodScanView: View {
                     captureView
                 }
             }
+            .background(Color.ctBackground)
             .navigationTitle("AI Tarama")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -40,15 +41,15 @@ struct AIFoodScanView: View {
             Spacer()
 
             Image(systemName: "camera.viewfinder")
-                .font(.system(size: 80))
-                .foregroundColor(.accentColor)
+                .font(.system(size: 96))
+                .foregroundStyle(.ctAccent)
 
             Text("Yemeğini Fotoğrafla")
                 .font(.ctTitle)
 
             Text("Fotoğraf çek veya galeriden seç,\nAI kaloriyi hesaplasın")
                 .font(.ctSubheadline)
-                .foregroundColor(.secondary)
+                .foregroundStyle(.ctTextSecondary)
                 .multilineTextAlignment(.center)
 
             // Meal type selector
@@ -60,8 +61,8 @@ struct AIFoodScanView: View {
                             .fontWeight(.medium)
                             .padding(.horizontal, 14)
                             .padding(.vertical, 8)
-                            .background(viewModel.selectedMealType == type ? Color.accentColor : Color.ctSecondaryBg)
-                            .foregroundColor(viewModel.selectedMealType == type ? .white : .primary)
+                            .background(viewModel.selectedMealType == type ? Color.ctAccent : Color.ctSurfaceElevated)
+                            .foregroundStyle(viewModel.selectedMealType == type ? .black : .ctTextPrimary)
                             .cornerRadius(20)
                     }
                 }
@@ -90,9 +91,9 @@ struct AIFoodScanView: View {
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 20)
-                    .background(Color.accentColor)
-                    .foregroundColor(.white)
-                    .cornerRadius(16)
+                    .background(Color.ctAccent)
+                    .foregroundStyle(.black)
+                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                 }
 
                 // Gallery button
@@ -108,9 +109,9 @@ struct AIFoodScanView: View {
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 20)
-                    .background(Color.ctSecondaryBg)
-                    .foregroundColor(.primary)
-                    .cornerRadius(16)
+                    .foregroundStyle(.ctTextPrimary)
+                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .glassEffect(.regular)
                 }
             }
             .padding(.horizontal)
@@ -140,7 +141,7 @@ struct AIFoodScanView: View {
 
             Text("AI fotoğrafı inceliyor")
                 .font(.ctSubheadline)
-                .foregroundColor(.secondary)
+                .foregroundStyle(.ctTextSecondary)
 
             Spacer()
         }
@@ -165,7 +166,7 @@ struct AIFoodScanView: View {
                 if let result = viewModel.analysisResult {
                     Text(result.mealDescription)
                         .font(.ctSubheadline)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.ctTextSecondary)
                         .padding(.horizontal)
                 }
 
@@ -186,7 +187,7 @@ struct AIFoodScanView: View {
                         Spacer()
                         Text("Düzenlenebilir")
                             .font(.ctCaption)
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.ctTextSecondary)
                     }
                     .padding(.horizontal)
 
@@ -213,8 +214,8 @@ struct AIFoodScanView: View {
                         }
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 16)
-                        .background(Color.accentColor)
-                        .foregroundColor(.white)
+                        .background(Color.ctAccent)
+                        .foregroundStyle(.black)
                         .cornerRadius(14)
                         .fontWeight(.semibold)
                     }
@@ -228,7 +229,7 @@ struct AIFoodScanView: View {
                         Text("Tekrar Çek")
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 12)
-                            .foregroundColor(.accentColor)
+                            .foregroundStyle(.ctAccent)
                     }
                 }
                 .padding(.horizontal)
@@ -269,15 +270,16 @@ struct NutritionBadge: View {
                 .foregroundColor(color)
             Text(unit)
                 .font(.system(size: 10))
-                .foregroundColor(.secondary)
+                .foregroundStyle(.ctTextSecondary)
             Text(label)
                 .font(.ctCaption)
-                .foregroundColor(.secondary)
+                .foregroundStyle(.ctTextSecondary)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 10)
-        .background(color.opacity(0.1))
-        .cornerRadius(10)
+        .background(color.opacity(0.08))
+        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .glassEffect(.clear)
     }
 }
 
@@ -305,7 +307,7 @@ struct DetectedFoodItemRow: View {
                     if let nameEn = item.nameEn {
                         Text(nameEn)
                             .font(.ctCaption)
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.ctTextSecondary)
                     }
                 }
 
@@ -322,7 +324,7 @@ struct DetectedFoodItemRow: View {
 
                 Button(action: { withAnimation { isEditing.toggle() } }) {
                     Image(systemName: "pencil.circle")
-                        .foregroundColor(.accentColor)
+                        .foregroundStyle(.ctAccent)
                 }
 
                 Button(action: onDelete) {
@@ -334,7 +336,7 @@ struct DetectedFoodItemRow: View {
             HStack(spacing: 12) {
                 Text("\(Int(item.portionG))g")
                     .font(.ctSubheadline)
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.ctTextSecondary)
 
                 Spacer()
 
@@ -361,7 +363,7 @@ struct DetectedFoodItemRow: View {
                     }
 
                     Slider(value: $editPortionG, in: 10...1000, step: 10)
-                        .tint(.accentColor)
+                        .tint(.ctAccent)
                         .onChange(of: editPortionG) { _, newValue in
                             let ratio = newValue / item.portionG
                             var updated = item
@@ -376,9 +378,7 @@ struct DetectedFoodItemRow: View {
                 .padding(.top, 4)
             }
         }
-        .padding()
-        .background(Color.ctSecondaryBg)
-        .cornerRadius(14)
+        .glassCard()
         .padding(.horizontal)
     }
 }

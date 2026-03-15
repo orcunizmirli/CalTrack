@@ -13,64 +13,67 @@ struct MicroNutrientView: View {
     }
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ScrollView {
-                VStack(spacing: 20) {
-                    // Summary
-                    HStack(spacing: 16) {
-                        MicroSummaryCard(
-                            title: "Optimal",
-                            count: nutrients.filter { $0.status == .optimal }.count,
-                            total: nutrients.count,
-                            color: .ctSuccess
-                        )
-                        MicroSummaryCard(
-                            title: "Düşük",
-                            count: nutrients.filter { $0.status == .low || $0.status == .deficient }.count,
-                            total: nutrients.count,
-                            color: .ctWarning
-                        )
-                        MicroSummaryCard(
-                            title: "Fazla",
-                            count: nutrients.filter { $0.status == .high || $0.status == .excessive }.count,
-                            total: nutrients.count,
-                            color: .ctError
-                        )
-                    }
-                    .padding(.horizontal)
-
-                    // Vitamins
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Vitaminler")
-                            .font(.ctTitle2)
-                            .padding(.horizontal)
-
-                        ForEach(vitamins) { nutrient in
-                            MicroNutrientRow(nutrient: nutrient)
-                                .padding(.horizontal)
+                GlassEffectContainer {
+                    VStack(spacing: 20) {
+                        // Summary
+                        HStack(spacing: 16) {
+                            MicroSummaryCard(
+                                title: "Optimal",
+                                count: nutrients.filter { $0.status == .optimal }.count,
+                                total: nutrients.count,
+                                color: .ctSuccess
+                            )
+                            MicroSummaryCard(
+                                title: "Düşük",
+                                count: nutrients.filter { $0.status == .low || $0.status == .deficient }.count,
+                                total: nutrients.count,
+                                color: .ctWarning
+                            )
+                            MicroSummaryCard(
+                                title: "Fazla",
+                                count: nutrients.filter { $0.status == .high || $0.status == .excessive }.count,
+                                total: nutrients.count,
+                                color: .ctError
+                            )
                         }
-                    }
+                        .padding(.horizontal)
 
-                    // Minerals
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Mineraller")
-                            .font(.ctTitle2)
-                            .padding(.horizontal)
-
-                        ForEach(minerals) { nutrient in
-                            MicroNutrientRow(nutrient: nutrient)
+                        // Vitamins
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("Vitaminler")
+                                .font(.ctTitle2)
                                 .padding(.horizontal)
-                        }
-                    }
 
-                    Text("Değerler bugünkü tüketiminize göre hesaplanır.\nRDA (Günlük Önerilen Miktar) yaş ve cinsiyete göre belirlenir.")
-                        .font(.ctCaption)
-                        .foregroundColor(.secondary)
-                        .multilineTextAlignment(.center)
-                        .padding()
+                            ForEach(vitamins) { nutrient in
+                                MicroNutrientRow(nutrient: nutrient)
+                                    .padding(.horizontal)
+                            }
+                        }
+
+                        // Minerals
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("Mineraller")
+                                .font(.ctTitle2)
+                                .padding(.horizontal)
+
+                            ForEach(minerals) { nutrient in
+                                MicroNutrientRow(nutrient: nutrient)
+                                    .padding(.horizontal)
+                            }
+                        }
+
+                        Text("Değerler bugünkü tüketiminize göre hesaplanır.\nRDA (Günlük Önerilen Miktar) yaş ve cinsiyete göre belirlenir.")
+                            .font(.ctCaption)
+                            .foregroundStyle(.ctTextSecondary)
+                            .multilineTextAlignment(.center)
+                            .padding()
+                    }
+                    .padding(.vertical)
                 }
-                .padding(.vertical)
             }
+            .background(Color.ctBackground)
             .navigationTitle("Mikro Besinler")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -92,18 +95,16 @@ struct MicroSummaryCard: View {
         VStack(spacing: 4) {
             Text("\(count)")
                 .font(.ctTitle)
-                .foregroundColor(color)
+                .foregroundStyle(color)
             Text("/ \(total)")
                 .font(.ctCaption)
-                .foregroundColor(.secondary)
+                .foregroundStyle(.ctTextSecondary)
             Text(title)
                 .font(.ctCaption)
-                .foregroundColor(.secondary)
+                .foregroundStyle(.ctTextSecondary)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 12)
-        .background(color.opacity(0.1))
-        .cornerRadius(12)
+        .glassClearCard(padding: 12, cornerRadius: 12)
     }
 }
 
@@ -123,12 +124,12 @@ struct MicroNutrientRow: View {
                            nutrient.rdaAmount,
                            nutrient.unit))
                     .font(.ctCaption)
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.ctTextSecondary)
 
                 Text("\(nutrient.progressPercentage)%")
                     .font(.ctCaption)
                     .fontWeight(.medium)
-                    .foregroundColor(statusColor)
+                    .foregroundStyle(statusColor)
             }
 
             GeometryReader { geo in

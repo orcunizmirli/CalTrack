@@ -9,14 +9,14 @@ struct BodyFatView: View {
                 VStack(spacing: 8) {
                     Image(systemName: "percent")
                         .font(.system(size: 48))
-                        .foregroundColor(.accentColor)
+                        .foregroundStyle(.ctAccent)
 
                     Text("Vücut Yağ Oranı")
                         .font(.ctTitle)
 
                     Text("Yağ oranını bilmek kalori hesabını daha doğru yapar. Bilmiyorsan tahmin edebiliriz.")
                         .font(.ctSubheadline)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.ctTextSecondary)
                         .multilineTextAlignment(.center)
                 }
                 .padding(.top, 20)
@@ -35,18 +35,19 @@ struct BodyFatView: View {
                                 )
                             }
                         }) {
+                            let isActive = viewModel.bodyFatMethod == method
                             HStack {
                                 Text(method.rawValue)
-                                    .font(.ctBody)
+                                    .font(.ctSubheadline)
                                 Spacer()
-                                Image(systemName: viewModel.bodyFatMethod == method ? "checkmark.circle.fill" : "circle")
-                                    .foregroundColor(viewModel.bodyFatMethod == method ? .accentColor : .secondary)
+                                Image(systemName: isActive ? "checkmark.circle.fill" : "circle")
                             }
-                            .padding()
-                            .background(viewModel.bodyFatMethod == method ? Color.accentColor.opacity(0.1) : Color.ctSecondaryBg)
-                            .cornerRadius(12)
+                            .foregroundStyle(isActive ? .black : .ctTextPrimary)
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 11)
+                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                            .glassEffect(isActive ? .regular.tint(.ctAccent) : .regular)
                         }
-                        .foregroundColor(.primary)
                     }
                 }
 
@@ -68,45 +69,41 @@ struct BodyFatView: View {
     }
 
     private var manualInput: some View {
-        VStack(spacing: 12) {
-            Text("Yağ Oranını Gir")
-                .font(.ctHeadline)
-
+        VStack(spacing: 6) {
             HStack {
+                Text("Yağ Oranı")
+                    .font(.ctHeadline)
                 Spacer()
-                Text(String(format: "%%%.1f", viewModel.bodyFatPct ?? 20))
-                    .font(.ctCalorieDisplay)
-                    .foregroundColor(.accentColor)
-                Spacer()
+                Text(String(format: "%%%.\(1)f", viewModel.bodyFatPct ?? 20))
+                    .font(.ctMacroValue)
+                    .foregroundStyle(.ctAccent)
             }
 
             Slider(value: Binding(
                 get: { viewModel.bodyFatPct ?? 20 },
                 set: { viewModel.bodyFatPct = $0 }
             ), in: 3...60, step: 0.5)
-            .tint(.accentColor)
+            .tint(.ctAccent)
 
             if let bf = viewModel.bodyFatPct {
                 Text(BodyFatEstimator.bodyFatCategory(gender: viewModel.gender, bodyFatPct: bf))
-                    .font(.ctSubheadline)
-                    .foregroundColor(.secondary)
+                    .font(.ctCaption)
+                    .foregroundStyle(.ctTextSecondary)
             }
         }
-        .padding()
-        .background(Color.ctSecondaryBg)
-        .cornerRadius(14)
+        .glassCard(padding: 14, cornerRadius: 14)
     }
 
     private var usNavyInput: some View {
-        VStack(spacing: 16) {
-            Text("Vücut Ölçüleri (cm)")
+        VStack(spacing: 12) {
+            Text("Vücut Ölçüleri")
                 .font(.ctHeadline)
 
-            MeasurementSlider(label: "Bel Çevresi", value: $viewModel.waistCm, range: 50...150, unit: "cm")
-            MeasurementSlider(label: "Boyun Çevresi", value: $viewModel.neckCm, range: 25...60, unit: "cm")
+            MeasurementSlider(label: "Bel", value: $viewModel.waistCm, range: 50...150, unit: "cm")
+            MeasurementSlider(label: "Boyun", value: $viewModel.neckCm, range: 25...60, unit: "cm")
 
             if viewModel.gender == .female {
-                MeasurementSlider(label: "Kalça Çevresi", value: $viewModel.hipCm, range: 60...160, unit: "cm")
+                MeasurementSlider(label: "Kalça", value: $viewModel.hipCm, range: 60...160, unit: "cm")
             }
 
             Button("Hesapla") {
@@ -119,67 +116,62 @@ struct BodyFatView: View {
                 )
             }
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 12)
-            .background(Color.accentColor)
-            .foregroundColor(.white)
-            .cornerRadius(10)
+            .padding(.vertical, 10)
+            .background(Color.ctAccent)
+            .foregroundStyle(.black)
+            .font(.ctSubheadline)
+            .fontWeight(.semibold)
+            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
 
             if let bf = viewModel.bodyFatPct {
-                HStack {
-                    Text("Tahmini Yağ Oranı:")
-                        .font(.ctBody)
-                    Text(String(format: "%%%.1f", bf))
+                HStack(spacing: 4) {
+                    Text("Tahmin:")
+                        .font(.ctSubheadline)
+                    Text(String(format: "%%%.\(1)f", bf))
                         .font(.ctMacroValue)
-                        .foregroundColor(.accentColor)
-                    Text("(\(BodyFatEstimator.bodyFatCategory(gender: viewModel.gender, bodyFatPct: bf)))")
-                        .font(.ctFootnote)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.ctAccent)
+                    Text(BodyFatEstimator.bodyFatCategory(gender: viewModel.gender, bodyFatPct: bf))
+                        .font(.ctCaption)
+                        .foregroundStyle(.ctTextSecondary)
                 }
             }
         }
-        .padding()
-        .background(Color.ctSecondaryBg)
-        .cornerRadius(14)
+        .glassCard(padding: 14, cornerRadius: 14)
     }
 
     private var bmiResult: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 6) {
             if let bf = viewModel.bodyFatPct {
-                Text("BMI Tabanlı Tahmin")
-                    .font(.ctHeadline)
+                HStack {
+                    Text("BMI Tahmin")
+                        .font(.ctHeadline)
+                    Spacer()
+                    Text(String(format: "%%%.\(1)f", bf))
+                        .font(.ctMacroValue)
+                        .foregroundStyle(.ctAccent)
+                    Text(BodyFatEstimator.bodyFatCategory(gender: viewModel.gender, bodyFatPct: bf))
+                        .font(.ctCaption)
+                        .foregroundStyle(.ctTextSecondary)
+                }
 
-                Text(String(format: "%%%.1f", bf))
-                    .font(.ctCalorieDisplay)
-                    .foregroundColor(.accentColor)
-
-                Text(BodyFatEstimator.bodyFatCategory(gender: viewModel.gender, bodyFatPct: bf))
-                    .font(.ctSubheadline)
-                    .foregroundColor(.secondary)
-
-                Text("Bu yöntem tahminidir. Daha doğru sonuç için ölçüm yöntemini kullanabilirsiniz.")
+                Text("Tahminidir. Ölçüm yöntemi daha doğru sonuç verir.")
                     .font(.ctCaption)
-                    .foregroundColor(.secondary)
-                    .multilineTextAlignment(.center)
+                    .foregroundStyle(.ctTextTertiary)
             }
         }
-        .padding()
-        .background(Color.ctSecondaryBg)
-        .cornerRadius(14)
+        .glassCard(padding: 14, cornerRadius: 14)
     }
 
     private var noBodyFatView: some View {
-        VStack(spacing: 8) {
+        HStack(spacing: 10) {
             Image(systemName: "info.circle")
-                .font(.title2)
-                .foregroundColor(.secondary)
-            Text("Sorun değil! Yağ oranı olmadan da hesaplama yapabiliriz. Sadece biraz daha az hassas olacaktır.")
+                .font(.body)
+                .foregroundStyle(.ctTextSecondary)
+            Text("Sorun değil! Yağ oranı olmadan da hesaplama yapabiliriz.")
                 .font(.ctFootnote)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
+                .foregroundStyle(.ctTextSecondary)
         }
-        .padding()
-        .background(Color.ctSecondaryBg)
-        .cornerRadius(14)
+        .glassCard(padding: 12, cornerRadius: 12)
     }
 }
 
@@ -197,10 +189,10 @@ struct MeasurementSlider: View {
                 Spacer()
                 Text("\(Int(value)) \(unit)")
                     .font(.ctHeadline)
-                    .foregroundColor(.accentColor)
+                    .foregroundStyle(.ctAccent)
             }
             Slider(value: $value, in: range, step: 1)
-                .tint(.accentColor)
+                .tint(.ctAccent)
         }
     }
 }

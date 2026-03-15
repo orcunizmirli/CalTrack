@@ -9,37 +9,34 @@ struct MacroSetupView: View {
                 VStack(spacing: 8) {
                     Image(systemName: "chart.pie.fill")
                         .font(.system(size: 48))
-                        .foregroundColor(.accentColor)
+                        .foregroundStyle(.ctAccent)
 
                     Text("Makro Hedefleri")
                         .font(.ctTitle)
 
                     Text("Günlük makro besin hedeflerini ayarla")
                         .font(.ctSubheadline)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.ctTextSecondary)
                         .multilineTextAlignment(.center)
                 }
                 .padding(.top, 20)
 
                 // Daily Calories Display
-                VStack(spacing: 4) {
-                    Text("Günlük Kalori Hedefi")
-                        .font(.ctSubheadline)
-                        .foregroundColor(.secondary)
+                HStack {
+                    Text("Günlük Kalori")
+                        .font(.ctHeadline)
+                    Spacer()
                     Text("\(viewModel.dailyCalories)")
-                        .font(.ctCalorieDisplay)
-                        .foregroundColor(.ctCalories)
+                        .font(.ctTitle)
+                        .foregroundStyle(.ctCalories)
                     Text("kcal")
                         .font(.ctSubheadline)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.ctTextSecondary)
                 }
-                .padding()
-                .frame(maxWidth: .infinity)
-                .background(Color.ctSecondaryBg)
-                .cornerRadius(14)
+                .glassCard(padding: 14, cornerRadius: 14)
 
                 // Macro Sliders
-                VStack(spacing: 20) {
+                VStack(spacing: 16) {
                     // Protein
                     MacroSliderRow(
                         name: "Protein",
@@ -61,35 +58,29 @@ struct MacroSetupView: View {
                     )
 
                     // Carbs (calculated)
-                    VStack(spacing: 8) {
+                    VStack(spacing: 4) {
                         HStack {
                             Circle()
                                 .fill(Color.ctCarbs)
-                                .frame(width: 12, height: 12)
-                            Text("Karbonhidrat")
-                                .font(.ctHeadline)
+                                .frame(width: 10, height: 10)
+                            Text("Karb")
+                                .font(.ctSubheadline)
                             Spacer()
                             Text("\(viewModel.carbsG)g")
                                 .font(.ctMacroValue)
-                                .foregroundColor(.ctCarbs)
-                            Text("(\(viewModel.carbsG * 4) kcal)")
+                                .foregroundStyle(.ctCarbs)
+                            Text("\(viewModel.carbsG * 4) kcal")
                                 .font(.ctCaption)
-                                .foregroundColor(.secondary)
+                                .foregroundStyle(.ctTextSecondary)
                         }
 
-                        HStack {
-                            Image(systemName: "info.circle.fill")
-                                .foregroundColor(.ctCarbs)
-                                .font(.caption)
-                            Text("Karbonhidrat, protein ve yağdan kalan kaloriye göre otomatik hesaplanır")
-                                .font(.ctCaption)
-                                .foregroundColor(.secondary)
-                        }
+                        Text("Protein ve yağdan kalan kaloriye göre otomatik hesaplanır")
+                            .font(.system(size: 10))
+                            .foregroundStyle(.ctTextTertiary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
                     }
                 }
-                .padding()
-                .background(Color.ctSecondaryBg)
-                .cornerRadius(14)
+                .glassCard(padding: 14, cornerRadius: 14)
 
                 // Macro Pie Chart
                 VStack(spacing: 12) {
@@ -101,33 +92,32 @@ struct MacroSetupView: View {
                         carbsG: viewModel.carbsG,
                         fatG: viewModel.fatG
                     )
-                    .frame(height: 160)
 
                     // Calorie difference indicator
                     let diff = viewModel.macroCalorieDifference
                     if abs(diff) > 10 {
-                        HStack {
-                            Image(systemName: diff > 0 ? "exclamationmark.triangle.fill" : "exclamationmark.triangle.fill")
-                                .foregroundColor(.ctWarning)
+                        HStack(spacing: 4) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .font(.caption2)
+                                .foregroundStyle(.ctWarning)
                             Text(diff > 0 ?
-                                 "\(diff) kcal makrolara dağıtılmamış" :
-                                 "\(abs(diff)) kcal fazla dağıtılmış")
+                                 "\(diff) kcal dağıtılmamış" :
+                                 "\(abs(diff)) kcal fazla")
                                 .font(.ctCaption)
-                                .foregroundColor(.ctWarning)
+                                .foregroundStyle(.ctWarning)
                         }
                     } else {
-                        HStack {
+                        HStack(spacing: 4) {
                             Image(systemName: "checkmark.circle.fill")
-                                .foregroundColor(.ctSuccess)
-                            Text("Makrolar kalori hedefine uygun")
+                                .font(.caption2)
+                                .foregroundStyle(.ctSuccess)
+                            Text("Makrolar uygun")
                                 .font(.ctCaption)
-                                .foregroundColor(.ctSuccess)
+                                .foregroundStyle(.ctSuccess)
                         }
                     }
                 }
-                .padding()
-                .background(Color.ctSecondaryBg)
-                .cornerRadius(14)
+                .glassCard(cornerRadius: 14)
             }
             .padding(.horizontal)
             .padding(.bottom, 100)
@@ -144,20 +134,20 @@ struct MacroSliderRow: View {
     var onChange: (() -> Void)?
 
     var body: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: 4) {
             HStack {
                 Circle()
                     .fill(color)
-                    .frame(width: 12, height: 12)
+                    .frame(width: 10, height: 10)
                 Text(name)
-                    .font(.ctHeadline)
+                    .font(.ctSubheadline)
                 Spacer()
                 Text("\(value)g")
                     .font(.ctMacroValue)
-                    .foregroundColor(color)
-                Text("(\(value * caloriePerGram) kcal)")
+                    .foregroundStyle(color)
+                Text("\(value * caloriePerGram) kcal")
                     .font(.ctCaption)
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.ctTextSecondary)
             }
 
             Slider(
@@ -191,17 +181,17 @@ struct MacroPieChart: View {
             ZStack {
                 Circle()
                     .trim(from: 0, to: proteinPct)
-                    .stroke(Color.ctProtein, lineWidth: 20)
+                    .stroke(Color.ctProtein, lineWidth: 18)
                     .rotationEffect(.degrees(-90))
 
                 Circle()
                     .trim(from: proteinPct, to: proteinPct + carbsPct)
-                    .stroke(Color.ctCarbs, lineWidth: 20)
+                    .stroke(Color.ctCarbs, lineWidth: 18)
                     .rotationEffect(.degrees(-90))
 
                 Circle()
                     .trim(from: proteinPct + carbsPct, to: 1)
-                    .stroke(Color.ctFat, lineWidth: 20)
+                    .stroke(Color.ctFat, lineWidth: 18)
                     .rotationEffect(.degrees(-90))
 
                 VStack(spacing: 2) {
@@ -210,17 +200,20 @@ struct MacroPieChart: View {
                         .fontWeight(.bold)
                     Text("kcal")
                         .font(.ctCaption)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.ctTextSecondary)
                 }
             }
-            .frame(width: 120, height: 120)
+            .frame(width: 130, height: 130)
 
-            VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: 14) {
                 MacroLegendRow(color: .ctProtein, name: "Protein", grams: proteinG, percentage: proteinPct)
                 MacroLegendRow(color: .ctCarbs, name: "Karb", grams: carbsG, percentage: carbsPct)
                 MacroLegendRow(color: .ctFat, name: "Yağ", grams: fatG, percentage: fatPct)
             }
+
+            Spacer(minLength: 0)
         }
+        .frame(maxWidth: .infinity)
     }
 }
 
@@ -238,7 +231,7 @@ struct MacroLegendRow: View {
             VStack(alignment: .leading) {
                 Text(name)
                     .font(.ctCaption)
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.ctTextSecondary)
                 Text("\(grams)g (\(Int(percentage * 100))%)")
                     .font(.ctSubheadline)
                     .fontWeight(.medium)

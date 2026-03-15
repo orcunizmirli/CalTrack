@@ -8,7 +8,7 @@ struct OnboardingFlowView: View {
         VStack(spacing: 0) {
             // Progress bar
             ProgressView(value: Double(viewModel.currentStep + 1), total: Double(viewModel.totalSteps))
-                .tint(.accentColor)
+                .tint(.ctAccent)
                 .padding(.horizontal)
                 .padding(.top, 8)
 
@@ -41,7 +41,7 @@ struct OnboardingFlowView: View {
                     .tag(6)
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
-            .animation(.easeInOut, value: viewModel.currentStep)
+            .animation(.ctSpring, value: viewModel.currentStep)
 
             // Navigation buttons
             HStack(spacing: 16) {
@@ -51,13 +51,16 @@ struct OnboardingFlowView: View {
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
-                    .background(Color.ctSecondaryBg)
-                    .foregroundColor(.primary)
-                    .cornerRadius(14)
+                    .foregroundStyle(.ctTextPrimary)
+                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    .glassEffect(.regular.interactive())
                 }
 
-                Button(viewModel.currentStep == viewModel.totalSteps - 1 ? "Başla" : "Devam") {
-                    if viewModel.currentStep == viewModel.totalSteps - 1 {
+                let isFinalStep = viewModel.currentStep == viewModel.totalSteps - 1
+                let isDisabled = isFinalStep && !viewModel.hasSeenSummary
+
+                Button(isFinalStep ? "Başla" : "Devam") {
+                    if isFinalStep {
                         viewModel.saveProfile()
                         appState.completeOnboarding()
                     } else {
@@ -69,10 +72,12 @@ struct OnboardingFlowView: View {
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 16)
-                .background(Color.accentColor)
-                .foregroundColor(.white)
-                .cornerRadius(14)
                 .fontWeight(.semibold)
+                .foregroundStyle(isDisabled ? .ctTextSecondary : .black)
+                .background(isDisabled ? Color.ctTextTertiary : Color.ctAccent)
+                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .disabled(isDisabled)
+                .animation(.ctQuick, value: isDisabled)
             }
             .padding(.horizontal)
             .padding(.bottom, 32)

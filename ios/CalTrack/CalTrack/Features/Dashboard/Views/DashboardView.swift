@@ -8,9 +8,9 @@ struct DashboardView: View {
     @State private var selectedMealType: MealType = .breakfast
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ScrollView {
-                VStack(spacing: 16) {
+                GlassEffectContainer { VStack(spacing: 16) {
                     // Date Selector
                     DateSelectorView(selectedDate: $viewModel.selectedDate)
                         .onChange(of: viewModel.selectedDate) { _, _ in
@@ -70,7 +70,8 @@ struct DashboardView: View {
                     Spacer(minLength: 100)
                 }
                 .padding(.top, 8)
-            }
+            } }
+            .background(Color.ctBackground)
             .navigationTitle("CalTrack")
             .refreshable {
                 await viewModel.loadData(context: modelContext)
@@ -93,7 +94,7 @@ struct DateSelectorView: View {
             Button(action: { changeDate(by: -1) }) {
                 Image(systemName: "chevron.left")
                     .font(.title3)
-                    .foregroundColor(.accentColor)
+                    .foregroundStyle(.ctAccent)
             }
 
             Spacer()
@@ -111,7 +112,7 @@ struct DateSelectorView: View {
                 }
                 Text(selectedDate.fullDate)
                     .font(.ctCaption)
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.ctTextSecondary)
             }
 
             Spacer()
@@ -119,7 +120,7 @@ struct DateSelectorView: View {
             Button(action: { changeDate(by: 1) }) {
                 Image(systemName: "chevron.right")
                     .font(.title3)
-                    .foregroundColor(selectedDate.isToday ? .secondary : .accentColor)
+                    .foregroundStyle(selectedDate.isToday ? .ctTextTertiary : .ctAccent)
             }
             .disabled(selectedDate.isToday)
         }
@@ -144,20 +145,18 @@ struct ActivityCard: View {
     var body: some View {
         HStack(spacing: 10) {
             Image(systemName: icon)
-                .foregroundColor(.accentColor)
+                .foregroundStyle(.ctAccent)
                 .font(.title3)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(label)
                     .font(.ctCaption)
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.ctTextSecondary)
                 Text(value)
                     .font(.ctHeadline)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding()
-        .background(Color.ctSecondaryBg)
-        .cornerRadius(14)
+        .glassCard()
     }
 }

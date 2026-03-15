@@ -9,123 +9,120 @@ struct GoalsOverviewView: View {
 
     var body: some View {
         ScrollView {
-            VStack(spacing: 16) {
-                // Calorie Goal
-                VStack(spacing: 12) {
-                    HStack {
-                        Image(systemName: "flame.fill")
-                            .foregroundColor(.ctCalories)
-                        Text("Günlük Kalori Hedefi")
-                            .font(.ctHeadline)
-                        Spacer()
-                    }
-
-                    HStack {
-                        Text("\(dailyCalories)")
-                            .font(.ctCalorieDisplay)
-                            .foregroundColor(.ctCalories)
-                        Text("kcal")
-                            .font(.ctSubheadline)
-                            .foregroundColor(.secondary)
-                    }
-
-                    Stepper("", value: $dailyCalories, in: 800...5000, step: 50)
-                        .labelsHidden()
-                        .onChange(of: dailyCalories) { _, newValue in
-                            UserDefaultsManager.shared.dailyCalorieGoal = newValue
-                        }
-                }
-                .padding()
-                .background(Color.ctSecondaryBg)
-                .cornerRadius(14)
-
-                // Macro Goals
+            GlassEffectContainer {
                 VStack(spacing: 16) {
-                    HStack {
-                        Image(systemName: "chart.pie.fill")
-                            .foregroundColor(.accentColor)
-                        Text("Makro Hedefleri")
-                            .font(.ctHeadline)
-                        Spacer()
-                    }
-
-                    MacroGoalRow(
-                        name: "Protein", value: $proteinG,
-                        range: 20...400, color: .ctProtein, caloriePerGram: 4,
-                        onChange: { UserDefaultsManager.shared.proteinGoal = proteinG; recalcCarbs() }
-                    )
-
-                    MacroGoalRow(
-                        name: "Yağ", value: $fatG,
-                        range: 10...250, color: .ctFat, caloriePerGram: 9,
-                        onChange: { UserDefaultsManager.shared.fatGoal = fatG; recalcCarbs() }
-                    )
-
-                    // Carbs (calculated)
-                    VStack(spacing: 8) {
+                    // Calorie Goal
+                    VStack(spacing: 12) {
                         HStack {
-                            Circle().fill(Color.ctCarbs).frame(width: 10, height: 10)
-                            Text("Karbonhidrat")
-                                .font(.ctBody)
+                            Image(systemName: "flame.fill")
+                                .foregroundStyle(.ctAccent)
+                            Text("Günlük Kalori Hedefi")
+                                .font(.ctHeadline)
                             Spacer()
-                            Text("\(carbsG)g")
-                                .font(.ctMacroValue)
-                                .foregroundColor(.ctCarbs)
-                            Text("(\(carbsG * 4) kcal)")
-                                .font(.ctCaption)
-                                .foregroundColor(.secondary)
                         }
 
                         HStack {
-                            Image(systemName: "arrow.right.circle.fill")
-                                .foregroundColor(.ctCarbs)
-                                .font(.caption)
-                            Text("Kalan kaloriden otomatik hesaplanır")
-                                .font(.ctCaption)
-                                .foregroundColor(.secondary)
+                            Text("\(dailyCalories)")
+                                .font(.ctCalorieDisplay)
+                                .foregroundStyle(.ctAccent)
+                            Text("kcal")
+                                .font(.ctSubheadline)
+                                .foregroundStyle(.ctTextSecondary)
                         }
+
+                        Stepper("", value: $dailyCalories, in: 800...5000, step: 50)
+                            .labelsHidden()
+                            .onChange(of: dailyCalories) { _, newValue in
+                                UserDefaultsManager.shared.dailyCalorieGoal = newValue
+                            }
                     }
+                    .glassCard()
 
-                    Divider()
+                    // Macro Goals
+                    VStack(spacing: 16) {
+                        HStack {
+                            Image(systemName: "chart.pie.fill")
+                                .foregroundStyle(.ctAccent)
+                            Text("Makro Hedefleri")
+                                .font(.ctHeadline)
+                            Spacer()
+                        }
 
-                    // Total check
-                    let totalCal = proteinG * 4 + carbsG * 4 + fatG * 9
-                    HStack {
-                        Text("Toplam Makro Kalorisi")
-                            .font(.ctSubheadline)
-                        Spacer()
-                        Text("\(totalCal) / \(dailyCalories) kcal")
-                            .font(.ctSubheadline)
-                            .foregroundColor(abs(totalCal - dailyCalories) < 50 ? .ctSuccess : .ctWarning)
+                        MacroGoalRow(
+                            name: "Protein", value: $proteinG,
+                            range: 20...400, color: .ctProtein, caloriePerGram: 4,
+                            onChange: { UserDefaultsManager.shared.proteinGoal = proteinG; recalcCarbs() }
+                        )
+
+                        MacroGoalRow(
+                            name: "Yağ", value: $fatG,
+                            range: 10...250, color: .ctFat, caloriePerGram: 9,
+                            onChange: { UserDefaultsManager.shared.fatGoal = fatG; recalcCarbs() }
+                        )
+
+                        // Carbs (calculated)
+                        VStack(spacing: 8) {
+                            HStack {
+                                Circle().fill(Color.ctCarbs).frame(width: 10, height: 10)
+                                Text("Karbonhidrat")
+                                    .font(.ctBody)
+                                Spacer()
+                                Text("\(carbsG)g")
+                                    .font(.ctMacroValue)
+                                    .foregroundStyle(.ctCarbs)
+                                Text("(\(carbsG * 4) kcal)")
+                                    .font(.ctCaption)
+                                    .foregroundStyle(.ctTextSecondary)
+                            }
+
+                            HStack {
+                                Image(systemName: "arrow.right.circle.fill")
+                                    .foregroundStyle(.ctCarbs)
+                                    .font(.caption)
+                                Text("Kalan kaloriden otomatik hesaplanır")
+                                    .font(.ctCaption)
+                                    .foregroundStyle(.ctTextSecondary)
+                            }
+                        }
+
+                        Divider()
+
+                        // Total check
+                        let totalCal = proteinG * 4 + carbsG * 4 + fatG * 9
+                        HStack {
+                            Text("Toplam Makro Kalorisi")
+                                .font(.ctSubheadline)
+                            Spacer()
+                            Text("\(totalCal) / \(dailyCalories) kcal")
+                                .font(.ctSubheadline)
+                                .foregroundStyle(abs(totalCal - dailyCalories) < 50 ? .ctSuccess : .ctWarning)
+                        }
+
+                        // Pie chart
+                        MacroPieChart(proteinG: proteinG, carbsG: carbsG, fatG: fatG)
+                            .frame(height: 140)
                     }
+                    .glassCard()
 
-                    // Pie chart
-                    MacroPieChart(proteinG: proteinG, carbsG: carbsG, fatG: fatG)
-                        .frame(height: 140)
+                    // Micro nutrients link
+                    Button(action: { showMicroNutrients = true }) {
+                        HStack {
+                            Image(systemName: "leaf.fill")
+                                .foregroundStyle(.green)
+                            Text("Mikro Besin Takibi")
+                                .font(.ctHeadline)
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .foregroundStyle(.ctTextSecondary)
+                        }
+                        .glassCard()
+                    }
+                    .foregroundStyle(.ctTextPrimary)
                 }
                 .padding()
-                .background(Color.ctSecondaryBg)
-                .cornerRadius(14)
-
-                // Micro nutrients link
-                Button(action: { showMicroNutrients = true }) {
-                    HStack {
-                        Image(systemName: "leaf.fill")
-                            .foregroundColor(.green)
-                        Text("Mikro Besin Takibi")
-                            .font(.ctHeadline)
-                        Spacer()
-                        Image(systemName: "chevron.right")
-                            .foregroundColor(.secondary)
-                    }
-                    .padding()
-                    .background(Color.ctSecondaryBg)
-                    .cornerRadius(14)
-                }
-                .foregroundColor(.primary)
             }
-            .padding()
         }
+        .background(Color.ctBackground)
         .navigationTitle("Hedefler")
         .sheet(isPresented: $showMicroNutrients) {
             MicroNutrientView()
@@ -159,10 +156,10 @@ struct MacroGoalRow: View {
                 Spacer()
                 Text("\(value)g")
                     .font(.ctMacroValue)
-                    .foregroundColor(color)
+                    .foregroundStyle(color)
                 Text("(\(value * caloriePerGram) kcal)")
                     .font(.ctCaption)
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.ctTextSecondary)
             }
 
             Slider(

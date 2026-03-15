@@ -12,15 +12,15 @@ struct WelcomeView: View {
             // Logo & Title
             VStack(spacing: 16) {
                 Image(systemName: "fork.knife.circle.fill")
-                    .font(.system(size: 80))
-                    .foregroundStyle(Color.accentColor)
+                    .font(.system(size: 96))
+                    .foregroundStyle(Color.ctAccent)
 
                 Text("CalTrack")
                     .font(.ctLargeTitle)
 
                 Text("Yapay zeka destekli kalori takibi")
                     .font(.ctBody)
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.ctTextSecondary)
             }
 
             Spacer()
@@ -58,8 +58,8 @@ struct WelcomeView: View {
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
-                    .background(Color.accentColor)
-                    .foregroundColor(.white)
+                    .background(Color.ctAccent)
+                    .foregroundStyle(.black)
                     .cornerRadius(14)
                     .fontWeight(.semibold)
                 }
@@ -68,7 +68,7 @@ struct WelcomeView: View {
                     showEmailLogin = true
                 }
                 .font(.ctSubheadline)
-                .foregroundColor(.accentColor)
+                .foregroundStyle(.ctAccent)
                 .padding(.top, 4)
             }
             .padding(.horizontal)
@@ -103,9 +103,9 @@ struct FeatureRow: View {
         HStack(spacing: 16) {
             Image(systemName: icon)
                 .font(.title2)
-                .foregroundColor(.accentColor)
+                .foregroundStyle(.ctAccent)
                 .frame(width: 44, height: 44)
-                .background(Color.accentColor.opacity(0.12))
+                .background(Color.ctAccent.opacity(0.1))
                 .cornerRadius(12)
 
             VStack(alignment: .leading, spacing: 2) {
@@ -113,7 +113,7 @@ struct FeatureRow: View {
                     .font(.ctHeadline)
                 Text(description)
                     .font(.ctFootnote)
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.ctTextSecondary)
             }
         }
     }
@@ -130,7 +130,7 @@ struct EmailLoginView: View {
     @State private var errorMessage: String?
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ScrollView {
                 VStack(spacing: 20) {
                     Text(isRegistering ? "Hesap Oluştur" : "Giriş Yap")
@@ -156,7 +156,7 @@ struct EmailLoginView: View {
                     if let error = errorMessage {
                         Text(error)
                             .font(.ctFootnote)
-                            .foregroundColor(.ctError)
+                            .foregroundStyle(.ctError)
                     }
 
                     Button(action: handleAuth) {
@@ -169,8 +169,8 @@ struct EmailLoginView: View {
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
-                    .background(Color.accentColor)
-                    .foregroundColor(.white)
+                    .background(Color.ctAccent)
+                    .foregroundStyle(.black)
                     .cornerRadius(14)
                     .fontWeight(.semibold)
                     .disabled(isLoading)
@@ -179,7 +179,7 @@ struct EmailLoginView: View {
                         withAnimation { isRegistering.toggle() }
                     }
                     .font(.ctSubheadline)
-                    .foregroundColor(.accentColor)
+                    .foregroundStyle(.ctAccent)
                 }
                 .padding()
             }

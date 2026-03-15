@@ -34,9 +34,7 @@ struct MacroProgressView: View {
                 unit: "g"
             )
         }
-        .padding()
-        .background(Color.ctSecondaryBg)
-        .cornerRadius(16)
+        .glassCard(cornerRadius: 16)
     }
 }
 
@@ -77,11 +75,11 @@ struct MacroProgressItem: View {
 
             Text(name)
                 .font(.ctCaption)
-                .foregroundColor(.secondary)
+                .foregroundStyle(.ctTextSecondary)
 
             Text("\(remaining)\(unit) kaldı")
                 .font(.system(size: 10))
-                .foregroundColor(.secondary)
+                .foregroundStyle(.ctTextSecondary)
         }
         .frame(maxWidth: .infinity)
     }

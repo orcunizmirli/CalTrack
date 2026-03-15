@@ -12,7 +12,7 @@ struct MealSectionView: View {
             // Header
             HStack {
                 Image(systemName: mealType.icon)
-                    .foregroundColor(mealTypeColor)
+                    .foregroundStyle(mealTypeColor)
                     .font(.title3)
 
                 Text(mealType.displayName)
@@ -23,13 +23,13 @@ struct MealSectionView: View {
                 if totalCalories > 0 {
                     Text("\(Int(totalCalories)) kcal")
                         .font(.ctSubheadline)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.ctTextSecondary)
                 }
 
                 Button(action: onAdd) {
                     Image(systemName: "plus.circle.fill")
                         .font(.title2)
-                        .foregroundColor(.accentColor)
+                        .foregroundStyle(.ctAccent)
                 }
             }
 
@@ -38,14 +38,14 @@ struct MealSectionView: View {
                 Button(action: onAdd) {
                     HStack {
                         Image(systemName: "plus")
-                            .foregroundColor(.accentColor)
+                            .foregroundStyle(.ctAccent)
                         Text("Yemek Ekle")
                             .font(.ctSubheadline)
-                            .foregroundColor(.accentColor)
+                            .foregroundStyle(.ctAccent)
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 12)
-                    .background(Color.accentColor.opacity(0.08))
+                    .background(Color.ctAccent.opacity(0.08))
                     .cornerRadius(10)
                 }
             } else {
@@ -54,9 +54,7 @@ struct MealSectionView: View {
                 }
             }
         }
-        .padding()
-        .background(Color.ctSecondaryBg)
-        .cornerRadius(14)
+        .glassCard()
     }
 
     private var mealTypeColor: Color {
@@ -77,10 +75,10 @@ struct MealItemRow: View {
         HStack(spacing: 12) {
             if meal.isAIScan {
                 Image(systemName: "camera.fill")
-                    .foregroundColor(.accentColor)
+                    .foregroundStyle(.ctAccent)
                     .font(.caption)
                     .frame(width: 28, height: 28)
-                    .background(Color.accentColor.opacity(0.1))
+                    .background(Color.ctAccent.opacity(0.1))
                     .cornerRadius(6)
             }
 
@@ -91,7 +89,7 @@ struct MealItemRow: View {
 
                 Text("\(Int(meal.quantityG))g")
                     .font(.ctCaption)
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.ctTextSecondary)
             }
 
             Spacer()

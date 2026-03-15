@@ -2,6 +2,7 @@ import SwiftUI
 
 struct BodyMetricsView: View {
     @ObservedObject var viewModel: OnboardingViewModel
+    @State private var hasManuallySetWeight = false
 
     var body: some View {
         ScrollView {
@@ -9,14 +10,14 @@ struct BodyMetricsView: View {
                 VStack(spacing: 8) {
                     Image(systemName: "figure.arms.open")
                         .font(.system(size: 48))
-                        .foregroundColor(.accentColor)
+                        .foregroundStyle(.ctAccent)
 
                     Text("Vücut Ölçülerin")
                         .font(.ctTitle)
 
                     Text("Boy ve kilo bilgilerin kalori hesaplaması için gerekli")
                         .font(.ctSubheadline)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.ctTextSecondary)
                         .multilineTextAlignment(.center)
                 }
                 .padding(.top, 20)
@@ -29,33 +30,38 @@ struct BodyMetricsView: View {
                         Spacer()
                         Text("\(Int(viewModel.heightCm)) cm")
                             .font(.ctMacroValue)
-                            .foregroundColor(.accentColor)
+                            .foregroundStyle(.ctAccent)
                     }
 
                     Slider(value: $viewModel.heightCm, in: 120...220, step: 1)
-                        .tint(.accentColor)
+                        .tint(.ctAccent)
                 }
-                .padding()
-                .background(Color.ctSecondaryBg)
-                .cornerRadius(14)
+                .glassCard(cornerRadius: 14)
+                .onChange(of: viewModel.heightCm) { _, newHeight in
+                    guard !hasManuallySetWeight else { return }
+                    viewModel.weightKg = idealWeight(heightCm: newHeight, gender: viewModel.gender)
+                }
 
                 // Weight
-                VStack(spacing: 12) {
+                VStack(spacing: 8) {
                     HStack {
                         Text("Kilo")
                             .font(.ctHeadline)
                         Spacer()
                         Text(String(format: "%.1f kg", viewModel.weightKg))
                             .font(.ctMacroValue)
-                            .foregroundColor(.accentColor)
+                            .foregroundStyle(.ctAccent)
                     }
+                    .padding(.horizontal, 4)
 
-                    Slider(value: $viewModel.weightKg, in: 30...200, step: 0.5)
-                        .tint(.accentColor)
+                    RulerPicker(
+                        value: $viewModel.weightKg,
+                        range: 30...200,
+                        step: 0.1,
+                        onUserScroll: { hasManuallySetWeight = true }
+                    )
                 }
-                .padding()
-                .background(Color.ctSecondaryBg)
-                .cornerRadius(14)
+                .glassCard(cornerRadius: 14)
 
                 // BMI Display
                 let bmi = BodyFatEstimator.bmi(weightKg: viewModel.weightKg, heightCm: viewModel.heightCm)
@@ -68,7 +74,7 @@ struct BodyMetricsView: View {
                             .font(.ctMacroValue)
                         Text(BodyFatEstimator.bmiCategory(bmi))
                             .font(.ctFootnote)
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.ctTextSecondary)
                     }
 
                     // BMI Bar
@@ -92,21 +98,30 @@ struct BodyMetricsView: View {
                     .frame(height: 16)
 
                     HStack {
-                        Text("15").font(.ctCaption).foregroundColor(.secondary)
+                        Text("15").font(.ctCaption).foregroundStyle(.ctTextSecondary)
                         Spacer()
-                        Text("25").font(.ctCaption).foregroundColor(.secondary)
+                        Text("25").font(.ctCaption).foregroundStyle(.ctTextSecondary)
                         Spacer()
-                        Text("35").font(.ctCaption).foregroundColor(.secondary)
+                        Text("35").font(.ctCaption).foregroundStyle(.ctTextSecondary)
                         Spacer()
-                        Text("45").font(.ctCaption).foregroundColor(.secondary)
+                        Text("45").font(.ctCaption).foregroundStyle(.ctTextSecondary)
                     }
                 }
-                .padding()
-                .background(Color.ctSecondaryBg)
-                .cornerRadius(14)
+                .glassCard(cornerRadius: 14)
             }
             .padding(.horizontal)
             .padding(.bottom, 100)
         }
+        .onAppear {
+            if !hasManuallySetWeight {
+                viewModel.weightKg = idealWeight(heightCm: viewModel.heightCm, gender: viewModel.gender)
+            }
+        }
+    }
+
+    private func idealWeight(heightCm: Double, gender: Gender) -> Double {
+        let heightM = heightCm / 100
+        let idealBMI: Double = gender == .male ? 22.5 : 21.5
+        return ((idealBMI * heightM * heightM) * 10).rounded() / 10
     }
 }

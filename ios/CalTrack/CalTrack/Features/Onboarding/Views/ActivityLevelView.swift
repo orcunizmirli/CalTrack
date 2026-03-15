@@ -9,53 +9,49 @@ struct ActivityLevelView: View {
                 VStack(spacing: 8) {
                     Image(systemName: "figure.run")
                         .font(.system(size: 48))
-                        .foregroundColor(.accentColor)
+                        .foregroundStyle(.ctAccent)
 
                     Text("Aktivite Seviyesi")
                         .font(.ctTitle)
 
                     Text("Günlük aktivite seviyeni seç")
                         .font(.ctSubheadline)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.ctTextSecondary)
                 }
                 .padding(.top, 20)
 
                 VStack(spacing: 10) {
                     ForEach(ActivityLevel.allCases, id: \.self) { level in
+                        let isActive = viewModel.activityLevel == level
                         Button(action: {
                             withAnimation { viewModel.activityLevel = level }
                         }) {
-                            HStack(spacing: 14) {
+                            HStack(spacing: 12) {
                                 Image(systemName: activityIcon(for: level))
-                                    .font(.title2)
-                                    .foregroundColor(viewModel.activityLevel == level ? .accentColor : .secondary)
-                                    .frame(width: 40)
+                                    .font(.body)
+                                    .frame(width: 28)
 
-                                VStack(alignment: .leading, spacing: 2) {
+                                VStack(alignment: .leading, spacing: 1) {
                                     Text(level.displayName)
-                                        .font(.ctHeadline)
-                                        .foregroundColor(.primary)
+                                        .font(.ctSubheadline)
                                     Text(level.description)
                                         .font(.ctCaption)
-                                        .foregroundColor(.secondary)
+                                        .foregroundStyle(isActive ? .black.opacity(0.6) : .ctTextSecondary)
                                 }
 
                                 Spacer()
 
-                                Text("×\(String(format: "%.2f", level.multiplier))")
-                                    .font(.ctFootnote)
-                                    .foregroundColor(.secondary)
+                                Text("×\(String(format: "%.1f", level.multiplier))")
+                                    .font(.ctCaption)
+                                    .foregroundStyle(isActive ? .black.opacity(0.6) : .ctTextTertiary)
 
-                                Image(systemName: viewModel.activityLevel == level ? "checkmark.circle.fill" : "circle")
-                                    .foregroundColor(viewModel.activityLevel == level ? .accentColor : .secondary)
+                                Image(systemName: isActive ? "checkmark.circle.fill" : "circle")
                             }
-                            .padding()
-                            .background(viewModel.activityLevel == level ? Color.accentColor.opacity(0.1) : Color.ctSecondaryBg)
-                            .cornerRadius(14)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 14)
-                                    .stroke(viewModel.activityLevel == level ? Color.accentColor : Color.clear, lineWidth: 1.5)
-                            )
+                            .foregroundStyle(isActive ? .black : .ctTextPrimary)
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 11)
+                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                            .glassEffect(isActive ? .regular.tint(.ctAccent) : .regular)
                         }
                     }
                 }

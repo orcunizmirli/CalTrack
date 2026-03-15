@@ -38,9 +38,7 @@ struct PlanSummaryView: View {
                         SummaryRow(icon: "calendar", label: "Tahmini Süre", value: "\(Int(weeksNeeded)) hafta")
                     }
                 }
-                .padding()
-                .background(Color.ctSecondaryBg)
-                .cornerRadius(14)
+                .glassCard(cornerRadius: 14)
 
                 // Macro Summary
                 VStack(spacing: 12) {
@@ -53,9 +51,7 @@ struct PlanSummaryView: View {
                         MacroSummaryItem(name: "Yağ", value: "\(viewModel.fatG)g", color: .ctFat)
                     }
                 }
-                .padding()
-                .background(Color.ctSecondaryBg)
-                .cornerRadius(14)
+                .glassCard(cornerRadius: 14)
 
                 // Calculation details
                 VStack(alignment: .leading, spacing: 8) {
@@ -73,17 +69,24 @@ struct PlanSummaryView: View {
                         DetailRow(label: "Hesaplama Yöntemi", value: "Mifflin-St Jeor")
                     }
                 }
-                .padding()
-                .background(Color.ctSecondaryBg)
-                .cornerRadius(14)
+                .glassCard(cornerRadius: 14)
 
                 Text("Tüm değerler daha sonra ayarlardan düzenlenebilir")
                     .font(.ctCaption)
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.ctTextSecondary)
                     .multilineTextAlignment(.center)
+                    .id("bottom")
             }
             .padding(.horizontal)
             .padding(.bottom, 100)
+        }
+        .onScrollGeometryChange(for: Bool.self) { geo in
+            let atBottom = geo.contentOffset.y + geo.containerSize.height >= geo.contentSize.height - 20
+            return atBottom
+        } action: { _, atBottom in
+            if atBottom && !viewModel.hasSeenSummary {
+                viewModel.hasSeenSummary = true
+            }
         }
     }
 }
@@ -96,11 +99,11 @@ struct SummaryRow: View {
     var body: some View {
         HStack {
             Image(systemName: icon)
-                .foregroundColor(.accentColor)
+                .foregroundStyle(.ctAccent)
                 .frame(width: 24)
             Text(label)
                 .font(.ctBody)
-                .foregroundColor(.secondary)
+                .foregroundStyle(.ctTextSecondary)
             Spacer()
             Text(value)
                 .font(.ctHeadline)
@@ -116,7 +119,7 @@ struct DetailRow: View {
         HStack {
             Text(label)
                 .font(.ctCaption)
-                .foregroundColor(.secondary)
+                .foregroundStyle(.ctTextSecondary)
             Spacer()
             Text(value)
                 .font(.ctCaption)
@@ -137,7 +140,7 @@ struct MacroSummaryItem: View {
                 .foregroundColor(color)
             Text(name)
                 .font(.ctCaption)
-                .foregroundColor(.secondary)
+                .foregroundStyle(.ctTextSecondary)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 12)

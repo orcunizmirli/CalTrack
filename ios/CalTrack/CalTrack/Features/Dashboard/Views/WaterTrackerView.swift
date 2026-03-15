@@ -18,7 +18,7 @@ struct WaterTrackerView: View {
                 Spacer()
                 Text("\(totalWaterMl) / \(waterGoal) ml")
                     .font(.ctSubheadline)
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.ctTextSecondary)
             }
 
             // Progress bar
@@ -60,13 +60,11 @@ struct WaterTrackerView: View {
                         withAnimation { totalWaterMl = max(0, totalWaterMl - 200) }
                     }) {
                         Image(systemName: "minus.circle")
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.ctTextSecondary)
                     }
                 }
             }
         }
-        .padding()
-        .background(Color.ctSecondaryBg)
-        .cornerRadius(14)
+        .glassCard()
     }
 }

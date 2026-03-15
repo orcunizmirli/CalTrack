@@ -27,6 +27,9 @@ class OnboardingViewModel: ObservableObject {
     @Published var tdee: Double = 0
     @Published var estimatedBodyFat: Double? = nil
 
+    // UI State
+    @Published var hasSeenSummary = false
+
     // HealthKit
     @Published var useHealthKit = false
 
@@ -153,6 +156,9 @@ class OnboardingViewModel: ObservableObject {
 
     func previousStep() {
         if currentStep > 0 {
+            if currentStep == totalSteps - 1 {
+                hasSeenSummary = false
+            }
             withAnimation { currentStep -= 1 }
         }
     }

@@ -12,38 +12,41 @@ struct AnalyticsView: View {
     @State private var selectedTab = 0
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ScrollView {
-                VStack(spacing: 16) {
-                    // Range selector
-                    Picker("Aralık", selection: $selectedRange) {
-                        ForEach(AnalyticsRange.allCases, id: \.self) { range in
-                            Text(range.rawValue).tag(range)
+                GlassEffectContainer {
+                    VStack(spacing: 16) {
+                        // Range selector
+                        Picker("Aralık", selection: $selectedRange) {
+                            ForEach(AnalyticsRange.allCases, id: \.self) { range in
+                                Text(range.rawValue).tag(range)
+                            }
                         }
+                        .pickerStyle(.segmented)
+                        .padding(.horizontal)
+
+                        // Streak
+                        StreakView()
+                            .padding(.horizontal)
+
+                        // Calorie Chart
+                        CalorieChartView(range: selectedRange)
+                            .padding(.horizontal)
+
+                        // Macro Trend
+                        MacroTrendView(range: selectedRange)
+                            .padding(.horizontal)
+
+                        // Weight Chart
+                        WeightChartView(range: selectedRange)
+                            .padding(.horizontal)
+
+                        Spacer(minLength: 100)
                     }
-                    .pickerStyle(.segmented)
-                    .padding(.horizontal)
-
-                    // Streak
-                    StreakView()
-                        .padding(.horizontal)
-
-                    // Calorie Chart
-                    CalorieChartView(range: selectedRange)
-                        .padding(.horizontal)
-
-                    // Macro Trend
-                    MacroTrendView(range: selectedRange)
-                        .padding(.horizontal)
-
-                    // Weight Chart
-                    WeightChartView(range: selectedRange)
-                        .padding(.horizontal)
-
-                    Spacer(minLength: 100)
+                    .padding(.top, 8)
                 }
-                .padding(.top, 8)
             }
+            .background(Color.ctBackground)
             .navigationTitle("Analiz")
         }
     }
@@ -58,12 +61,12 @@ struct StreakView: View {
             VStack(spacing: 4) {
                 Image(systemName: "flame.fill")
                     .font(.title)
-                    .foregroundColor(.orange)
+                    .foregroundStyle(.ctAccent)
                 Text("\(currentStreak)")
                     .font(.ctTitle)
                 Text("Günlük Seri")
                     .font(.ctCaption)
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.ctTextSecondary)
             }
             .frame(maxWidth: .infinity)
 
@@ -72,18 +75,16 @@ struct StreakView: View {
             VStack(spacing: 4) {
                 Image(systemName: "trophy.fill")
                     .font(.title)
-                    .foregroundColor(.yellow)
+                    .foregroundStyle(.ctWarning)
                 Text("\(longestStreak)")
                     .font(.ctTitle)
                 Text("En Uzun Seri")
                     .font(.ctCaption)
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.ctTextSecondary)
             }
             .frame(maxWidth: .infinity)
         }
-        .padding()
-        .background(Color.ctSecondaryBg)
-        .cornerRadius(16)
+        .glassCard(cornerRadius: 16)
     }
 }
 
@@ -112,7 +113,7 @@ struct CalorieChartView: View {
                         x: .value("Tarih", item.0, unit: .day),
                         y: .value("Kalori", item.1)
                     )
-                    .foregroundStyle(item.1 <= item.2 ? Color.ctCalories : Color.ctError)
+                    .foregroundStyle(item.1 <= item.2 ? Color.ctAccent : Color.ctError)
 
                     RuleMark(y: .value("Hedef", item.2))
                         .foregroundStyle(Color.secondary.opacity(0.5))
@@ -129,15 +130,13 @@ struct CalorieChartView: View {
             HStack {
                 Text("Ortalama:")
                     .font(.ctCaption)
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.ctTextSecondary)
                 Text("\(Int(avg)) kcal/gün")
                     .font(.ctCaption)
                     .fontWeight(.medium)
             }
         }
-        .padding()
-        .background(Color.ctSecondaryBg)
-        .cornerRadius(16)
+        .glassCard(cornerRadius: 16)
     }
 }
 
@@ -164,13 +163,11 @@ struct MacroTrendView: View {
                     Spacer()
                     Text("\(Int(item.1))g ort.")
                         .font(.ctSubheadline)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.ctTextSecondary)
                 }
             }
         }
-        .padding()
-        .background(Color.ctSecondaryBg)
-        .cornerRadius(16)
+        .glassCard(cornerRadius: 16)
     }
 }
 
@@ -198,7 +195,7 @@ struct WeightChartView: View {
                         x: .value("Tarih", item.0, unit: .day),
                         y: .value("Kilo", item.1)
                     )
-                    .foregroundStyle(Color.accentColor)
+                    .foregroundStyle(Color.ctAccent)
                     .interpolationMethod(.catmullRom)
 
                     AreaMark(
@@ -207,7 +204,7 @@ struct WeightChartView: View {
                     )
                     .foregroundStyle(
                         LinearGradient(
-                            colors: [Color.accentColor.opacity(0.3), Color.accentColor.opacity(0.0)],
+                            colors: [Color.ctAccent.opacity(0.3), Color.ctAccent.opacity(0.0)],
                             startPoint: .top, endPoint: .bottom
                         )
                     )
@@ -222,7 +219,7 @@ struct WeightChartView: View {
                 HStack {
                     Text("Değişim:")
                         .font(.ctCaption)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.ctTextSecondary)
                     Text(String(format: "%+.1f kg", change))
                         .font(.ctCaption)
                         .fontWeight(.medium)
@@ -230,8 +227,6 @@ struct WeightChartView: View {
                 }
             }
         }
-        .padding()
-        .background(Color.ctSecondaryBg)
-        .cornerRadius(16)
+        .glassCard(cornerRadius: 16)
     }
 }

@@ -6,20 +6,23 @@ struct RecipeListView: View {
     @State private var selectedRecipe: RecipeResponse?
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ScrollView {
-                VStack(spacing: 16) {
-                    Text("\(recipes.count) tarif önerisi")
-                        .font(.ctSubheadline)
-                        .foregroundColor(.secondary)
+                GlassEffectContainer {
+                    VStack(spacing: 16) {
+                        Text("\(recipes.count) tarif önerisi")
+                            .font(.ctSubheadline)
+                            .foregroundStyle(.ctTextSecondary)
 
-                    ForEach(recipes) { recipe in
-                        RecipeCard(recipe: recipe)
-                            .onTapGesture { selectedRecipe = recipe }
+                        ForEach(recipes) { recipe in
+                            RecipeCard(recipe: recipe)
+                                .onTapGesture { selectedRecipe = recipe }
+                        }
                     }
+                    .padding()
                 }
-                .padding()
             }
+            .background(Color.ctBackground)
             .navigationTitle("Tarifler")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -45,16 +48,16 @@ struct RecipeCard: View {
                         .font(.ctHeadline)
                     Text(recipe.description)
                         .font(.ctCaption)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.ctTextSecondary)
                         .lineLimit(2)
                 }
                 Spacer()
             }
 
             HStack(spacing: 12) {
-                RecipeInfoChip(icon: "flame.fill", text: "\(Int(recipe.calories)) kcal", color: .ctCalories)
-                RecipeInfoChip(icon: "clock.fill", text: "\(recipe.prepTimeMin + recipe.cookTimeMin) dk", color: .secondary)
-                RecipeInfoChip(icon: "person.fill", text: "\(recipe.servings) kişi", color: .secondary)
+                RecipeInfoChip(icon: "flame.fill", text: "\(Int(recipe.calories)) kcal", color: .ctAccent)
+                RecipeInfoChip(icon: "clock.fill", text: "\(recipe.prepTimeMin + recipe.cookTimeMin) dk", color: .ctTextSecondary)
+                RecipeInfoChip(icon: "person.fill", text: "\(recipe.servings) kişi", color: .ctTextSecondary)
             }
 
             HStack(spacing: 12) {
@@ -72,16 +75,14 @@ struct RecipeCard: View {
                             .font(.system(size: 10))
                             .padding(.horizontal, 8)
                             .padding(.vertical, 4)
-                            .background(Color.accentColor.opacity(0.1))
-                            .foregroundColor(.accentColor)
-                            .cornerRadius(8)
+                            .background(Color.ctAccent.opacity(0.1))
+                            .foregroundStyle(.ctAccent)
+                            .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
                     }
                 }
             }
         }
-        .padding()
-        .background(Color.ctSecondaryBg)
-        .cornerRadius(16)
+        .glassCard()
     }
 }
 
@@ -94,10 +95,10 @@ struct RecipeInfoChip: View {
         HStack(spacing: 4) {
             Image(systemName: icon)
                 .font(.system(size: 10))
-                .foregroundColor(color)
+                .foregroundStyle(color)
             Text(text)
                 .font(.ctCaption)
-                .foregroundColor(.secondary)
+                .foregroundStyle(.ctTextSecondary)
         }
     }
 }
@@ -111,15 +112,15 @@ struct MacroBadge: View {
         HStack(spacing: 2) {
             Text(label)
                 .font(.system(size: 11, weight: .bold))
-                .foregroundColor(color)
+                .foregroundStyle(color)
             Text("\(value)g")
                 .font(.system(size: 11))
-                .foregroundColor(.secondary)
+                .foregroundStyle(.ctTextSecondary)
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 4)
-        .background(color.opacity(0.1))
-        .cornerRadius(6)
+        .background(color.opacity(0.08))
+        .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
     }
 }
 
@@ -129,7 +130,7 @@ struct RecipeDetailView: View {
     @Environment(\.modelContext) private var modelContext
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
                     // Header
@@ -138,7 +139,7 @@ struct RecipeDetailView: View {
                             .font(.ctTitle)
                         Text(recipe.description)
                             .font(.ctSubheadline)
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.ctTextSecondary)
                     }
 
                     // Nutrition summary
@@ -156,7 +157,7 @@ struct RecipeDetailView: View {
                         Label("\(recipe.servings) kişilik", systemImage: "person.2")
                     }
                     .font(.ctCaption)
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.ctTextSecondary)
 
                     Divider()
 
@@ -169,13 +170,13 @@ struct RecipeDetailView: View {
                             HStack {
                                 Image(systemName: "circle.fill")
                                     .font(.system(size: 6))
-                                    .foregroundColor(.accentColor)
+                                    .foregroundStyle(.ctAccent)
                                 Text("\(ingredient.name)")
                                     .font(.ctBody)
                                 Spacer()
                                 Text("\(String(format: "%.0f", ingredient.amount)) \(ingredient.unit)")
                                     .font(.ctSubheadline)
-                                    .foregroundColor(.secondary)
+                                    .foregroundStyle(.ctTextSecondary)
                             }
                         }
                     }
@@ -191,10 +192,10 @@ struct RecipeDetailView: View {
                             HStack(alignment: .top, spacing: 12) {
                                 Text("\(index + 1)")
                                     .font(.ctHeadline)
-                                    .foregroundColor(.white)
+                                    .foregroundStyle(.black)
                                     .frame(width: 28, height: 28)
-                                    .background(Color.accentColor)
-                                    .cornerRadius(14)
+                                    .background(Color.ctAccent)
+                                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
 
                                 Text(instruction)
                                     .font(.ctBody)
@@ -211,15 +212,16 @@ struct RecipeDetailView: View {
                         }
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 16)
-                        .background(Color.accentColor)
-                        .foregroundColor(.white)
-                        .cornerRadius(14)
+                        .background(Color.ctAccent)
+                        .foregroundStyle(.black)
+                        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                         .fontWeight(.semibold)
                     }
                     .padding(.top, 8)
                 }
                 .padding()
             }
+            .background(Color.ctBackground)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -235,4 +237,3 @@ struct RecipeDetailView: View {
         dismiss()
     }
 }
-

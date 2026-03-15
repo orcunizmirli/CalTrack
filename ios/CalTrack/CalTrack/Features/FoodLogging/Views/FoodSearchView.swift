@@ -7,13 +7,13 @@ struct FoodSearchView: View {
     @State private var showAddFood = false
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack(spacing: 0) {
                 // Search bar
                 HStack(spacing: 12) {
                     HStack {
                         Image(systemName: "magnifyingglass")
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.ctTextSecondary)
                         TextField("Yemek ara...", text: $viewModel.searchQuery)
                             .textFieldStyle(.plain)
                             .autocapitalization(.none)
@@ -24,22 +24,22 @@ struct FoodSearchView: View {
                         if !viewModel.searchQuery.isEmpty {
                             Button(action: { viewModel.searchQuery = "" }) {
                                 Image(systemName: "xmark.circle.fill")
-                                    .foregroundColor(.secondary)
+                                    .foregroundStyle(.ctTextSecondary)
                             }
                         }
                     }
                     .padding(12)
-                    .background(Color.ctSecondaryBg)
-                    .cornerRadius(12)
+                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .glassEffect(.regular)
 
                     // Barcode button
                     Button(action: { showBarcodeScan = true }) {
                         Image(systemName: "barcode.viewfinder")
                             .font(.title2)
-                            .foregroundColor(.accentColor)
+                            .foregroundStyle(.ctAccent)
                             .frame(width: 44, height: 44)
-                            .background(Color.ctSecondaryBg)
-                            .cornerRadius(12)
+                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                            .glassEffect(.clear)
                     }
                 }
                 .padding(.horizontal)
@@ -58,8 +58,8 @@ struct FoodSearchView: View {
                                 }
                                 .padding(.horizontal, 12)
                                 .padding(.vertical, 8)
-                                .background(viewModel.selectedMealType == type ? Color.accentColor : Color.ctSecondaryBg)
-                                .foregroundColor(viewModel.selectedMealType == type ? .white : .primary)
+                                .background(viewModel.selectedMealType == type ? Color.ctAccent : Color.ctSurfaceElevated)
+                                .foregroundStyle(viewModel.selectedMealType == type ? .black : .ctTextPrimary)
                                 .cornerRadius(20)
                             }
                         }
@@ -78,6 +78,7 @@ struct FoodSearchView: View {
                     recentAndFrequentList
                 }
             }
+            .background(Color.ctBackground)
             .navigationTitle("Yemek Ekle")
             .sheet(isPresented: $showBarcodeScan) {
                 BarcodeScannerView(scannedCode: $viewModel.scannedBarcode)
@@ -139,9 +140,9 @@ struct FoodSearchView: View {
                 Button(action: { showAddFood = true }) {
                     HStack {
                         Image(systemName: "plus.circle.fill")
-                            .foregroundColor(.accentColor)
+                            .foregroundStyle(.ctAccent)
                         Text("Özel Yemek Ekle")
-                            .foregroundColor(.accentColor)
+                            .foregroundStyle(.ctAccent)
                     }
                 }
             }
@@ -163,11 +164,11 @@ struct FoodSearchRow: View {
                     if let brand = food.brand {
                         Text(brand)
                             .font(.ctCaption)
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.ctTextSecondary)
                     }
                     Text("\(food.servingLabel ?? "\(Int(food.servingSizeG))g")")
                         .font(.ctCaption)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.ctTextSecondary)
                 }
             }
 
@@ -191,7 +192,7 @@ struct FoodSearchRow: View {
 
             Image(systemName: "chevron.right")
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundStyle(.ctTextSecondary)
         }
         .padding(.vertical, 4)
     }
@@ -216,7 +217,7 @@ struct FoodDetailAddView: View {
     }
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ScrollView {
                 VStack(spacing: 20) {
                     // Food info
@@ -226,7 +227,7 @@ struct FoodDetailAddView: View {
                         if let brand = food.brand {
                             Text(brand)
                                 .font(.ctSubheadline)
-                                .foregroundColor(.secondary)
+                                .foregroundStyle(.ctTextSecondary)
                         }
                     }
                     .padding(.top, 20)
@@ -239,11 +240,11 @@ struct FoodDetailAddView: View {
                             Spacer()
                             Text("\(Int(quantityG))g")
                                 .font(.ctMacroValue)
-                                .foregroundColor(.accentColor)
+                                .foregroundStyle(.ctAccent)
                         }
 
                         Slider(value: $quantityG, in: 10...1000, step: 10)
-                            .tint(.accentColor)
+                            .tint(.ctAccent)
 
                         // Quick serving buttons
                         HStack(spacing: 8) {
@@ -255,16 +256,14 @@ struct FoodDetailAddView: View {
                                         .font(.ctCaption)
                                         .padding(.horizontal, 10)
                                         .padding(.vertical, 6)
-                                        .background(Color.ctSecondaryBg)
-                                        .cornerRadius(8)
+                                        .background(Color.ctSurfaceElevated)
+                                        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
                                 }
-                                .foregroundColor(.primary)
+                                .foregroundStyle(.ctTextPrimary)
                             }
                         }
                     }
-                    .padding()
-                    .background(Color.ctSecondaryBg)
-                    .cornerRadius(14)
+                    .glassCard()
 
                     // Nutrition info
                     VStack(spacing: 12) {
@@ -280,9 +279,7 @@ struct FoodDetailAddView: View {
                             NutritionRow(label: "Lif", value: String(format: "%.1f", nutrition.fiberG), unit: "g", color: .secondary)
                         }
                     }
-                    .padding()
-                    .background(Color.ctSecondaryBg)
-                    .cornerRadius(14)
+                    .glassCard()
 
                     // Add button
                     Button(action: addMeal) {
@@ -292,14 +289,15 @@ struct FoodDetailAddView: View {
                         }
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 16)
-                        .background(Color.accentColor)
-                        .foregroundColor(.white)
+                        .background(Color.ctAccent)
+                        .foregroundStyle(.black)
                         .cornerRadius(14)
                         .fontWeight(.semibold)
                     }
                 }
                 .padding()
             }
+            .background(Color.ctBackground)
             .navigationTitle("Yemek Detayı")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -344,7 +342,7 @@ struct NutritionRow: View {
                 .font(.ctHeadline)
             Text(unit)
                 .font(.ctCaption)
-                .foregroundColor(.secondary)
+                .foregroundStyle(.ctTextSecondary)
         }
     }
 }
@@ -354,7 +352,7 @@ struct AddFoodView: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             FoodSearchView()
                 .navigationTitle("\(mealType.displayName) - Yemek Ekle")
                 .navigationBarTitleDisplayMode(.inline)

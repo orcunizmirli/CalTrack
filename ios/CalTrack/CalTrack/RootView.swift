@@ -13,74 +13,49 @@ struct RootView: View {
                 MainTabView()
             }
         }
-        .animation(.easeInOut, value: appState.isAuthenticated)
-        .animation(.easeInOut, value: appState.isOnboardingComplete)
+        .animation(.ctSpring, value: appState.isAuthenticated)
+        .animation(.ctSpring, value: appState.isOnboardingComplete)
     }
 }
 
 struct MainTabView: View {
-    @State private var selectedTab = 0
+    @State private var selectedTab = AppTab.home
     @State private var showAIScan = false
 
+    enum AppTab: String, CaseIterable {
+        case home, search, scan, analytics, profile
+    }
+
     var body: some View {
-        ZStack(alignment: .bottom) {
-            TabView(selection: $selectedTab) {
+        TabView(selection: $selectedTab) {
+            Tab("Ana Sayfa", systemImage: "house.fill", value: .home) {
                 DashboardView()
-                    .tabItem {
-                        Image(systemName: "house.fill")
-                        Text("Ana Sayfa")
-                    }
-                    .tag(0)
+            }
 
+            Tab("Ara", systemImage: "magnifyingglass", value: .search) {
                 FoodSearchView()
-                    .tabItem {
-                        Image(systemName: "magnifyingglass")
-                        Text("Ara")
-                    }
-                    .tag(1)
+            }
 
+            Tab("Tara", systemImage: "camera.fill", value: .scan) {
                 Color.clear
-                    .tabItem {
-                        Image(systemName: "camera.fill")
-                        Text("Tara")
-                    }
-                    .tag(2)
+            }
 
+            Tab("Analiz", systemImage: "chart.bar.fill", value: .analytics) {
                 AnalyticsView()
-                    .tabItem {
-                        Image(systemName: "chart.bar.fill")
-                        Text("Analiz")
-                    }
-                    .tag(3)
+            }
 
+            Tab("Profil", systemImage: "person.fill", value: .profile) {
                 SettingsView()
-                    .tabItem {
-                        Image(systemName: "person.fill")
-                        Text("Profil")
-                    }
-                    .tag(4)
             }
-            .onChange(of: selectedTab) { _, newValue in
-                if newValue == 2 {
-                    showAIScan = true
-                    selectedTab = 0
-                }
+        }
+        .tabViewStyle(.tabBarOnly)
+        .tabBarMinimizeBehavior(.onScrollDown)
+        .onChange(of: selectedTab) { _, newValue in
+            if newValue == .scan {
+                HapticManager.medium()
+                showAIScan = true
+                selectedTab = .home
             }
-
-            // Floating AI Scan Button
-            Button(action: { showAIScan = true }) {
-                ZStack {
-                    Circle()
-                        .fill(Color.accentColor)
-                        .frame(width: 64, height: 64)
-                        .shadow(color: Color.accentColor.opacity(0.4), radius: 8, y: 4)
-
-                    Image(systemName: "camera.fill")
-                        .font(.system(size: 24, weight: .semibold))
-                        .foregroundColor(.white)
-                }
-            }
-            .offset(y: -8)
         }
         .fullScreenCover(isPresented: $showAIScan) {
             AIFoodScanView()
