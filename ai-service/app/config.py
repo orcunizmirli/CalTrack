@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     ALLOWED_ORIGINS: list[str] = ["*"]
 
     # Model settings
-    PRIMARY_VISION_MODEL: str = "gpt-4o"
+    PRIMARY_VISION_MODEL: str = "gpt-5.2"
     FALLBACK_VISION_MODEL: str = "claude-sonnet-4-20250514"
     RECIPE_MODEL: str = "claude-sonnet-4-20250514"
     EMBEDDING_MODEL: str = "text-embedding-3-small"
