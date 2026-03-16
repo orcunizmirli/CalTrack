@@ -12,6 +12,7 @@ import { analyticsRouter } from './routes/analytics';
 import { waterRouter } from './routes/water';
 import { recipeRouter } from './routes/recipes';
 import { subscriptionRouter } from './routes/subscriptions';
+import { weightRouter } from './routes/weight';
 import { errorHandler } from './middleware/errorHandler';
 import { rateLimiter } from './middleware/rateLimiter';
 
@@ -43,6 +44,7 @@ app.use('/api/v1/analytics', analyticsRouter);
 app.use('/api/v1/water', waterRouter);
 app.use('/api/v1/recipes', recipeRouter);
 app.use('/api/v1/subscriptions', subscriptionRouter);
+app.use('/api/v1/weight', weightRouter);
 
 // Error handler
 app.use(errorHandler);

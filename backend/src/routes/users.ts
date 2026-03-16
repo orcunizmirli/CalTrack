@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import { authenticate, AuthRequest } from '../middleware/auth';
 import { updateProfileSchema, updateGoalsSchema } from '../validators/user';
 import { AppError } from '../middleware/errorHandler';
+import { calculateBMR, calculateTDEE, calculateNutritionPlan } from '../services/nutrition';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -118,6 +119,38 @@ router.get('/me/stats', async (req: AuthRequest, res: Response, next) => {
       todayMeals: mealCount,
       totalDaysLogged: totalDays.length,
     });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// GET /users/me/nutrition-plan?goalType=lose_weight&weeklyChange=0.5
+router.get('/me/nutrition-plan', async (req: AuthRequest, res: Response, next) => {
+  try {
+    const user = await prisma.user.findUnique({ where: { id: req.userId } });
+    if (!user) throw new AppError('Kullanıcı bulunamadı', 404);
+
+    if (!user.gender || !user.heightCm || !user.weightKg || !user.birthDate) {
+      throw new AppError('Profil bilgilerinizi (boy, kilo, cinsiyet, doğum tarihi) doldurun', 400);
+    }
+
+    const metrics = {
+      gender: user.gender,
+      weightKg: Number(user.weightKg),
+      heightCm: Number(user.heightCm),
+      birthDate: user.birthDate,
+      activityLevel: user.activityLevel || 'moderate',
+    };
+
+    const goalType = (req.query.goalType as string) || 'maintain';
+    const weeklyChange = req.query.weeklyChange ? parseFloat(req.query.weeklyChange as string) : 0.5;
+
+    const plan = calculateNutritionPlan(metrics, {
+      goalType: goalType as 'lose_weight' | 'gain_muscle' | 'burn_fat' | 'maintain',
+      weeklyChange,
+    });
+
+    res.json(plan);
   } catch (error) {
     next(error);
   }

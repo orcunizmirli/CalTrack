@@ -101,9 +101,26 @@ model Food {
 
   creator        User?    @relation("CustomFoods", fields: [createdBy], references: [id])
   mealEntries    MealEntry[]
+  embeddings     FoodEmbedding[]
 
   @@index([barcode])
   @@map("foods")
+}
+
+model FoodEmbedding {
+  id         String   @id @default(uuid()) @db.Uuid
+  foodId     String   @map("food_id") @db.Uuid
+  foodName   String   @map("food_name") @db.VarChar(255)
+  foodNameTr String?  @map("food_name_tr") @db.VarChar(255)
+  searchText String   @map("search_text")
+  // embedding column managed by pgvector directly (Unsupported type)
+  embedding  Unsupported("vector(1536)")?
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  food       Food     @relation(fields: [foodId], references: [id], onDelete: Cascade)
+
+  @@unique([foodId])
+  @@map("food_embeddings")
 }
 
 model MealEntry {
