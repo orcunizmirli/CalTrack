@@ -3,24 +3,31 @@ import json
 import openai
 import anthropic
 from app.config import settings
-from app.models.schemas import RawVisionResult, FoodItem
+from app.models.schemas import RawVisionResult, ReferenceObject, FoodItem
 
 FOOD_ANALYSIS_PROMPT = """You are a professional nutrition expert AI specialized in Turkish cuisine. Analyze the food in this photo carefully.
 
-For each distinct food item visible:
-1. Identify the food item — use the most specific Turkish name (e.g., "Adana Kebap" not just "kebap")
-2. Also provide the English name for database matching
-3. Estimate the portion size in grams — use visual cues:
-   - Standard dinner plate ≈ 26cm diameter
-   - Tea glass (ince belli) ≈ 100ml
-   - Standard fork ≈ 19cm
-   - A closed fist ≈ 100g rice/pasta
-   - Palm of hand ≈ 85g meat
-   - Thumb tip ≈ 5g butter/oil
-4. Calculate calories and macronutrients per YOUR estimated portion
-5. Assign a confidence score (0.0-1.0) based on how clearly you can identify the food
+## STEP 1: Detect Reference Objects
+First, identify reference objects in the photo that help calibrate portion sizes:
+- Plate: type (dinner ≈ 26cm, dessert ≈ 20cm, bowl ≈ 16cm) and estimated diameter
+- Fork (≈ 19cm), knife (≈ 22cm), spoon (≈ 18cm)
+- Glass: tea glass (ince belli ≈ 100ml), water glass (≈ 250ml)
+- Hand, packaging, or other objects with known size
+Use detected references to improve your portion estimates below.
 
-IMPORTANT RULES:
+## STEP 2: Identify & Measure Each Food Item
+For each distinct food item visible:
+1. Identify the food — use the most specific Turkish name (e.g., "Adana Kebap" not just "kebap")
+2. Also provide the English name for database matching
+3. Estimate portion in grams using BOTH:
+   - Reference objects you detected (plate area × food coverage × depth × density)
+   - Visual heuristics: closed fist ≈ 100g rice, palm ≈ 85g meat, thumb tip ≈ 5g butter
+4. Estimate what fraction of the plate each food covers (plate_fraction, 0.0-1.0)
+5. Estimate the food's depth/height in cm on the plate
+6. Calculate calories and macronutrients for YOUR estimated portion
+7. Assign a confidence score (0.0-1.0) based on identification clarity
+
+## IMPORTANT RULES
 - For Turkish dishes with sauce/oil (zeytinyağlı, sote), include the oil calories
 - For mixed dishes (karnıyarık, mantı), estimate each component's contribution
 - If multiple items share a plate, estimate each separately
@@ -28,11 +35,20 @@ IMPORTANT RULES:
 
 Return ONLY valid JSON in this exact format:
 {
+  "reference_objects": [
+    {
+      "type": "dinner_plate",
+      "estimated_diameter_cm": 26,
+      "confidence": 0.9
+    }
+  ],
   "items": [
     {
       "name": "Adana Kebap",
       "name_en": "Adana Kebab",
       "portion_g": 200,
+      "plate_fraction": 0.35,
+      "depth_cm": 2.5,
       "calories": 460,
       "protein_g": 34.0,
       "carbs_g": 4.0,
@@ -136,8 +152,15 @@ class VisionService:
         data = json.loads(content.strip())
         items = [FoodItem(**item) for item in data.get("items", [])]
 
+        # Parse reference objects (from unified prompt)
+        ref_objects = [
+            ReferenceObject(**ref)
+            for ref in data.get("reference_objects", [])
+        ]
+
         return RawVisionResult(
             items=items,
             meal_description=data.get("meal_description", ""),
             model_used=model,
+            reference_objects=ref_objects,
         )

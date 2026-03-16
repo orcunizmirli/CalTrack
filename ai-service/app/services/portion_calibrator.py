@@ -1,239 +1,117 @@
 """
 Portion Calibrator: Adjusts AI-estimated portions using reference objects
-detected in the food photo.
+detected in the same Vision API call.
 
-The Vision model is asked to detect reference objects (plate, fork, spoon,
-glass, hand) and report their apparent sizes. We use known real-world sizes
-of these objects to compute a scale factor, then apply it to portion estimates.
+The unified prompt asks the model to:
+1. Detect reference objects (plate, fork, glass, etc.)
+2. Estimate plate_fraction and depth_cm for each food item
+3. Provide portion estimates informed by these references
 
-Reference Object Dimensions (real-world):
-- Standard dinner plate: 26cm diameter
-- Small/dessert plate: 20cm diameter
-- Turkish tea glass (ince belli): 6.5cm height, ~100ml
-- Water glass: 8cm diameter
-- Standard fork: 19cm length
-- Standard spoon: 18cm length
-- Adult hand width (palm): ~8.5cm
+This calibrator provides a secondary validation layer:
+- Uses plate area × food coverage × depth × density to compute an independent
+  weight estimate, then blends it with the model's gram estimate.
+
+No extra API calls required — all data comes from the single Vision response.
 """
 
-import json
 import logging
-
-import openai
-from app.config import settings
-from app.models.schemas import FoodItem
+from app.models.schemas import FoodItem, ReferenceObject
 
 logger = logging.getLogger(__name__)
 
-REFERENCE_DETECTION_PROMPT = """Analyze this food photo for reference objects that can help estimate portion sizes.
-
-Look for these objects and estimate their APPARENT size in the image:
-1. Plate - type (dinner/dessert/bowl) and approximate diameter visible
-2. Fork/Knife/Spoon - if visible
-3. Glass/Cup - type and approximate size
-4. Hand - if visible
-5. Any standard packaging with known size
-
-For each food item on the plate, estimate what FRACTION of the plate surface it covers.
-
-Return ONLY valid JSON:
-{
-  "reference_objects": [
-    {
-      "type": "dinner_plate",
-      "estimated_diameter_cm": 26,
-      "confidence": 0.9
-    }
-  ],
-  "food_coverage": [
-    {
-      "food_name": "pilav",
-      "plate_fraction": 0.3,
-      "estimated_depth_cm": 2.0
-    }
-  ],
-  "scale_factor": 1.0,
-  "notes": "Standard dinner plate detected, portions appear normal sized"
-}"""
-
-# Known dimensions for scale calculation
-REFERENCE_DIMENSIONS = {
-    "dinner_plate": {"diameter_cm": 26, "area_cm2": 530},
-    "dessert_plate": {"diameter_cm": 20, "area_cm2": 314},
-    "bowl": {"diameter_cm": 16, "area_cm2": 201},
-    "fork": {"length_cm": 19},
-    "knife": {"length_cm": 22},
-    "spoon": {"length_cm": 18},
-    "tea_glass": {"height_cm": 6.5, "volume_ml": 100},
-    "water_glass": {"diameter_cm": 8, "volume_ml": 250},
-    "hand": {"width_cm": 8.5},
+# Known plate areas
+PLATE_AREAS: dict[str, float] = {
+    "dinner_plate": 530.0,   # π × 13² cm²
+    "dessert_plate": 314.0,  # π × 10² cm²
+    "bowl": 201.0,           # π × 8² cm²
 }
 
-# Approximate density of common food categories (g/cm3)
-FOOD_DENSITY = {
-    "rice": 1.1,
-    "pilav": 1.1,
-    "pasta": 0.9,
-    "makarna": 0.9,
-    "meat": 1.05,
-    "et": 1.05,
-    "kebap": 1.0,
-    "köfte": 1.0,
-    "salad": 0.4,
-    "salata": 0.4,
-    "soup": 1.0,
-    "çorba": 1.0,
-    "bread": 0.35,
-    "ekmek": 0.35,
-    "vegetables": 0.6,
-    "sebze": 0.6,
-    "default": 0.8,
+# Approximate food density (g/cm³)
+FOOD_DENSITY: dict[str, float] = {
+    "rice": 1.1, "pilav": 1.1, "pirinç": 1.1,
+    "pasta": 0.9, "makarna": 0.9,
+    "meat": 1.05, "et": 1.05, "kebap": 1.0, "kebab": 1.0,
+    "köfte": 1.0, "tavuk": 1.0, "chicken": 1.0,
+    "salad": 0.4, "salata": 0.4,
+    "soup": 1.0, "çorba": 1.0,
+    "bread": 0.35, "ekmek": 0.35, "lavaş": 0.3, "simit": 0.35,
+    "vegetables": 0.6, "sebze": 0.6,
+    "börek": 0.55, "pide": 0.5, "lahmacun": 0.45,
+    "dessert": 0.7, "tatlı": 0.7, "baklava": 0.8,
 }
 
 
 def _get_density(food_name: str) -> float:
-    """Get approximate density for a food item."""
     name_lower = food_name.lower()
     for key, density in FOOD_DENSITY.items():
         if key in name_lower:
             return density
-    return FOOD_DENSITY["default"]
+    return 0.8  # default
 
 
-class PortionCalibrator:
-    def __init__(self):
-        self._client = openai.AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
+def calibrate_portions(
+    items: list[FoodItem],
+    reference_objects: list[ReferenceObject],
+) -> list[FoodItem]:
+    """
+    Validate and optionally adjust portion estimates using reference object data.
 
-    async def detect_references(self, image_data: bytes) -> dict | None:
-        """Detect reference objects in the food photo."""
-        try:
-            import base64
-            b64 = base64.b64encode(image_data).decode("utf-8")
+    Only adjusts if:
+    - A plate-type reference was detected with decent confidence
+    - The item has plate_fraction and depth_cm data
+    - The calculated weight differs significantly from the AI estimate
+    """
+    if not reference_objects:
+        return items
 
-            response = await self._client.chat.completions.create(
-                model=settings.PRIMARY_VISION_MODEL,
-                messages=[
-                    {
-                        "role": "user",
-                        "content": [
-                            {"type": "text", "text": REFERENCE_DETECTION_PROMPT},
-                            {
-                                "type": "image_url",
-                                "image_url": {
-                                    "url": f"data:image/jpeg;base64,{b64}",
-                                    "detail": "high",
-                                },
-                            },
-                        ],
-                    }
-                ],
-                max_tokens=1000,
-                temperature=0.1,
-            )
+    # Find best plate reference
+    plate_ref = None
+    for ref in reference_objects:
+        if ref.type in PLATE_AREAS and ref.confidence >= 0.6:
+            if plate_ref is None or ref.confidence > plate_ref.confidence:
+                plate_ref = ref
 
-            content = response.choices[0].message.content or ""
-            if "```json" in content:
-                content = content.split("```json")[1].split("```")[0]
-            elif "```" in content:
-                content = content.split("```")[1].split("```")[0]
+    if not plate_ref:
+        return items
 
-            return json.loads(content.strip())
+    plate_area = PLATE_AREAS[plate_ref.type]
 
-        except Exception as e:
-            logger.warning(f"Reference object detection failed: {e}")
-            return None
+    calibrated: list[FoodItem] = []
+    for item in items:
+        if item.plate_fraction and item.depth_cm:
+            density = _get_density(item.name)
+            volume_cm3 = plate_area * item.plate_fraction * item.depth_cm
+            calculated_g = volume_cm3 * density
 
-    def calibrate_portions(
-        self, items: list[FoodItem], ref_data: dict
-    ) -> list[FoodItem]:
-        """
-        Adjust portion estimates using detected reference objects.
+            # Only adjust if there's a significant discrepancy (>30%)
+            ratio = calculated_g / item.portion_g if item.portion_g > 0 else 1.0
 
-        Strategy:
-        1. Compute scale factor from reference objects
-        2. Use food_coverage fractions to estimate volume
-        3. Apply density to convert volume -> weight
-        4. Blend calibrated weight with AI estimate
-        """
-        if not ref_data:
-            return items
+            if abs(ratio - 1.0) > 0.3:
+                # Blend: 50% AI estimate, 50% calculated — trust both equally
+                blended_g = item.portion_g * 0.5 + calculated_g * 0.5
 
-        ref_objects = ref_data.get("reference_objects", [])
-        food_coverage = ref_data.get("food_coverage", [])
+                # Safety: don't deviate more than 2x from AI
+                blended_g = max(item.portion_g * 0.4, min(item.portion_g * 2.0, blended_g))
 
-        if not ref_objects:
-            return items
-
-        # Find best reference object (highest confidence)
-        best_ref = max(ref_objects, key=lambda r: r.get("confidence", 0))
-        ref_type = best_ref.get("type", "")
-        ref_known = REFERENCE_DIMENSIONS.get(ref_type)
-
-        if not ref_known or "area_cm2" not in ref_known:
-            # Only plate references give us area-based calibration
-            return items
-
-        plate_area = ref_known["area_cm2"]
-
-        # Build coverage lookup
-        coverage_map: dict[str, dict] = {}
-        for fc in food_coverage:
-            name = fc.get("food_name", "").lower()
-            coverage_map[name] = fc
-
-        calibrated: list[FoodItem] = []
-        for item in items:
-            name_lower = item.name.lower()
-
-            # Find matching coverage data
-            matched_coverage = None
-            for cov_name, cov_data in coverage_map.items():
-                if cov_name in name_lower or name_lower in cov_name:
-                    matched_coverage = cov_data
-                    break
-
-            if matched_coverage:
-                fraction = matched_coverage.get("plate_fraction", 0)
-                depth_cm = matched_coverage.get("estimated_depth_cm", 1.5)
-                density = _get_density(item.name)
-
-                # Volume = plate_area * fraction * depth
-                volume_cm3 = plate_area * fraction * depth_cm
-                calibrated_g = volume_cm3 * density
-
-                # Blend: 60% calibrated, 40% AI estimate
-                blended_g = calibrated_g * 0.6 + item.portion_g * 0.4
-
-                # Sanity check: don't deviate more than 2x from AI estimate
-                if blended_g > item.portion_g * 2:
-                    blended_g = item.portion_g * 1.5
-                elif blended_g < item.portion_g * 0.3:
-                    blended_g = item.portion_g * 0.5
-
-                portion_ratio = blended_g / item.portion_g if item.portion_g > 0 else 1.0
-
-                calibrated.append(FoodItem(
-                    name=item.name,
-                    name_en=item.name_en,
-                    portion_g=round(blended_g, 1),
-                    calories=round(item.calories * portion_ratio, 1),
-                    protein_g=round(item.protein_g * portion_ratio, 1),
-                    carbs_g=round(item.carbs_g * portion_ratio, 1),
-                    fat_g=round(item.fat_g * portion_ratio, 1),
-                    fiber_g=round((item.fiber_g or 0) * portion_ratio, 1),
-                    confidence=item.confidence,
-                    matched_food_id=item.matched_food_id,
-                    standard_portion_g=item.standard_portion_g,
-                    standard_portion_label=item.standard_portion_label,
-                    portion_options=item.portion_options,
-                    calories_per_100g=item.calories_per_100g,
-                ))
+                scale = blended_g / item.portion_g if item.portion_g > 0 else 1.0
 
                 logger.info(
-                    f"Calibrated '{item.name}': {item.portion_g}g -> {round(blended_g, 1)}g "
-                    f"(plate fraction={fraction}, depth={depth_cm}cm)"
+                    f"Calibrated '{item.name}': {item.portion_g}g -> {round(blended_g)}g "
+                    f"(calc={round(calculated_g)}g, fraction={item.plate_fraction}, "
+                    f"depth={item.depth_cm}cm, density={density})"
                 )
+
+                calibrated.append(item.model_copy(update={
+                    "portion_g": round(blended_g, 1),
+                    "calories": round(item.calories * scale, 1),
+                    "protein_g": round(item.protein_g * scale, 1),
+                    "carbs_g": round(item.carbs_g * scale, 1),
+                    "fat_g": round(item.fat_g * scale, 1),
+                    "fiber_g": round((item.fiber_g or 0) * scale, 1),
+                }))
             else:
                 calibrated.append(item)
+        else:
+            calibrated.append(item)
 
-        return calibrated
+    return calibrated

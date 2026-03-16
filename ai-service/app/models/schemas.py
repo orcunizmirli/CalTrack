@@ -10,6 +10,8 @@ class FoodItem(BaseModel):
     carbs_g: float
     fat_g: float
     fiber_g: float | None = None
+    plate_fraction: float | None = None  # fraction of plate covered
+    depth_cm: float | None = None  # estimated depth on plate
     confidence: float = 0.8
     matched_food_id: str | None = None  # DB match from RAG
     # Portion calibration fields
@@ -26,10 +28,17 @@ class PortionOption(BaseModel):
     calories: float
 
 
+class ReferenceObject(BaseModel):
+    type: str  # dinner_plate, dessert_plate, bowl, fork, etc.
+    estimated_diameter_cm: float | None = None
+    confidence: float = 0.5
+
+
 class RawVisionResult(BaseModel):
     items: list[FoodItem]
     meal_description: str
     model_used: str
+    reference_objects: list[ReferenceObject] = []
 
 
 class FoodAnalysisResponse(BaseModel):

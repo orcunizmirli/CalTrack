@@ -1,4 +1,3 @@
-import asyncio
 import logging
 import time
 from pydantic import BaseModel
@@ -10,10 +9,9 @@ from app.models.schemas import (
     FoodItem,
     PortionOption,
     PortionUpdateRequest,
-    RawVisionResult,
 )
 from app.services.portion_standards import get_standard_portions, get_portion_options
-from app.services.portion_calibrator import PortionCalibrator
+from app.services.portion_calibrator import calibrate_portions
 from app.services.feedback_service import FeedbackService
 
 logger = logging.getLogger(__name__)
@@ -21,7 +19,6 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 vision_service = VisionService()
 rag_service = RAGService()
-portion_calibrator = PortionCalibrator()
 feedback_service = FeedbackService()
 
 
@@ -53,26 +50,21 @@ async def analyze_food(
         raise HTTPException(status_code=400, detail="Resim boyutu 10MB'dan büyük olamaz.")
 
     try:
-        # Step 1: AI Vision Analysis + Reference Object Detection (parallel)
-        vision_task = vision_service.analyze_food_image(
+        # Step 1: AI Vision Analysis (includes reference object detection in single call)
+        raw_result = await vision_service.analyze_food_image(
             image_data=image_data,
             meal_type=meal_type,
             additional_context=additional_context,
         )
-        ref_task = portion_calibrator.detect_references(image_data)
-        raw_result, ref_data = await asyncio.gather(vision_task, ref_task)
 
-        # Step 1.5: Calibrate portions using reference objects
-        if ref_data:
-            raw_result = RawVisionResult(
-                items=portion_calibrator.calibrate_portions(raw_result.items, ref_data),
-                meal_description=raw_result.meal_description,
-                model_used=raw_result.model_used,
-            )
+        # Step 1.5: Calibrate portions using reference objects from the same response
+        calibrated_items = calibrate_portions(
+            raw_result.items, raw_result.reference_objects
+        )
 
         # Step 2: RAG Enhancement - match with food database
         enhanced_items: list[FoodItem] = []
-        for item in raw_result.items:
+        for item in calibrated_items:
             enhanced = await rag_service.enhance_food_item(item)
 
             # Step 2.5: Enrich with standard portion info for UI
