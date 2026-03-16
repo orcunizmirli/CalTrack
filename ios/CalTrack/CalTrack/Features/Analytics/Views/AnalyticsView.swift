@@ -8,8 +8,8 @@ enum AnalyticsRange: String, CaseIterable {
 }
 
 struct AnalyticsView: View {
+    @StateObject private var viewModel = AnalyticsViewModel()
     @State private var selectedRange: AnalyticsRange = .week
-    @State private var selectedTab = 0
 
     var body: some View {
         NavigationStack {
@@ -25,21 +25,40 @@ struct AnalyticsView: View {
                         .pickerStyle(.segmented)
                         .padding(.horizontal)
 
-                        // Streak
-                        StreakView()
+                        if viewModel.isLoading {
+                            ProgressView()
+                                .padding(.vertical, 40)
+                        } else {
+                            // Streak
+                            StreakView(
+                                currentStreak: viewModel.streak.currentStreak,
+                                longestStreak: viewModel.streak.longestStreak
+                            )
                             .padding(.horizontal)
 
-                        // Calorie Chart
-                        CalorieChartView(range: selectedRange)
+                            // Calorie Chart
+                            CalorieChartView(
+                                data: viewModel.calorieData,
+                                goal: viewModel.calorieGoal,
+                                average: viewModel.avgCalories
+                            )
                             .padding(.horizontal)
 
-                        // Macro Trend
-                        MacroTrendView(range: selectedRange)
+                            // Macro Trend
+                            MacroTrendView(
+                                avgProtein: viewModel.avgProtein,
+                                avgCarbs: viewModel.avgCarbs,
+                                avgFat: viewModel.avgFat
+                            )
                             .padding(.horizontal)
 
-                        // Weight Chart
-                        WeightChartView(range: selectedRange)
+                            // Weight Chart
+                            WeightChartView(
+                                data: viewModel.weightData,
+                                change: viewModel.weightChange
+                            )
                             .padding(.horizontal)
+                        }
 
                         Spacer(minLength: 100)
                     }
@@ -48,13 +67,17 @@ struct AnalyticsView: View {
             }
             .background(Color.ctBackground)
             .navigationTitle("Analiz")
+            .task { await viewModel.loadData(range: selectedRange) }
+            .onChange(of: selectedRange) { _, newRange in
+                Task { await viewModel.loadData(range: newRange) }
+            }
         }
     }
 }
 
 struct StreakView: View {
-    @State private var currentStreak = 7
-    @State private var longestStreak = 14
+    let currentStreak: Int
+    let longestStreak: Int
 
     var body: some View {
         HStack(spacing: 16) {
@@ -89,51 +112,48 @@ struct StreakView: View {
 }
 
 struct CalorieChartView: View {
-    let range: AnalyticsRange
-
-    // Mock data
-    var data: [(Date, Double, Double)] {
-        let days = range == .week ? 7 : range == .month ? 30 : 90
-        return (0..<days).map { i in
-            let date = Date().daysAgo(days - 1 - i)
-            let consumed = Double.random(in: 1600...2400)
-            let goal = 2100.0
-            return (date, consumed, goal)
-        }
-    }
+    let data: [CalorieDayData]
+    let goal: Double
+    let average: Double
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Kalori Takibi")
                 .font(.ctHeadline)
 
-            Chart {
-                ForEach(data, id: \.0) { item in
-                    BarMark(
-                        x: .value("Tarih", item.0, unit: .day),
-                        y: .value("Kalori", item.1)
-                    )
-                    .foregroundStyle(item.1 <= item.2 ? Color.ctAccent : Color.ctError)
+            if data.isEmpty {
+                Text("Henüz veri yok")
+                    .font(.ctSubheadline)
+                    .foregroundStyle(.ctTextSecondary)
+                    .frame(height: 200)
+                    .frame(maxWidth: .infinity)
+            } else {
+                Chart {
+                    ForEach(data) { item in
+                        BarMark(
+                            x: .value("Tarih", item.date, unit: .day),
+                            y: .value("Kalori", item.calories)
+                        )
+                        .foregroundStyle(item.calories <= goal ? Color.ctAccent : Color.ctError)
+                    }
 
-                    RuleMark(y: .value("Hedef", item.2))
+                    RuleMark(y: .value("Hedef", goal))
                         .foregroundStyle(Color.secondary.opacity(0.5))
                         .lineStyle(StrokeStyle(dash: [5]))
                 }
-            }
-            .frame(height: 200)
-            .chartYAxis {
-                AxisMarks(position: .leading)
-            }
+                .frame(height: 200)
+                .chartYAxis {
+                    AxisMarks(position: .leading)
+                }
 
-            // Average
-            let avg = data.map(\.1).reduce(0, +) / Double(data.count)
-            HStack {
-                Text("Ortalama:")
-                    .font(.ctCaption)
-                    .foregroundStyle(.ctTextSecondary)
-                Text("\(Int(avg)) kcal/gün")
-                    .font(.ctCaption)
-                    .fontWeight(.medium)
+                HStack {
+                    Text("Ortalama:")
+                        .font(.ctCaption)
+                        .foregroundStyle(.ctTextSecondary)
+                    Text("\(Int(average)) kcal/gün")
+                        .font(.ctCaption)
+                        .fontWeight(.medium)
+                }
             }
         }
         .glassCard(cornerRadius: 16)
@@ -141,21 +161,22 @@ struct CalorieChartView: View {
 }
 
 struct MacroTrendView: View {
-    let range: AnalyticsRange
+    let avgProtein: Double
+    let avgCarbs: Double
+    let avgFat: Double
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Makro Trendleri")
                 .font(.ctHeadline)
 
-            let days = range == .week ? 7 : range == .month ? 30 : 90
-            let data: [(String, Double, Color)] = [
-                ("Protein", Double.random(in: 100...180), .ctProtein),
-                ("Karb", Double.random(in: 150...250), .ctCarbs),
-                ("Yağ", Double.random(in: 50...90), .ctFat)
+            let items: [(String, Double, Color)] = [
+                ("Protein", avgProtein, .ctProtein),
+                ("Karb", avgCarbs, .ctCarbs),
+                ("Yağ", avgFat, .ctFat)
             ]
 
-            ForEach(data, id: \.0) { item in
+            ForEach(items, id: \.0) { item in
                 HStack {
                     Circle().fill(item.2).frame(width: 8, height: 8)
                     Text(item.0)
@@ -172,58 +193,58 @@ struct MacroTrendView: View {
 }
 
 struct WeightChartView: View {
-    let range: AnalyticsRange
-
-    var data: [(Date, Double)] {
-        let days = range == .week ? 7 : range == .month ? 30 : 90
-        var weight = 75.0
-        return (0..<days).map { i in
-            let date = Date().daysAgo(days - 1 - i)
-            weight += Double.random(in: -0.3...0.2)
-            return (date, weight)
-        }
-    }
+    let data: [WeightDayData]
+    let change: Double?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Kilo Grafiği")
                 .font(.ctHeadline)
 
-            Chart {
-                ForEach(data, id: \.0) { item in
-                    LineMark(
-                        x: .value("Tarih", item.0, unit: .day),
-                        y: .value("Kilo", item.1)
-                    )
-                    .foregroundStyle(Color.ctAccent)
-                    .interpolationMethod(.catmullRom)
-
-                    AreaMark(
-                        x: .value("Tarih", item.0, unit: .day),
-                        y: .value("Kilo", item.1)
-                    )
-                    .foregroundStyle(
-                        LinearGradient(
-                            colors: [Color.ctAccent.opacity(0.3), Color.ctAccent.opacity(0.0)],
-                            startPoint: .top, endPoint: .bottom
+            if data.isEmpty {
+                Text("Henüz kilo verisi yok")
+                    .font(.ctSubheadline)
+                    .foregroundStyle(.ctTextSecondary)
+                    .frame(height: 180)
+                    .frame(maxWidth: .infinity)
+            } else {
+                Chart {
+                    ForEach(data) { item in
+                        LineMark(
+                            x: .value("Tarih", item.date, unit: .day),
+                            y: .value("Kilo", item.weightKg)
                         )
-                    )
-                    .interpolationMethod(.catmullRom)
-                }
-            }
-            .frame(height: 180)
-            .chartYScale(domain: (data.map(\.1).min() ?? 70) - 1...(data.map(\.1).max() ?? 80) + 1)
+                        .foregroundStyle(Color.ctAccent)
+                        .interpolationMethod(.catmullRom)
 
-            if let first = data.first, let last = data.last {
-                let change = last.1 - first.1
-                HStack {
-                    Text("Değişim:")
-                        .font(.ctCaption)
-                        .foregroundStyle(.ctTextSecondary)
-                    Text(String(format: "%+.1f kg", change))
-                        .font(.ctCaption)
-                        .fontWeight(.medium)
-                        .foregroundColor(change < 0 ? .ctSuccess : .ctWarning)
+                        AreaMark(
+                            x: .value("Tarih", item.date, unit: .day),
+                            y: .value("Kilo", item.weightKg)
+                        )
+                        .foregroundStyle(
+                            LinearGradient(
+                                colors: [Color.ctAccent.opacity(0.3), Color.ctAccent.opacity(0.0)],
+                                startPoint: .top, endPoint: .bottom
+                            )
+                        )
+                        .interpolationMethod(.catmullRom)
+                    }
+                }
+                .frame(height: 180)
+                .chartYScale(
+                    domain: (data.map(\.weightKg).min() ?? 70) - 1...(data.map(\.weightKg).max() ?? 80) + 1
+                )
+
+                if let change {
+                    HStack {
+                        Text("Değişim:")
+                            .font(.ctCaption)
+                            .foregroundStyle(.ctTextSecondary)
+                        Text(String(format: "%+.1f kg", change))
+                            .font(.ctCaption)
+                            .fontWeight(.medium)
+                            .foregroundColor(change < 0 ? .ctSuccess : .ctWarning)
+                    }
                 }
             }
         }

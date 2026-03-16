@@ -13,6 +13,7 @@ import { waterRouter } from './routes/water';
 import { recipeRouter } from './routes/recipes';
 import { subscriptionRouter } from './routes/subscriptions';
 import { weightRouter } from './routes/weight';
+import { healthSyncRouter } from './routes/healthSync';
 import { errorHandler } from './middleware/errorHandler';
 import { rateLimiter } from './middleware/rateLimiter';
 
@@ -45,6 +46,7 @@ app.use('/api/v1/water', waterRouter);
 app.use('/api/v1/recipes', recipeRouter);
 app.use('/api/v1/subscriptions', subscriptionRouter);
 app.use('/api/v1/weight', weightRouter);
+app.use('/api/v1/health-sync', healthSyncRouter);
 
 // Error handler
 app.use(errorHandler);

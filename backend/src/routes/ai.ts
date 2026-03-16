@@ -6,6 +6,7 @@ import { aiRateLimiter } from '../middleware/rateLimiter';
 import { recipeRequestSchema } from '../validators/meal';
 import { config } from '../config';
 import { AppError } from '../middleware/errorHandler';
+import { uploadToS3 } from '../utils/s3';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -43,14 +44,23 @@ router.post('/analyze-food', aiRateLimiter, upload.single('image'), async (req: 
     const result = await aiResponse.json() as Record<string, any>;
     const processingMs = Date.now() - startTime;
 
+    // Upload photo to S3
+    let photoUrl = '';
+    try {
+      const ext = req.file.mimetype === 'image/png' ? 'png' : 'jpg';
+      photoUrl = await uploadToS3(req.file.buffer, 'ai-scans', req.file.mimetype, ext);
+    } catch (uploadErr) {
+      console.error('S3 upload failed, continuing without photo URL:', uploadErr);
+    }
+
     // Save scan record
     const scan = await prisma.aiScan.create({
       data: {
         userId: req.userId!,
-        photoUrl: '', // TODO: Upload to S3
+        photoUrl,
         rawResponse: result,
         detectedItems: result.items,
-        modelUsed: result.model_used || 'gpt-4o',
+        modelUsed: result.model_used || 'gpt-5.2',
         confidence: result.confidence,
         processingMs,
       },
