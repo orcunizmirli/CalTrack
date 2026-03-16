@@ -1,13 +1,14 @@
 import { Router, Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
-import { PrismaClient } from '@prisma/client';
 import { generateTokens, verifyRefreshToken } from '../middleware/auth';
 import { registerSchema, loginSchema, refreshTokenSchema } from '../validators/auth';
 import { AppError } from '../middleware/errorHandler';
 import { t, getLocale } from '../i18n';
+import { prisma } from '../utils/prisma';
+import { getRedisClient } from '../utils/redis';
+import { config } from '../config';
 
 const router = Router();
-const prisma = new PrismaClient();
 
 // POST /auth/register
 router.post('/register', async (req: Request, res: Response, next) => {
@@ -175,6 +176,16 @@ router.post('/refresh', async (req: Request, res: Response, next) => {
   try {
     const locale = getLocale(req);
     const { refreshToken } = refreshTokenSchema.parse(req.body);
+
+    // Check if token is blacklisted
+    const redis = await getRedisClient();
+    if (redis) {
+      const isBlacklisted = await redis.get(`bl:${refreshToken}`);
+      if (isBlacklisted) {
+        throw new AppError(t('auth.invalid_refresh_token', locale), 401);
+      }
+    }
+
     const userId = verifyRefreshToken(refreshToken);
 
     if (!userId) {
@@ -189,10 +200,38 @@ router.post('/refresh', async (req: Request, res: Response, next) => {
 });
 
 // POST /auth/logout
-router.post('/logout', (req: Request, res: Response) => {
-  const locale = getLocale(req);
-  // In a more complete implementation, invalidate the refresh token in Redis
-  res.json({ message: t('auth.logout_success', locale) });
+router.post('/logout', async (req: Request, res: Response, next) => {
+  try {
+    const locale = getLocale(req);
+    const { refreshToken } = req.body;
+
+    // Blacklist the refresh token in Redis if provided
+    if (refreshToken) {
+      const redis = await getRedisClient();
+      if (redis) {
+        // Parse token to get expiry, then set TTL accordingly
+        const ttlSeconds = parseTTLFromConfig(config.jwt.refreshExpiresIn);
+        await redis.set(`bl:${refreshToken}`, '1', { EX: ttlSeconds });
+      }
+    }
+
+    res.json({ message: t('auth.logout_success', locale) });
+  } catch (error) {
+    next(error);
+  }
 });
+
+function parseTTLFromConfig(expiresIn: string): number {
+  const match = expiresIn.match(/^(\d+)([smhd])$/);
+  if (!match) return 7 * 24 * 3600; // default 7 days
+  const value = parseInt(match[1]);
+  switch (match[2]) {
+    case 's': return value;
+    case 'm': return value * 60;
+    case 'h': return value * 3600;
+    case 'd': return value * 86400;
+    default: return 7 * 86400;
+  }
+}
 
 export { router as authRouter };

@@ -1,13 +1,12 @@
 import { Router, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
 import { authenticate, AuthRequest } from '../middleware/auth';
 import { updateProfileSchema, updateGoalsSchema } from '../validators/user';
 import { AppError } from '../middleware/errorHandler';
 import { calculateBMR, calculateTDEE, calculateNutritionPlan } from '../services/nutrition';
 import { t, getLocale } from '../i18n';
+import { prisma } from '../utils/prisma';
 
 const router = Router();
-const prisma = new PrismaClient();
 
 // All routes require authentication
 router.use(authenticate);

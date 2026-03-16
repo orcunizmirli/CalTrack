@@ -1,11 +1,11 @@
 import { Router, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
 import { authenticate, AuthRequest } from '../middleware/auth';
 import { AppError } from '../middleware/errorHandler';
 import { t, getLocale } from '../i18n';
+import { prisma } from '../utils/prisma';
+import { syncPullSchema, syncPushSchema } from '../validators/sync';
 
 const router = Router();
-const prisma = new PrismaClient();
 
 router.use(authenticate);
 
@@ -17,7 +17,7 @@ router.use(authenticate);
 router.post('/pull', async (req: AuthRequest, res: Response, next) => {
   try {
     const userId = req.userId!;
-    const { lastSyncedAt } = req.body;
+    const { lastSyncedAt } = syncPullSchema.parse(req.body);
 
     const since = lastSyncedAt ? new Date(lastSyncedAt) : new Date(0);
 
@@ -105,13 +105,8 @@ router.post('/pull', async (req: AuthRequest, res: Response, next) => {
  */
 router.post('/push', async (req: AuthRequest, res: Response, next) => {
   try {
-    const locale = getLocale(req);
     const userId = req.userId!;
-    const { meals, waterEntries, weightLogs } = req.body;
-
-    if (!meals && !waterEntries && !weightLogs) {
-      throw new AppError(t('sync.invalid_data', locale), 400);
-    }
+    const { meals, waterEntries, weightLogs } = syncPushSchema.parse(req.body);
 
     const results = {
       meals: { created: 0, updated: 0, conflicts: 0 },

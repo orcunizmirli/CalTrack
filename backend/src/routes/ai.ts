@@ -1,5 +1,4 @@
 import { Router, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
 import multer from 'multer';
 import { authenticate, AuthRequest } from '../middleware/auth';
 import { aiRateLimiter } from '../middleware/rateLimiter';
@@ -8,9 +7,9 @@ import { config } from '../config';
 import { AppError } from '../middleware/errorHandler';
 import { uploadToS3 } from '../utils/s3';
 import { t, getLocale } from '../i18n';
+import { prisma } from '../utils/prisma';
 
 const router = Router();
-const prisma = new PrismaClient();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
 
 router.use(authenticate);
