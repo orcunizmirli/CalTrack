@@ -305,13 +305,13 @@ async def create_vector_index(pool: asyncpg.Pool):
 
 
 async def main():
-    parser = argparse.ArgumentParser(description="Seed CalTrack food database")
+    parser = argparse.ArgumentParser(description="Seed Forkcast food database")
     parser.add_argument("--turkish-only", action="store_true", help="Only import Turkish foods")
     parser.add_argument("--usda-only", action="store_true", help="Only import USDA foods")
     parser.add_argument("--skip-embeddings", action="store_true", help="Skip embedding generation")
     args = parser.parse_args()
 
-    logger.info("=== CalTrack Food Database Seeder ===")
+    logger.info("=== Forkcast Food Database Seeder ===")
 
     pool = await asyncpg.create_pool(dsn=settings.DATABASE_URL, min_size=2, max_size=10)
     await ensure_schema(pool)

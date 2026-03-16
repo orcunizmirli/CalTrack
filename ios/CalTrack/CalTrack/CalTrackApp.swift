@@ -2,7 +2,7 @@ import SwiftUI
 import SwiftData
 
 @main
-struct CalTrackApp: App {
+struct ForkcastApp: App {
     @StateObject private var appState = AppState()
 
     var sharedModelContainer: ModelContainer = {

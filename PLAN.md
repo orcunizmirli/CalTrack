@@ -1,7 +1,7 @@
-# CalTrack iOS Premium Feature Implementation Plan
+# Forkcast iOS Premium Feature Implementation Plan
 
 ## Overview
-14 major feature implementations to elevate CalTrack to a premium-quality iOS app.
+14 major feature implementations to elevate Forkcast to a premium-quality iOS app.
 Each phase is independent and will be committed separately.
 
 ---
@@ -42,7 +42,7 @@ Each phase is independent and will be committed separately.
 ---
 
 ## Phase 4: WidgetKit - Ana Ekran Widget'ları
-**Files:** New target `CalTrackWidget/`, `project.yml` update
+**Files:** New target `ForkcastWidget/`, `project.yml` update
 
 - **CalorieRingWidget (small):** Günlük kalori ring + kalan
 - **MacroWidget (medium):** Kalori ring + 3 makro bar
@@ -54,7 +54,7 @@ Each phase is independent and will be committed separately.
 ---
 
 ## Phase 5: Interactive Widget - Hızlı Su Ekleme
-**Files:** `CalTrackWidget/` intent handlers
+**Files:** `ForkcastWidget/` intent handlers
 
 - Su bardağı interactive widget (AppIntent)
 - +200ml, +330ml, +500ml butonları widget üzerinde
@@ -64,7 +64,7 @@ Each phase is independent and will be committed separately.
 ---
 
 ## Phase 6: Apple Watch Uygulaması
-**Files:** New target `CalTrackWatch/`
+**Files:** New target `ForkcastWatch/`
 
 - **WatchApp ana ekran:** Günlük kalori ring (küçük)
 - **Complication:** Kalori kalan / su takibi

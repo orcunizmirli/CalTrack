@@ -17,7 +17,7 @@ from app.config import settings
 logger = logging.getLogger(__name__)
 
 BASE_URL = "https://world.openfoodfacts.org"
-USER_AGENT = "CalTrack/1.0 (caltrack.app)"
+USER_AGENT = "Forkcast/1.0 (forkcast.app)"
 
 
 class OpenFoodFactsService:

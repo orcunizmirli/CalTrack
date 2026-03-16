@@ -72,7 +72,7 @@ struct DashboardView: View {
                 .padding(.top, 8)
             } }
             .background(Color.ctBackground)
-            .navigationTitle("CalTrack")
+            .navigationTitle("Forkcast")
             .refreshable {
                 await viewModel.loadData(context: modelContext)
             }

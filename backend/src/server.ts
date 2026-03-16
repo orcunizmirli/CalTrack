@@ -23,7 +23,7 @@ const app = express();
 // Middleware
 app.use(helmet());
 app.use(cors({
-  origin: config.isDev ? '*' : ['https://caltrack.app'],
+  origin: config.isDev ? '*' : ['https://forkcast.app'],
   credentials: true,
 }));
 app.use(express.json({ limit: '10mb' }));
@@ -55,7 +55,7 @@ app.use(errorHandler);
 
 // Start server
 app.listen(config.port, () => {
-  console.log(`CalTrack API running on port ${config.port} [${config.nodeEnv}]`);
+  console.log(`Forkcast API running on port ${config.port} [${config.nodeEnv}]`);
 });
 
 export default app;

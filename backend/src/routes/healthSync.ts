@@ -10,7 +10,7 @@ router.use(authenticate);
 
 /**
  * POST /health-sync/import
- * Import health data from Apple HealthKit into CalTrack DB.
+ * Import health data from Apple HealthKit into Forkcast DB.
  * iOS sends batched data (weight, steps, calories burned) periodically.
  */
 router.post('/import', async (req: AuthRequest, res: Response, next) => {
@@ -97,7 +97,7 @@ router.post('/import', async (req: AuthRequest, res: Response, next) => {
 
 /**
  * POST /health-sync/export
- * Export CalTrack data for writing back to Apple HealthKit.
+ * Export Forkcast data for writing back to Apple HealthKit.
  * Returns meals (calories), water, and weight data for a date range.
  */
 router.post('/export', async (req: AuthRequest, res: Response, next) => {

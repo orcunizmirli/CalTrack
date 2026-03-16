@@ -4,17 +4,17 @@ services:
   # PostgreSQL Database
   postgres:
     image: pgvector/pgvector:pg16
-    container_name: caltrack-db
+    container_name: forkcast-db
     environment:
-      POSTGRES_USER: caltrack
-      POSTGRES_PASSWORD: caltrack_dev_password
-      POSTGRES_DB: caltrack
+      POSTGRES_USER: forkcast
+      POSTGRES_PASSWORD: forkcast_dev_password
+      POSTGRES_DB: forkcast
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U caltrack"]
+      test: ["CMD-SHELL", "pg_isready -U forkcast"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -22,7 +22,7 @@ services:
   # Redis Cache
   redis:
     image: redis:7-alpine
-    container_name: caltrack-redis
+    container_name: forkcast-redis
     ports:
       - "6379:6379"
     volumes:
@@ -33,9 +33,9 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: caltrack-api
+    container_name: forkcast-api
     environment:
-      DATABASE_URL: postgresql://caltrack:caltrack_dev_password@postgres:5432/caltrack
+      DATABASE_URL: postgresql://forkcast:forkcast_dev_password@postgres:5432/forkcast
       REDIS_URL: redis://redis:6379
       JWT_SECRET: dev-jwt-secret-change-in-production
       NODE_ENV: development
@@ -55,9 +55,9 @@ services:
     build:
       context: ./ai-service
       dockerfile: Dockerfile
-    container_name: caltrack-ai
+    container_name: forkcast-ai
     environment:
-      DATABASE_URL: postgresql://caltrack:caltrack_dev_password@postgres:5432/caltrack
+      DATABASE_URL: postgresql://forkcast:forkcast_dev_password@postgres:5432/forkcast
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
     ports:

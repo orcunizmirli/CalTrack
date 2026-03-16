@@ -1,7 +1,7 @@
 {
-  "name": "caltrack-api",
+  "name": "forkcast-api",
   "version": "1.0.0",
-  "description": "CalTrack Backend API - Calorie Tracker with AI",
+  "description": "Forkcast Backend API - Smart Meal Tracking, Powered by AI",
   "main": "dist/server.js",
   "scripts": {
     "dev": "tsx watch src/server.ts",

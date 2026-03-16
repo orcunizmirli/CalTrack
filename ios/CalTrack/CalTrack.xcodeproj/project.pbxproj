@@ -422,10 +422,10 @@
 			);
 			dependencies = (
 			);
-			name = CalTrack;
+			name = Forkcast;
 			packageProductDependencies = (
 			);
-			productName = CalTrack;
+			productName = Forkcast;
 			productReference = C0EB9C0520D7F57DEF4248BB /* CalTrack.app */;
 			productType = "com.apple.product-type.application";
 		};

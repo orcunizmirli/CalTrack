@@ -15,10 +15,10 @@ struct WelcomeView: View {
                     .font(.system(size: 96))
                     .foregroundStyle(Color.ctAccent)
 
-                Text("CalTrack")
+                Text("Forkcast")
                     .font(.ctLargeTitle)
 
-                Text("Yapay zeka destekli kalori takibi")
+                Text("Smart Meal Tracking, Powered by AI")
                     .font(.ctBody)
                     .foregroundStyle(.ctTextSecondary)
             }
