@@ -128,6 +128,10 @@ const translations: Record<string, Record<Locale, string>> = {
     tr: 'Hesaplama servisi yanıt vermedi',
     en: 'Calculation service is not responding',
   },
+  'ai.invalid_mimetype': {
+    tr: 'Yalnızca JPEG, PNG ve HEIC görselleri desteklenir',
+    en: 'Only JPEG, PNG, and HEIC images are allowed',
+  },
 
   // Food routes
   'food.product_not_found': {

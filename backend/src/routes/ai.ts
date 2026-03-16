@@ -10,7 +10,20 @@ import { t, getLocale } from '../i18n';
 import { prisma } from '../utils/prisma';
 
 const router = Router();
-const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
+
+const ALLOWED_MIMETYPES = ['image/jpeg', 'image/png', 'image/heic', 'image/heif'];
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    if (ALLOWED_MIMETYPES.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new AppError('Only JPEG, PNG, and HEIC images are allowed', 400) as any);
+    }
+  },
+});
 
 router.use(authenticate);
 
