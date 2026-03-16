@@ -55,13 +55,14 @@ struct GetCalorieStatusIntent: AppIntent {
     static var description = IntentDescription("Bugünkü kalori durumunu göster")
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
-        let goal = UserDefaultsManager.shared.dailyCalorieGoal
-        // In a full implementation, this would fetch from SwiftData
-        let consumed = 0 // Placeholder
-        let remaining = goal - consumed
+        let data = WidgetDataManager.load()
+        let consumed = Int(data.caloriesConsumed)
+        let goal = data.calorieGoal
+        let burned = Int(data.caloriesBurned)
+        let remaining = max(0, goal - consumed + burned)
 
         return .result(
-            dialog: "Bugün \(consumed) kalori aldın. Hedefin \(goal) kcal, \(remaining) kcal daha alabilirsin."
+            dialog: "Bugün \(consumed) kalori aldın, \(burned) kcal yaktın. Hedefin \(goal) kcal, \(remaining) kcal daha alabilirsin."
         )
     }
 }
@@ -73,7 +74,6 @@ struct QuickAddWaterIntent: AppIntent {
     static var description = IntentDescription("250ml su ekle")
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
-        // Update via shared data
         var data = WidgetDataManager.load()
         data.waterMl += 250
         data.lastUpdated = Date()
@@ -93,7 +93,6 @@ struct OpenFoodScanIntent: AppIntent {
     static var openAppWhenRun: Bool = true
 
     func perform() async throws -> some IntentResult {
-        // App will handle deep link to scan screen
         return .result()
     }
 }
@@ -105,12 +104,13 @@ struct GetMacroStatusIntent: AppIntent {
     static var description = IntentDescription("Bugünkü protein, karbonhidrat ve yağ durumunu göster")
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
-        let proteinGoal = UserDefaultsManager.shared.proteinGoal
-        let carbsGoal = UserDefaultsManager.shared.carbsGoal
-        let fatGoal = UserDefaultsManager.shared.fatGoal
+        let data = WidgetDataManager.load()
+        let protein = Int(data.proteinG)
+        let carbs = Int(data.carbsG)
+        let fat = Int(data.fatG)
 
         return .result(
-            dialog: "Bugünkü makro hedeflerin: Protein \(proteinGoal)g, Karbonhidrat \(carbsGoal)g, Yağ \(fatGoal)g."
+            dialog: "Bugün \(protein)g protein (hedef \(data.proteinGoal)g), \(carbs)g karbonhidrat (hedef \(data.carbsGoal)g), \(fat)g yağ (hedef \(data.fatGoal)g) aldın."
         )
     }
 }

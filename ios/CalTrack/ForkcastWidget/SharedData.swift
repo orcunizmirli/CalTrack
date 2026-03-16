@@ -1,4 +1,5 @@
 import Foundation
+import os
 
 /// Shared data container for App Group communication between main app and widgets
 struct WidgetData: Codable {
@@ -36,20 +37,66 @@ struct WidgetData: Codable {
 enum WidgetDataManager {
     static let appGroupID = "group.com.forkcast.app"
     private static let dataKey = "widget_data"
+    private static let lock = NSLock()
+    private static let logger = Logger(subsystem: "com.forkcast.app", category: "WidgetData")
 
     static func save(_ data: WidgetData) {
-        guard let userDefaults = UserDefaults(suiteName: appGroupID) else { return }
-        if let encoded = try? JSONEncoder().encode(data) {
+        lock.lock()
+        defer { lock.unlock() }
+
+        guard let userDefaults = UserDefaults(suiteName: appGroupID) else {
+            logger.error("Failed to access App Group UserDefaults for save")
+            return
+        }
+        do {
+            let encoded = try JSONEncoder().encode(data)
             userDefaults.set(encoded, forKey: dataKey)
+        } catch {
+            logger.error("Failed to encode WidgetData: \(error.localizedDescription)")
         }
     }
 
     static func load() -> WidgetData {
-        guard let userDefaults = UserDefaults(suiteName: appGroupID),
-              let data = userDefaults.data(forKey: dataKey),
-              let decoded = try? JSONDecoder().decode(WidgetData.self, from: data) else {
+        lock.lock()
+        defer { lock.unlock() }
+
+        guard let userDefaults = UserDefaults(suiteName: appGroupID) else {
+            logger.error("Failed to access App Group UserDefaults for load")
             return .placeholder
         }
-        return decoded
+        guard let data = userDefaults.data(forKey: dataKey) else {
+            return .placeholder
+        }
+        do {
+            return try JSONDecoder().decode(WidgetData.self, from: data)
+        } catch {
+            logger.error("Failed to decode WidgetData: \(error.localizedDescription)")
+            return .placeholder
+        }
+    }
+
+    /// Atomically update widget data — read, modify, write in one locked operation
+    static func update(_ transform: (inout WidgetData) -> Void) {
+        lock.lock()
+        defer { lock.unlock() }
+
+        guard let userDefaults = UserDefaults(suiteName: appGroupID) else {
+            logger.error("Failed to access App Group UserDefaults for update")
+            return
+        }
+
+        var data: WidgetData
+        if let raw = userDefaults.data(forKey: dataKey),
+           let decoded = try? JSONDecoder().decode(WidgetData.self, from: raw) {
+            data = decoded
+        } else {
+            data = .placeholder
+        }
+
+        transform(&data)
+
+        if let encoded = try? JSONEncoder().encode(data) {
+            userDefaults.set(encoded, forKey: dataKey)
+        }
     }
 }

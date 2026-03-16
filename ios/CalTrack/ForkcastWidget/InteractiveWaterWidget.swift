@@ -20,10 +20,10 @@ struct AddWaterIntent: AppIntent {
     }
 
     func perform() async throws -> some IntentResult {
-        var data = WidgetDataManager.load()
-        data.waterMl += amount
-        data.lastUpdated = Date()
-        WidgetDataManager.save(data)
+        WidgetDataManager.update { data in
+            data.waterMl += amount
+            data.lastUpdated = Date()
+        }
 
         // Reload widget timelines
         WidgetCenter.shared.reloadTimelines(ofKind: "InteractiveWaterWidget")
@@ -59,7 +59,7 @@ struct InteractiveWaterProvider: TimelineProvider {
     func getTimeline(in context: Context, completion: @escaping (Timeline<InteractiveWaterEntry>) -> Void) {
         let data = WidgetDataManager.load()
         let entry = InteractiveWaterEntry(date: Date(), data: data)
-        let nextUpdate = Calendar.current.date(byAdding: .minute, value: 15, to: Date())!
+        let nextUpdate = Calendar.current.date(byAdding: .minute, value: 15, to: Date()) ?? Date().addingTimeInterval(900)
         let timeline = Timeline(entries: [entry], policy: .after(nextUpdate))
         completion(timeline)
     }

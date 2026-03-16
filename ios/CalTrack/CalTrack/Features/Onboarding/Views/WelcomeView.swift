@@ -40,10 +40,10 @@ struct WelcomeView: View {
                 }
                 .padding(.horizontal)
 
-            Spacer()
+                Spacer()
 
-            // Sign In Buttons
-            VStack(spacing: 12) {
+                // Sign In Buttons
+                VStack(spacing: 12) {
                 SignInWithAppleButton(.signIn) { request in
                     request.requestedScopes = [.fullName, .email]
                 } onCompletion: { result in
@@ -73,9 +73,9 @@ struct WelcomeView: View {
                 .foregroundStyle(.ctAccent)
                 .padding(.top, 4)
             }
-            .padding(.horizontal)
-            .padding(.bottom, 32)
-        }
+                .padding(.horizontal)
+                .padding(.bottom, 32)
+            } // end VStack(spacing: 32)
         } // end ZStack
         .background(AnimatedGradientBackground())
         .background(Color.ctBackground)

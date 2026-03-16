@@ -13,7 +13,7 @@ struct CalorieRingProvider: TimelineProvider {
     func getTimeline(in context: Context, completion: @escaping (Timeline<CalorieRingEntry>) -> Void) {
         let data = WidgetDataManager.load()
         let entry = CalorieRingEntry(date: Date(), data: data)
-        let nextUpdate = Calendar.current.date(byAdding: .minute, value: 15, to: Date())!
+        let nextUpdate = Calendar.current.date(byAdding: .minute, value: 15, to: Date()) ?? Date().addingTimeInterval(900)
         let timeline = Timeline(entries: [entry], policy: .after(nextUpdate))
         completion(timeline)
     }

@@ -1,7 +1,13 @@
 import SwiftUI
+import WidgetKit
 
 struct WaterTrackerView: View {
-    @State private var totalWaterMl: Int = 0
+    @AppStorage("today_water_ml", store: UserDefaults(suiteName: WidgetDataManager.appGroupID))
+    private var totalWaterMl: Int = 0
+
+    @AppStorage("today_water_date", store: UserDefaults(suiteName: WidgetDataManager.appGroupID))
+    private var waterDateString: String = ""
+
     let waterGoal = 2500 // ml
 
     var progress: Double {
@@ -28,7 +34,7 @@ struct WaterTrackerView: View {
             HStack(spacing: 8) {
                 ForEach([200, 250, 330, 500], id: \.self) { amount in
                     Button(action: {
-                        withAnimation { totalWaterMl += amount }
+                        withAnimation { addWater(amount) }
                     }) {
                         Text("+\(amount)ml")
                             .font(.ctCaption)
@@ -46,6 +52,7 @@ struct WaterTrackerView: View {
                 if totalWaterMl > 0 {
                     Button(action: {
                         withAnimation { totalWaterMl = max(0, totalWaterMl - 200) }
+                        syncWidgetData()
                     }) {
                         Image(systemName: "minus.circle")
                             .foregroundStyle(.ctTextSecondary)
@@ -54,5 +61,29 @@ struct WaterTrackerView: View {
             }
         }
         .glassCard()
+        .onAppear { resetIfNewDay() }
+    }
+
+    private func addWater(_ amount: Int) {
+        totalWaterMl += amount
+        syncWidgetData()
+    }
+
+    private func resetIfNewDay() {
+        let today = Date().formatted(date: .numeric, time: .omitted)
+        if waterDateString != today {
+            totalWaterMl = 0
+            waterDateString = today
+        }
+    }
+
+    private func syncWidgetData() {
+        var data = WidgetDataManager.load()
+        data.waterMl = totalWaterMl
+        data.waterGoal = waterGoal
+        data.lastUpdated = Date()
+        WidgetDataManager.save(data)
+        WidgetCenter.shared.reloadTimelines(ofKind: "WaterWidget")
+        WidgetCenter.shared.reloadTimelines(ofKind: "InteractiveWaterWidget")
     }
 }

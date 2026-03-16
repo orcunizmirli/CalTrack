@@ -13,7 +13,7 @@ struct MacroProvider: TimelineProvider {
     func getTimeline(in context: Context, completion: @escaping (Timeline<MacroEntry>) -> Void) {
         let data = WidgetDataManager.load()
         let entry = MacroEntry(date: Date(), data: data)
-        let nextUpdate = Calendar.current.date(byAdding: .minute, value: 15, to: Date())!
+        let nextUpdate = Calendar.current.date(byAdding: .minute, value: 15, to: Date()) ?? Date().addingTimeInterval(900)
         let timeline = Timeline(entries: [entry], policy: .after(nextUpdate))
         completion(timeline)
     }

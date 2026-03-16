@@ -14,6 +14,11 @@ class FoodSearchViewModel: ObservableObject {
 
     private var searchTask: Task<Void, Never>?
 
+    func cancelPendingWork() {
+        searchTask?.cancel()
+        searchTask = nil
+    }
+
     func search() {
         searchTask?.cancel()
 

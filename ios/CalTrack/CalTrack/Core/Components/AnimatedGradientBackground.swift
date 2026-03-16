@@ -75,8 +75,6 @@ struct OnboardingStepGradient: View {
 // MARK: - Celebration Gradient
 
 struct CelebrationGradient: View {
-    @State private var animate = false
-
     var body: some View {
         AnimatedGradientBackground(
             colors: [.ctSuccess, .ctAccent, .ctWarning],

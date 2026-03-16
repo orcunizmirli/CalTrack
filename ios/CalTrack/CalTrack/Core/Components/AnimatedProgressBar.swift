@@ -115,7 +115,8 @@ struct WaveShape: Shape {
 
         path.move(to: CGPoint(x: 0, y: waterLevel))
 
-        for x in stride(from: CGFloat(0), through: rect.width, by: 1) {
+        let step = max(2, rect.width / 30) // ~30 points instead of per-pixel
+        for x in stride(from: CGFloat(0), through: rect.width, by: step) {
             let relativeX = x / rect.width
             let sine = sin(relativeX * .pi * 2 + offset)
             let y = waterLevel + sine * waveHeight

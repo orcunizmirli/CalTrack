@@ -51,15 +51,17 @@ struct AppLogoView: View {
 struct FloatingFoodParticlesView: View {
     let emojis = ["🍎", "🥑", "🍗", "🥦", "🍳", "🥗", "🍕", "🥩", "🫐", "🍌", "🥕", "🍚"]
     @State private var particles: [FoodParticle] = []
+    @State private var animationToggle = false
 
     struct FoodParticle: Identifiable {
         let id = UUID()
         let emoji: String
-        var x: CGFloat
-        var y: CGFloat
-        var opacity: Double
-        var scale: CGFloat
-        var speed: Double
+        let x: CGFloat
+        let baseY: CGFloat
+        let drift: CGFloat // how far it floats up/down
+        let opacity: Double
+        let scale: CGFloat
+        let speed: Double
     }
 
     var body: some View {
@@ -70,12 +72,19 @@ struct FloatingFoodParticlesView: View {
                         .font(.system(size: 24))
                         .opacity(particle.opacity)
                         .scaleEffect(particle.scale)
-                        .position(x: particle.x, y: particle.y)
+                        .position(
+                            x: particle.x,
+                            y: particle.baseY + (animationToggle ? particle.drift : -particle.drift)
+                        )
+                        .animation(
+                            .easeInOut(duration: particle.speed).repeatForever(autoreverses: true),
+                            value: animationToggle
+                        )
                 }
             }
             .onAppear {
                 generateParticles(in: geo.size)
-                animateParticles(in: geo.size)
+                animationToggle = true
             }
         }
         .allowsHitTesting(false)
@@ -86,21 +95,12 @@ struct FloatingFoodParticlesView: View {
             FoodParticle(
                 emoji: emojis.randomElement()!,
                 x: CGFloat.random(in: 20...(size.width - 20)),
-                y: CGFloat.random(in: 20...(size.height - 20)),
+                baseY: CGFloat.random(in: 20...(size.height - 20)),
+                drift: CGFloat.random(in: 10...25),
                 opacity: Double.random(in: 0.1...0.25),
                 scale: CGFloat.random(in: 0.6...1.0),
                 speed: Double.random(in: 3...6)
             )
-        }
-    }
-
-    private func animateParticles(in size: CGSize) {
-        for i in particles.indices {
-            let duration = particles[i].speed
-            withAnimation(.easeInOut(duration: duration).repeatForever(autoreverses: true)) {
-                particles[i].y += CGFloat.random(in: -30...30)
-                particles[i].opacity = Double.random(in: 0.08...0.2)
-            }
         }
     }
 }

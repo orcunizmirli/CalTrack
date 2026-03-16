@@ -29,13 +29,13 @@ struct DepthParallaxModifier: ViewModifier {
     func body(content: Content) -> some View {
         GeometryReader { geo in
             let frame = geo.frame(in: .named(coordinateSpace))
-            let screenHeight = UIScreen.main.bounds.height
+            let containerHeight = geo.frame(in: .global).height
+            let screenHeight = max(containerHeight, 1)
             let centerY = frame.midY / screenHeight
             let offset = (centerY - 0.5) * intensity
 
             content
                 .offset(y: offset)
-                .scaleEffect(1.0 + abs(centerY - 0.5) * 0.02)
         }
     }
 }

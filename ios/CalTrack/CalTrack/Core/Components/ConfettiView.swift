@@ -2,17 +2,16 @@ import SwiftUI
 
 struct ConfettiView: View {
     @State private var particles: [ConfettiParticle] = []
-    @State private var isActive = false
+    @State private var startTime: Date?
 
     let colors: [Color] = [.ctAccent, .ctProtein, .ctCarbs, .ctFat, .ctWarning, .ctSuccess]
 
     struct ConfettiParticle: Identifiable {
         let id = UUID()
-        var x: CGFloat
-        var y: CGFloat
+        let startX: CGFloat
+        let startY: CGFloat
         let color: Color
         let size: CGFloat
-        let rotation: Double
         let speed: Double
         let wobble: CGFloat
         let shape: Int // 0=circle, 1=rect, 2=triangle
@@ -20,71 +19,67 @@ struct ConfettiView: View {
 
     var body: some View {
         GeometryReader { geo in
-            Canvas { context, size in
-                for particle in particles {
-                    let rect = CGRect(
-                        x: particle.x - particle.size / 2,
-                        y: particle.y - particle.size / 2,
-                        width: particle.size,
-                        height: particle.size
-                    )
+            TimelineView(.animation) { timeline in
+                let elapsed = startTime.map { timeline.date.timeIntervalSince($0) } ?? 0
 
-                    context.opacity = max(0, 1.0 - particle.y / size.height)
+                Canvas { context, size in
+                    for particle in particles {
+                        let y = particle.startY + CGFloat(elapsed * particle.speed * 60)
+                        let x = particle.startX + particle.wobble * sin(CGFloat(y / 30))
 
-                    switch particle.shape {
-                    case 0:
-                        context.fill(Circle().path(in: rect), with: .color(particle.color))
-                    case 1:
-                        context.fill(
-                            RoundedRectangle(cornerRadius: 2).path(in: rect),
-                            with: .color(particle.color)
+                        guard y < size.height + 20 else { continue }
+
+                        let rect = CGRect(
+                            x: x - particle.size / 2,
+                            y: y - particle.size / 2,
+                            width: particle.size,
+                            height: particle.size
                         )
-                    default:
-                        var path = Path()
-                        path.move(to: CGPoint(x: rect.midX, y: rect.minY))
-                        path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
-                        path.addLine(to: CGPoint(x: rect.minX, y: rect.maxY))
-                        path.closeSubpath()
-                        context.fill(path, with: .color(particle.color))
+
+                        context.opacity = max(0, min(1.0, 1.0 - y / size.height))
+
+                        switch particle.shape {
+                        case 0:
+                            context.fill(Circle().path(in: rect), with: .color(particle.color))
+                        case 1:
+                            context.fill(
+                                RoundedRectangle(cornerRadius: 2).path(in: rect),
+                                with: .color(particle.color)
+                            )
+                        default:
+                            var path = Path()
+                            path.move(to: CGPoint(x: rect.midX, y: rect.minY))
+                            path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
+                            path.addLine(to: CGPoint(x: rect.minX, y: rect.maxY))
+                            path.closeSubpath()
+                            context.fill(path, with: .color(particle.color))
+                        }
                     }
                 }
             }
             .onAppear {
-                startConfetti(in: geo.size)
+                generateParticles(in: geo.size)
+                startTime = Date()
+            }
+            .onDisappear {
+                particles = []
+                startTime = nil
             }
         }
         .allowsHitTesting(false)
     }
 
-    private func startConfetti(in size: CGSize) {
-        // Generate particles
+    private func generateParticles(in size: CGSize) {
         particles = (0..<50).map { _ in
             ConfettiParticle(
-                x: CGFloat.random(in: 0...size.width),
-                y: CGFloat.random(in: -size.height...0),
+                startX: CGFloat.random(in: 0...size.width),
+                startY: CGFloat.random(in: -size.height...0),
                 color: colors.randomElement()!,
                 size: CGFloat.random(in: 4...10),
-                rotation: Double.random(in: 0...360),
                 speed: Double.random(in: 2...5),
                 wobble: CGFloat.random(in: -2...2),
                 shape: Int.random(in: 0...2)
             )
-        }
-
-        // Animate particles falling
-        Timer.scheduledTimer(withTimeInterval: 1.0 / 60.0, repeats: true) { timer in
-            var allOffScreen = true
-            for i in particles.indices {
-                particles[i].y += CGFloat(particles[i].speed)
-                particles[i].x += particles[i].wobble * sin(CGFloat(particles[i].y / 30))
-                if particles[i].y < size.height + 20 {
-                    allOffScreen = false
-                }
-            }
-            if allOffScreen {
-                timer.invalidate()
-                particles = []
-            }
         }
     }
 }
