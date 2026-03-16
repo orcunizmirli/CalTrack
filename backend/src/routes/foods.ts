@@ -4,7 +4,7 @@ import { createCustomFoodSchema } from '../validators/meal';
 import { AppError } from '../middleware/errorHandler';
 import { t, getLocale } from '../i18n';
 import { prisma } from '../utils/prisma';
-import { getCache, setCache } from '../utils/redis';
+import { withCache } from '../utils/redis';
 
 const router = Router();
 
@@ -19,30 +19,24 @@ router.get('/search', async (req: Request, res: Response, next) => {
       return;
     }
 
-    // Check cache for popular searches (5 min TTL)
     const cacheKey = `food_search:${query.toLowerCase().trim()}`;
-    const cached = await getCache<unknown[]>(cacheKey);
-    if (cached) {
-      res.json(cached);
-      return;
-    }
 
-    const foods = await prisma.food.findMany({
-      where: {
-        OR: [
-          { name: { contains: query, mode: 'insensitive' } },
-          { nameTr: { contains: query, mode: 'insensitive' } },
-          { brand: { contains: query, mode: 'insensitive' } },
+    const foods = await withCache(cacheKey, 300, () =>
+      prisma.food.findMany({
+        where: {
+          OR: [
+            { name: { contains: query, mode: 'insensitive' } },
+            { nameTr: { contains: query, mode: 'insensitive' } },
+            { brand: { contains: query, mode: 'insensitive' } },
+          ],
+        },
+        take: 30,
+        orderBy: [
+          { isVerified: 'desc' },
+          { name: 'asc' },
         ],
-      },
-      take: 30,
-      orderBy: [
-        { isVerified: 'desc' },
-        { name: 'asc' },
-      ],
-    });
-
-    await setCache(cacheKey, foods, 300);
+      })
+    );
 
     res.json(foods);
   } catch (error) {

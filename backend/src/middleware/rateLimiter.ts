@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { RateLimiterRedis, RateLimiterMemory, RateLimiterAbstract } from 'rate-limiter-flexible';
 import { getRedisClient } from '../utils/redis';
+import { getClientIp } from '../utils/request';
 import { t, getLocale } from '../i18n';
 import { AuthRequest } from './auth';
 
@@ -71,14 +72,10 @@ export async function initRateLimiters(): Promise<void> {
   }
 }
 
-function getIpKey(req: Request): string {
-  return req.ip || req.socket.remoteAddress || 'unknown';
-}
-
 export const rateLimiter = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const limiter = generalLimiter || memoryGeneralLimiter;
   try {
-    await limiter.consume(getIpKey(req));
+    await limiter.consume(getClientIp(req));
     next();
   } catch {
     const locale = getLocale(req);
@@ -98,7 +95,7 @@ export const aiRateLimiter = async (req: Request, res: Response, next: NextFunct
 
   try {
     // Check IP-based limit
-    await ipLimiter.consume(getIpKey(req));
+    await ipLimiter.consume(getClientIp(req));
   } catch {
     res.status(429).json({ error: t('rate_limit.ai_limit_exceeded', locale) });
     return;

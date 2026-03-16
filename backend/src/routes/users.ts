@@ -5,7 +5,7 @@ import { AppError } from '../middleware/errorHandler';
 import { calculateBMR, calculateTDEE, calculateNutritionPlan } from '../services/nutrition';
 import { t, getLocale } from '../i18n';
 import { prisma } from '../utils/prisma';
-import { getCache, setCache, invalidateCache } from '../utils/redis';
+import { withCache, invalidateCache } from '../utils/redis';
 
 const router = Router();
 
@@ -137,32 +137,27 @@ router.get('/me/nutrition-plan', async (req: AuthRequest, res: Response, next) =
     const goalType = (req.query.goalType as string) || 'maintain';
     const weeklyChange = req.query.weeklyChange ? parseFloat(req.query.weeklyChange as string) : 0.5;
 
-    // Cache nutrition plan per user+params (invalidated on profile update)
     const cacheKey = `nutrition_plan:${req.userId}:${goalType}:${weeklyChange}`;
-    const cached = await getCache<unknown>(cacheKey);
-    if (cached) { res.json(cached); return; }
 
-    const user = await prisma.user.findUnique({ where: { id: req.userId } });
-    if (!user) throw new AppError(t('user.not_found', locale), 404);
+    const plan = await withCache(cacheKey, 300, async () => {
+      const user = await prisma.user.findUnique({ where: { id: req.userId } });
+      if (!user) throw new AppError(t('user.not_found', locale), 404);
 
-    if (!user.gender || !user.heightCm || !user.weightKg || !user.birthDate) {
-      throw new AppError(t('user.profile_incomplete', locale), 400);
-    }
+      if (!user.gender || !user.heightCm || !user.weightKg || !user.birthDate) {
+        throw new AppError(t('user.profile_incomplete', locale), 400);
+      }
 
-    const metrics = {
-      gender: user.gender,
-      weightKg: Number(user.weightKg),
-      heightCm: Number(user.heightCm),
-      birthDate: user.birthDate,
-      activityLevel: user.activityLevel || 'moderate',
-    };
-
-    const plan = calculateNutritionPlan(metrics, {
-      goalType: goalType as 'lose_weight' | 'gain_muscle' | 'burn_fat' | 'maintain',
-      weeklyChange,
+      return calculateNutritionPlan({
+        gender: user.gender,
+        weightKg: Number(user.weightKg),
+        heightCm: Number(user.heightCm),
+        birthDate: user.birthDate,
+        activityLevel: user.activityLevel || 'moderate',
+      }, {
+        goalType: goalType as 'lose_weight' | 'gain_muscle' | 'burn_fat' | 'maintain',
+        weeklyChange,
+      });
     });
-
-    await setCache(cacheKey, plan, 300);
 
     res.json(plan);
   } catch (error) {

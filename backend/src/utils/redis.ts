@@ -70,17 +70,32 @@ export async function setCache(key: string, value: unknown, ttlSeconds: number):
 
 /**
  * Delete cache entries matching a pattern prefix.
- * Used to invalidate cache when data changes.
+ * Uses SCAN instead of KEYS to avoid blocking Redis.
  */
 export async function invalidateCache(prefix: string): Promise<void> {
   const redis = await getRedisClient();
   if (!redis) return;
   try {
-    const keys = await redis.keys(`${prefix}*`);
-    if (keys.length > 0) {
-      await redis.del(keys);
-    }
+    let cursor = 0;
+    do {
+      const result = await redis.scan(cursor, { MATCH: `${prefix}*`, COUNT: 100 });
+      cursor = result.cursor;
+      if (result.keys.length > 0) {
+        await redis.del(result.keys);
+      }
+    } while (cursor !== 0);
   } catch {
     // Cache invalidation failure is non-critical
   }
+}
+
+/**
+ * Cache-through helper: returns cached value or computes, caches, and returns.
+ */
+export async function withCache<T>(key: string, ttlSeconds: number, compute: () => Promise<T>): Promise<T> {
+  const cached = await getCache<T>(key);
+  if (cached !== null) return cached;
+  const result = await compute();
+  await setCache(key, result, ttlSeconds);
+  return result;
 }

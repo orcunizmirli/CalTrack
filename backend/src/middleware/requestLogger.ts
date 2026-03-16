@@ -1,4 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
+import { AuthRequest } from './auth';
+import { getClientIp } from '../utils/request';
 
 /**
  * Logs AI endpoint response times and rate limit hits for monitoring.
@@ -9,6 +11,7 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction): 
   res.on('finish', () => {
     const duration = Date.now() - start;
     const path = req.originalUrl || req.path;
+    const userId = (req as AuthRequest).userId || null;
 
     // Log AI endpoint response times
     if (path.startsWith('/api/v1/ai/')) {
@@ -19,7 +22,7 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction): 
           path,
           statusCode: res.statusCode,
           durationMs: duration,
-          userId: (req as any).userId || null,
+          userId,
           timestamp: new Date().toISOString(),
         })
       );
@@ -32,8 +35,8 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction): 
           type: 'rate_limit_hit',
           method: req.method,
           path,
-          ip: req.ip || req.socket.remoteAddress,
-          userId: (req as any).userId || null,
+          ip: getClientIp(req),
+          userId,
           timestamp: new Date().toISOString(),
         })
       );

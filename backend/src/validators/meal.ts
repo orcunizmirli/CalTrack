@@ -1,9 +1,10 @@
 import { z } from 'zod';
+import { MEAL_TYPES } from '../utils/constants';
 
 export const createMealSchema = z.object({
   foodId: z.string().uuid().optional(),
   foodName: z.string().min(1).max(255),
-  mealType: z.enum(['breakfast', 'lunch', 'dinner', 'snack']),
+  mealType: z.enum(MEAL_TYPES),
   date: z.string(), // ISO date string
   quantity: z.number().min(1).max(5000),
   calories: z.number().min(0),
@@ -33,7 +34,7 @@ export const createCustomFoodSchema = z.object({
 });
 
 export const recipeRequestSchema = z.object({
-  mealType: z.enum(['breakfast', 'lunch', 'dinner', 'snack']),
+  mealType: z.enum(MEAL_TYPES),
   targetCalories: z.number().min(50).max(3000),
   ingredients: z.array(z.string()).optional(),
   dietaryRestrictions: z.array(z.string()).optional(),

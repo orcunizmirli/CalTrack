@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { MEAL_TYPES, WEIGHT_SOURCES } from '../utils/constants';
 
 const syncMealSchema = z.object({
   clientId: z.string().optional(),
@@ -6,7 +7,7 @@ const syncMealSchema = z.object({
   clientUpdatedAt: z.string().datetime().optional(),
   foodId: z.string().uuid().nullable().optional(),
   foodName: z.string().min(1).max(255),
-  mealType: z.enum(['breakfast', 'lunch', 'dinner', 'snack']),
+  mealType: z.enum(MEAL_TYPES),
   date: z.string(),
   quantity: z.number().min(1).max(5000),
   calories: z.number().min(0),
@@ -28,7 +29,7 @@ const syncWeightSchema = z.object({
   weightKg: z.number().min(20).max(300),
   bodyFatPct: z.number().min(1).max(70).nullable().optional(),
   date: z.string(),
-  source: z.enum(['manual', 'apple_health']).optional(),
+  source: z.enum(WEIGHT_SOURCES).optional(),
 });
 
 export const syncPushSchema = z.object({

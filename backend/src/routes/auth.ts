@@ -7,6 +7,7 @@ import { t, getLocale } from '../i18n';
 import { prisma } from '../utils/prisma';
 import { getRedisClient } from '../utils/redis';
 import { config } from '../config';
+import { parseDurationToSeconds } from '../utils/time';
 
 const router = Router();
 
@@ -210,7 +211,7 @@ router.post('/logout', async (req: Request, res: Response, next) => {
       const redis = await getRedisClient();
       if (redis) {
         // Parse token to get expiry, then set TTL accordingly
-        const ttlSeconds = parseTTLFromConfig(config.jwt.refreshExpiresIn);
+        const ttlSeconds = parseDurationToSeconds(config.jwt.refreshExpiresIn);
         await redis.set(`bl:${refreshToken}`, '1', { EX: ttlSeconds });
       }
     }
@@ -220,18 +221,5 @@ router.post('/logout', async (req: Request, res: Response, next) => {
     next(error);
   }
 });
-
-function parseTTLFromConfig(expiresIn: string): number {
-  const match = expiresIn.match(/^(\d+)([smhd])$/);
-  if (!match) return 7 * 24 * 3600; // default 7 days
-  const value = parseInt(match[1]);
-  switch (match[2]) {
-    case 's': return value;
-    case 'm': return value * 60;
-    case 'h': return value * 3600;
-    case 'd': return value * 86400;
-    default: return 7 * 86400;
-  }
-}
 
 export { router as authRouter };

@@ -3,6 +3,7 @@ import { authenticate, AuthRequest } from '../middleware/auth';
 import { z } from 'zod';
 import { t, getLocale } from '../i18n';
 import { prisma } from '../utils/prisma';
+import { WEIGHT_SOURCES } from '../utils/constants';
 
 const router = Router();
 
@@ -12,7 +13,7 @@ const weightLogSchema = z.object({
   weightKg: z.number().min(20).max(300),
   bodyFatPct: z.number().min(1).max(70).nullable().optional(),
   date: z.string().optional(),
-  source: z.enum(['manual', 'apple_health']).optional(),
+  source: z.enum(WEIGHT_SOURCES).optional(),
 });
 
 // GET /weight/history?range=week|month|3months|all

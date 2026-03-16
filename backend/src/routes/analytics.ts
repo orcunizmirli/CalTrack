@@ -1,42 +1,36 @@
 import { Router, Response } from 'express';
 import { authenticate, AuthRequest } from '../middleware/auth';
 import { prisma } from '../utils/prisma';
-import { getCache, setCache } from '../utils/redis';
+import { withCache } from '../utils/redis';
+import { rangeToDays } from '../utils/constants';
 
 const router = Router();
 
 router.use(authenticate);
 
+function startDateFromDays(days: number): Date {
+  const d = new Date();
+  d.setDate(d.getDate() - days);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
 // GET /analytics/calories?range=week|month|3months
 router.get('/calories', async (req: AuthRequest, res: Response, next) => {
   try {
     const range = req.query.range as string || 'week';
-    const days = range === 'week' ? 7 : range === 'month' ? 30 : 90;
-
+    const days = rangeToDays(range);
     const cacheKey = `analytics:calories:${req.userId}:${range}`;
-    const cached = await getCache<unknown[]>(cacheKey);
-    if (cached) { res.json(cached); return; }
 
-    const startDate = new Date();
-    startDate.setDate(startDate.getDate() - days);
-    startDate.setHours(0, 0, 0, 0);
-
-    const meals = await prisma.mealEntry.groupBy({
-      by: ['date'],
-      where: {
-        userId: req.userId!,
-        date: { gte: startDate },
-      },
-      _sum: { calories: true },
-      orderBy: { date: 'asc' },
+    const result = await withCache(cacheKey, 60, async () => {
+      const meals = await prisma.mealEntry.groupBy({
+        by: ['date'],
+        where: { userId: req.userId!, date: { gte: startDateFromDays(days) } },
+        _sum: { calories: true },
+        orderBy: { date: 'asc' },
+      });
+      return meals.map(m => ({ date: m.date, calories: m._sum.calories || 0 }));
     });
-
-    const result = meals.map(m => ({
-      date: m.date,
-      calories: m._sum.calories || 0,
-    }));
-
-    await setCache(cacheKey, result, 60);
 
     res.json(result);
   } catch (error) {
@@ -48,38 +42,23 @@ router.get('/calories', async (req: AuthRequest, res: Response, next) => {
 router.get('/macros', async (req: AuthRequest, res: Response, next) => {
   try {
     const range = req.query.range as string || 'week';
-    const days = range === 'week' ? 7 : range === 'month' ? 30 : 90;
-
+    const days = rangeToDays(range);
     const cacheKey = `analytics:macros:${req.userId}:${range}`;
-    const cached = await getCache<unknown[]>(cacheKey);
-    if (cached) { res.json(cached); return; }
 
-    const startDate = new Date();
-    startDate.setDate(startDate.getDate() - days);
-    startDate.setHours(0, 0, 0, 0);
-
-    const meals = await prisma.mealEntry.groupBy({
-      by: ['date'],
-      where: {
-        userId: req.userId!,
-        date: { gte: startDate },
-      },
-      _sum: {
-        proteinG: true,
-        carbsG: true,
-        fatG: true,
-      },
-      orderBy: { date: 'asc' },
+    const result = await withCache(cacheKey, 60, async () => {
+      const meals = await prisma.mealEntry.groupBy({
+        by: ['date'],
+        where: { userId: req.userId!, date: { gte: startDateFromDays(days) } },
+        _sum: { proteinG: true, carbsG: true, fatG: true },
+        orderBy: { date: 'asc' },
+      });
+      return meals.map(m => ({
+        date: m.date,
+        proteinG: m._sum.proteinG || 0,
+        carbsG: m._sum.carbsG || 0,
+        fatG: m._sum.fatG || 0,
+      }));
     });
-
-    const result = meals.map(m => ({
-      date: m.date,
-      proteinG: m._sum.proteinG || 0,
-      carbsG: m._sum.carbsG || 0,
-      fatG: m._sum.fatG || 0,
-    }));
-
-    await setCache(cacheKey, result, 60);
 
     res.json(result);
   } catch (error) {
@@ -91,16 +70,10 @@ router.get('/macros', async (req: AuthRequest, res: Response, next) => {
 router.get('/weight', async (req: AuthRequest, res: Response, next) => {
   try {
     const range = req.query.range as string || 'month';
-    const days = range === 'week' ? 7 : range === 'month' ? 30 : 90;
-
-    const startDate = new Date();
-    startDate.setDate(startDate.getDate() - days);
+    const days = rangeToDays(range);
 
     const weights = await prisma.weightLog.findMany({
-      where: {
-        userId: req.userId!,
-        date: { gte: startDate },
-      },
+      where: { userId: req.userId!, date: { gte: startDateFromDays(days) } },
       orderBy: { date: 'asc' },
     });
 
