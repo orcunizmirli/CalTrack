@@ -1,15 +1,28 @@
+import asyncio
 import logging
 import time
+from pydantic import BaseModel
 from fastapi import APIRouter, UploadFile, File, HTTPException, Query
 from app.services.vision_service import VisionService
 from app.services.rag_service import RAGService
-from app.models.schemas import FoodAnalysisResponse, FoodItem
+from app.models.schemas import (
+    FoodAnalysisResponse,
+    FoodItem,
+    PortionOption,
+    PortionUpdateRequest,
+    RawVisionResult,
+)
+from app.services.portion_standards import get_standard_portions, get_portion_options
+from app.services.portion_calibrator import PortionCalibrator
+from app.services.feedback_service import FeedbackService
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
 vision_service = VisionService()
 rag_service = RAGService()
+portion_calibrator = PortionCalibrator()
+feedback_service = FeedbackService()
 
 
 @router.post("/analyze-food", response_model=FoodAnalysisResponse)
@@ -17,6 +30,7 @@ async def analyze_food(
     image: UploadFile = File(...),
     meal_type: str | None = None,
     additional_context: str | None = None,
+    user_id: str | None = None,
 ):
     """
     Analyze a food photo using AI vision models.
@@ -39,18 +53,48 @@ async def analyze_food(
         raise HTTPException(status_code=400, detail="Resim boyutu 10MB'dan büyük olamaz.")
 
     try:
-        # Step 1: AI Vision Analysis
-        raw_result = await vision_service.analyze_food_image(
+        # Step 1: AI Vision Analysis + Reference Object Detection (parallel)
+        vision_task = vision_service.analyze_food_image(
             image_data=image_data,
             meal_type=meal_type,
             additional_context=additional_context,
         )
+        ref_task = portion_calibrator.detect_references(image_data)
+        raw_result, ref_data = await asyncio.gather(vision_task, ref_task)
+
+        # Step 1.5: Calibrate portions using reference objects
+        if ref_data:
+            raw_result = RawVisionResult(
+                items=portion_calibrator.calibrate_portions(raw_result.items, ref_data),
+                meal_description=raw_result.meal_description,
+                model_used=raw_result.model_used,
+            )
 
         # Step 2: RAG Enhancement - match with food database
         enhanced_items: list[FoodItem] = []
         for item in raw_result.items:
             enhanced = await rag_service.enhance_food_item(item)
+
+            # Step 2.5: Enrich with standard portion info for UI
+            std = get_standard_portions(enhanced.name, enhanced.name_en)
+            if std:
+                enhanced.standard_portion_g = std["standard_g"]
+                enhanced.standard_portion_label = std["label"]
+
+            # Build portion options for user slider
+            cal_per_100g = (enhanced.calories / enhanced.portion_g * 100) if enhanced.portion_g > 0 else 0
+            enhanced.calories_per_100g = round(cal_per_100g, 1)
+            enhanced.portion_options = get_portion_options(
+                enhanced.name, enhanced.name_en, cal_per_100g
+            )
+
             enhanced_items.append(enhanced)
+
+        # Step 2.7: Apply learned corrections from user feedback
+        if user_id:
+            enhanced_items = await feedback_service.apply_learned_corrections(
+                user_id, enhanced_items
+            )
 
         # Step 3: Calculate totals
         total_calories = sum(item.calories for item in enhanced_items)
@@ -75,6 +119,7 @@ async def analyze_food(
             confidence=avg_confidence,
             model_used=raw_result.model_used,
             processing_ms=processing_ms,
+            needs_portion_review=True,
         )
 
     except Exception as e:
@@ -110,3 +155,80 @@ async def search_foods(
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Arama hatası: {str(e)}")
+
+
+@router.post("/recalculate-portions")
+async def recalculate_portions(request: PortionUpdateRequest):
+    """
+    Recalculate nutrition after user adjusts portions.
+    Uses DB values (per 100g) when matched_food_id exists,
+    otherwise scales linearly from AI estimates.
+    """
+    try:
+        recalculated_items: list[dict] = []
+
+        for adj in request.items:
+            if adj.matched_food_id:
+                # Use DB nutrition per 100g
+                food = await rag_service.get_food_by_id(adj.matched_food_id)
+                if food:
+                    ratio = adj.adjusted_portion_g / 100.0
+                    recalculated_items.append({
+                        "name": adj.name,
+                        "portion_g": adj.adjusted_portion_g,
+                        "calories": round(float(food["calories"]) * ratio, 1),
+                        "protein_g": round(float(food.get("protein_g") or 0) * ratio, 1),
+                        "carbs_g": round(float(food.get("carbs_g") or 0) * ratio, 1),
+                        "fat_g": round(float(food.get("fat_g") or 0) * ratio, 1),
+                        "fiber_g": round(float(food.get("fiber_g") or 0) * ratio, 1),
+                        "source": "database",
+                    })
+                    continue
+
+            # Fallback: no DB match, just return adjusted portion
+            recalculated_items.append({
+                "name": adj.name,
+                "portion_g": adj.adjusted_portion_g,
+                "source": "needs_manual",
+            })
+
+        total_calories = sum(i.get("calories", 0) for i in recalculated_items)
+
+        return {
+            "items": recalculated_items,
+            "total_calories": round(total_calories, 1),
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Hesaplama hatası: {str(e)}")
+
+
+class FeedbackSubmission(BaseModel):
+    user_id: str
+    scan_id: str | None = None
+    corrections: list[dict]  # [{original: {...}, corrected: {...}}]
+
+
+@router.post("/submit-feedback")
+async def submit_feedback(submission: FeedbackSubmission):
+    """
+    Submit user corrections to improve future predictions.
+    Called when user adjusts portions/foods and confirms the meal.
+    """
+    try:
+        for correction in submission.corrections:
+            original = correction.get("original", {})
+            corrected = correction.get("corrected", {})
+
+            if original and corrected:
+                await feedback_service.save_correction(
+                    user_id=submission.user_id,
+                    scan_id=submission.scan_id,
+                    original_item=original,
+                    corrected_item=corrected,
+                )
+
+        return {"status": "ok", "corrections_saved": len(submission.corrections)}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Feedback kayıt hatası: {str(e)}")

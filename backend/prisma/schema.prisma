@@ -123,6 +123,29 @@ model FoodEmbedding {
   @@map("food_embeddings")
 }
 
+model UserFoodCorrection {
+  id                 String   @id @default(uuid()) @db.Uuid
+  userId             String   @map("user_id") @db.Uuid
+  scanId             String?  @map("scan_id") @db.Uuid
+  foodName           String   @map("food_name") @db.VarChar(255)
+  foodNameEn         String?  @map("food_name_en") @db.VarChar(255)
+  originalPortionG   Decimal  @map("original_portion_g") @db.Decimal(7, 1)
+  correctedPortionG  Decimal  @map("corrected_portion_g") @db.Decimal(7, 1)
+  originalCalories   Decimal? @map("original_calories") @db.Decimal(7, 1)
+  correctedCalories  Decimal? @map("corrected_calories") @db.Decimal(7, 1)
+  originalProteinG   Decimal? @map("original_protein_g") @db.Decimal(6, 1)
+  correctedProteinG  Decimal? @map("corrected_protein_g") @db.Decimal(6, 1)
+  originalCarbsG     Decimal? @map("original_carbs_g") @db.Decimal(6, 1)
+  correctedCarbsG    Decimal? @map("corrected_carbs_g") @db.Decimal(6, 1)
+  originalFatG       Decimal? @map("original_fat_g") @db.Decimal(6, 1)
+  correctedFatG      Decimal? @map("corrected_fat_g") @db.Decimal(6, 1)
+  correctionType     String   @default("portion") @map("correction_type") @db.VarChar(20)
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  @@index([userId])
+  @@map("user_food_corrections")
+}
+
 model MealEntry {
   id          String   @id @default(uuid()) @db.Uuid
   userId      String   @map("user_id") @db.Uuid

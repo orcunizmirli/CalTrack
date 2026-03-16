@@ -59,3 +59,36 @@ async def init_db():
             CREATE INDEX IF NOT EXISTS idx_food_embeddings_food_id
             ON food_embeddings (food_id);
         """)
+
+        # Create user_food_corrections table for feedback loop
+        await conn.execute("""
+            CREATE TABLE IF NOT EXISTS user_food_corrections (
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                user_id UUID NOT NULL,
+                scan_id UUID,
+                food_name VARCHAR(255) NOT NULL,
+                food_name_en VARCHAR(255),
+                original_portion_g DECIMAL(7,1) NOT NULL,
+                corrected_portion_g DECIMAL(7,1) NOT NULL,
+                original_calories DECIMAL(7,1),
+                corrected_calories DECIMAL(7,1),
+                original_protein_g DECIMAL(6,1),
+                corrected_protein_g DECIMAL(6,1),
+                original_carbs_g DECIMAL(6,1),
+                corrected_carbs_g DECIMAL(6,1),
+                original_fat_g DECIMAL(6,1),
+                corrected_fat_g DECIMAL(6,1),
+                correction_type VARCHAR(20) DEFAULT 'portion',
+                created_at TIMESTAMPTZ DEFAULT NOW()
+            );
+        """)
+
+        await conn.execute("""
+            CREATE INDEX IF NOT EXISTS idx_corrections_user_food
+            ON user_food_corrections (user_id, LOWER(food_name));
+        """)
+
+        await conn.execute("""
+            CREATE INDEX IF NOT EXISTS idx_corrections_food_name
+            ON user_food_corrections (LOWER(food_name));
+        """)

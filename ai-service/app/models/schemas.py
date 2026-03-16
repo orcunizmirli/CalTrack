@@ -12,6 +12,18 @@ class FoodItem(BaseModel):
     fiber_g: float | None = None
     confidence: float = 0.8
     matched_food_id: str | None = None  # DB match from RAG
+    # Portion calibration fields
+    standard_portion_g: float | None = None  # known standard portion
+    standard_portion_label: str | None = None  # e.g. "1 adet", "1 porsiyon"
+    portion_options: list["PortionOption"] | None = None  # suggested portions for UI slider
+    calories_per_100g: float | None = None  # for user recalculation
+
+
+class PortionOption(BaseModel):
+    """Preset portion option for the UI portion selector."""
+    label: str  # e.g. "Küçük", "Orta", "Büyük", "1 adet"
+    grams: float
+    calories: float
 
 
 class RawVisionResult(BaseModel):
@@ -30,6 +42,19 @@ class FoodAnalysisResponse(BaseModel):
     confidence: float
     model_used: str
     processing_ms: int
+    # Indicates items need user portion confirmation
+    needs_portion_review: bool = True
+
+
+class PortionUpdateRequest(BaseModel):
+    """User adjusts portion after AI analysis."""
+    items: list["PortionAdjustment"]
+
+
+class PortionAdjustment(BaseModel):
+    name: str
+    adjusted_portion_g: float
+    matched_food_id: str | None = None
 
 
 class RecipeRequest(BaseModel):

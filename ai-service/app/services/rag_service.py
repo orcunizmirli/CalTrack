@@ -172,6 +172,24 @@ class RAGService:
             logger.error(f"pgvector search failed: {e}")
             return []
 
+    async def get_food_by_id(self, food_id: str) -> dict | None:
+        """Get food nutrition data by ID."""
+        try:
+            pool = await get_pool()
+            async with pool.acquire() as conn:
+                row = await conn.fetchrow(
+                    """
+                    SELECT id, name, name_tr, calories, protein_g, carbs_g,
+                           fat_g, fiber_g, serving_size_g
+                    FROM foods WHERE id = $1
+                    """,
+                    food_id,
+                )
+                return dict(row) if row else None
+        except Exception as e:
+            logger.error(f"Food lookup by ID failed: {e}")
+            return None
+
     async def search_foods_by_name(self, query: str, top_k: int = 5) -> list[dict]:
         """
         Public method: search foods by name for the food search feature.

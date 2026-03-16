@@ -22,15 +22,16 @@ router.post('/analyze-food', aiRateLimiter, upload.single('image'), async (req: 
 
     const startTime = Date.now();
 
-    // Forward to AI service
+    // Forward to AI service with user_id for personalized predictions
     const formData = new FormData();
     const blob = new Blob([req.file.buffer], { type: req.file.mimetype });
     formData.append('image', blob, 'food.jpg');
     if (req.body.meal_type) {
       formData.append('meal_type', req.body.meal_type);
     }
+    formData.append('user_id', req.userId!);
 
-    const aiResponse = await fetch(`${config.aiService.url}/api/v1/analyze`, {
+    const aiResponse = await fetch(`${config.aiService.url}/ai/analyze-food`, {
       method: 'POST',
       body: formData,
     });
@@ -104,6 +105,56 @@ router.post('/generate-recipes', aiRateLimiter, async (req: AuthRequest, res: Re
     }
 
     res.json(recipes);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// POST /ai/submit-feedback
+router.post('/submit-feedback', async (req: AuthRequest, res: Response, next) => {
+  try {
+    const { corrections, scanId } = req.body;
+
+    if (!corrections || !Array.isArray(corrections) || corrections.length === 0) {
+      throw new AppError('Düzeltme verisi gerekli', 400);
+    }
+
+    const aiResponse = await fetch(`${config.aiService.url}/ai/submit-feedback`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        user_id: req.userId,
+        scan_id: scanId || null,
+        corrections,
+      }),
+    });
+
+    if (!aiResponse.ok) {
+      throw new AppError('Feedback servisi yanıt vermedi', 502);
+    }
+
+    const result = await aiResponse.json();
+    res.json(result);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// POST /ai/recalculate-portions
+router.post('/recalculate-portions', async (req: AuthRequest, res: Response, next) => {
+  try {
+    const aiResponse = await fetch(`${config.aiService.url}/ai/recalculate-portions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(req.body),
+    });
+
+    if (!aiResponse.ok) {
+      throw new AppError('Hesaplama servisi yanıt vermedi', 502);
+    }
+
+    const result = await aiResponse.json();
+    res.json(result);
   } catch (error) {
     next(error);
   }
