@@ -1,8 +1,11 @@
 import logging
+from uuid import uuid4
+
 import openai
 from app.config import settings
 from app.db import get_pool
 from app.models.schemas import FoodItem
+from app.services.openfoodfacts_service import OpenFoodFactsService
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +32,7 @@ class RAGService:
     def __init__(self):
         self._openai_client = openai.AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
         self._embedding_cache: dict[str, list[float]] = {}
+        self._off_service = OpenFoodFactsService()
 
     async def enhance_food_item(self, item: FoodItem) -> FoodItem:
         """Enhance an AI-detected food item with database nutrition data."""
@@ -63,10 +67,16 @@ class RAGService:
                 # Medium confidence: blend AI + DB values (60% DB, 40% AI)
                 return self._apply_db_nutrition(item, best_match, blend_ratio=0.6)
             else:
-                # Low confidence: keep AI values but note the closest match
+                # Low confidence: try OpenFoodFacts lazy-load fallback
                 logger.info(
-                    f"Low similarity ({similarity:.3f}) for '{item.name}', keeping AI values"
+                    f"Low similarity ({similarity:.3f}) for '{item.name}', trying OpenFoodFacts..."
                 )
+                off_match = await self._off_lazy_load(item.name_en or item.name)
+                if off_match:
+                    off_similarity = 1 - off_match["distance"]
+                    if off_similarity >= MEDIUM_CONFIDENCE_THRESHOLD:
+                        blend = 1.0 if off_similarity >= HIGH_CONFIDENCE_THRESHOLD else 0.6
+                        return self._apply_db_nutrition(item, off_match, blend_ratio=blend)
                 return item
 
         except Exception as e:
@@ -190,12 +200,139 @@ class RAGService:
             logger.error(f"Food lookup by ID failed: {e}")
             return None
 
+    async def _off_lazy_load(self, query: str) -> dict | None:
+        """
+        Lazy-load from OpenFoodFacts: search by name, cache top result in DB,
+        generate embedding, then return it as a match.
+        """
+        try:
+            results = await self._off_service.search_by_name(query, page_size=5)
+            if not results:
+                logger.info(f"No OFF results for '{query}'")
+                return None
+
+            # Pick the best result (first one with calories)
+            off_food = results[0]
+            logger.info(f"OFF found: '{off_food['name']}' for query '{query}'")
+
+            # Cache in our DB
+            food_id = await self._cache_off_food(off_food)
+            if not food_id:
+                return None
+
+            # Generate embedding for the cached food
+            search_text = off_food["name"]
+            if off_food.get("brand"):
+                search_text += " " + off_food["brand"]
+
+            embedding = await self._get_embedding(search_text)
+            if not embedding:
+                return None
+
+            # Store embedding
+            pool = await get_pool()
+            async with pool.acquire() as conn:
+                embedding_str = "[" + ",".join(str(x) for x in embedding) + "]"
+                await conn.execute(
+                    """
+                    INSERT INTO food_embeddings
+                        (id, food_id, food_name, food_name_tr, search_text, embedding)
+                    VALUES ($1, $2, $3, $4, $5, $6::vector)
+                    ON CONFLICT (food_id) DO UPDATE
+                    SET embedding = $6::vector, search_text = $5
+                    """,
+                    str(uuid4()),
+                    food_id,
+                    off_food["name"][:255],
+                    off_food.get("name_tr"),
+                    search_text,
+                    embedding_str,
+                )
+
+            # Now search again — the newly cached food should appear
+            query_embedding = await self._get_embedding(query)
+            if query_embedding:
+                matches = await self._search_similar_foods(query_embedding, top_k=1)
+                if matches:
+                    return matches[0]
+
+            return None
+
+        except Exception as e:
+            logger.warning(f"OFF lazy-load failed for '{query}': {e}")
+            return None
+
+    async def _cache_off_food(self, food: dict) -> str | None:
+        """Insert an OpenFoodFacts food into the foods table. Returns food_id or None."""
+        try:
+            pool = await get_pool()
+            async with pool.acquire() as conn:
+                # Check if already cached by barcode
+                barcode = food.get("barcode") or food.get("source_id")
+                if barcode:
+                    existing = await conn.fetchrow(
+                        "SELECT id FROM foods WHERE source = 'openfoodfacts' AND barcode = $1",
+                        barcode,
+                    )
+                    if existing:
+                        return str(existing["id"])
+
+                food_id = str(uuid4())
+                await conn.execute(
+                    """
+                    INSERT INTO foods (
+                        id, name, name_tr, brand, barcode, serving_size_g,
+                        calories, protein_g, carbs_g, fat_g, fiber_g,
+                        sugar_g, saturated_fat_g, sodium_mg,
+                        source, is_verified, created_at
+                    ) VALUES (
+                        $1, $2, $3, $4, $5, $6,
+                        $7, $8, $9, $10, $11,
+                        $12, $13, $14,
+                        $15, $16, NOW()
+                    )
+                    """,
+                    food_id,
+                    food["name"][:255],
+                    food.get("name_tr"),
+                    food.get("brand"),
+                    barcode,
+                    food.get("serving_size_g", 100),
+                    food.get("calories", 0),
+                    food.get("protein_g"),
+                    food.get("carbs_g"),
+                    food.get("fat_g"),
+                    food.get("fiber_g"),
+                    food.get("sugar_g"),
+                    food.get("saturated_fat_g"),
+                    food.get("sodium_mg"),
+                    "openfoodfacts",
+                    False,
+                )
+                logger.info(f"Cached OFF food: '{food['name']}' (id={food_id})")
+                return food_id
+
+        except Exception as e:
+            logger.warning(f"Failed to cache OFF food '{food.get('name')}': {e}")
+            return None
+
     async def search_foods_by_name(self, query: str, top_k: int = 5) -> list[dict]:
         """
         Public method: search foods by name for the food search feature.
         Returns similar foods from the database using semantic search.
+        Falls back to OpenFoodFacts if no good DB matches found.
         """
         embedding = await self._get_embedding(query)
         if not embedding:
             return []
-        return await self._search_similar_foods(embedding, top_k=top_k)
+
+        results = await self._search_similar_foods(embedding, top_k=top_k)
+
+        # If no good results, try OFF lazy-load
+        if not results or (1 - results[0]["distance"]) < MEDIUM_CONFIDENCE_THRESHOLD:
+            off_match = await self._off_lazy_load(query)
+            if off_match:
+                # Re-search to include newly cached food
+                results = await self._search_similar_foods(embedding, top_k=top_k)
+
+        return results

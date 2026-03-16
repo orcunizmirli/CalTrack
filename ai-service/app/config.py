@@ -5,6 +5,7 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: str = ""
     ANTHROPIC_API_KEY: str = ""
     DATABASE_URL: str = ""
+    USDA_API_KEY: str = "DEMO_KEY"
     AWS_S3_BUCKET: str = "caltrack-photos"
     AWS_REGION: str = "eu-west-1"
     ALLOWED_ORIGINS: list[str] = ["*"]
