@@ -1,4 +1,5 @@
 import SwiftUI
+import UserNotifications
 
 struct SettingsView: View {
     @EnvironmentObject var appState: AppState
@@ -195,16 +196,44 @@ struct HealthKitSettingsView: View {
 
 struct NotificationSettingsView: View {
     @State private var breakfastReminder = true
+    @State private var breakfastTime = dateFrom(hour: 8, minute: 0)
     @State private var lunchReminder = true
+    @State private var lunchTime = dateFrom(hour: 12, minute: 30)
     @State private var dinnerReminder = true
+    @State private var dinnerTime = dateFrom(hour: 19, minute: 0)
     @State private var waterReminder = false
+    @State private var notificationsAuthorized = false
+    @State private var showPermissionAlert = false
 
     var body: some View {
         List {
+            if !notificationsAuthorized {
+                Section {
+                    Button(action: { requestPermission() }) {
+                        HStack {
+                            Image(systemName: "bell.badge")
+                                .foregroundStyle(.ctAccent)
+                            Text("Bildirimleri Etkinleştir")
+                        }
+                    }
+                }
+            }
+
             Section("Öğün Hatırlatmaları") {
                 Toggle("Kahvaltı", isOn: $breakfastReminder)
+                if breakfastReminder {
+                    DatePicker("Saat", selection: $breakfastTime, displayedComponents: .hourAndMinute)
+                }
+
                 Toggle("Öğle Yemeği", isOn: $lunchReminder)
+                if lunchReminder {
+                    DatePicker("Saat", selection: $lunchTime, displayedComponents: .hourAndMinute)
+                }
+
                 Toggle("Akşam Yemeği", isOn: $dinnerReminder)
+                if dinnerReminder {
+                    DatePicker("Saat", selection: $dinnerTime, displayedComponents: .hourAndMinute)
+                }
             }
 
             Section("Diğer") {
@@ -214,5 +243,136 @@ struct NotificationSettingsView: View {
         .scrollContentBackground(.hidden)
         .background(Color.ctBackground)
         .navigationTitle("Bildirimler")
+        .onAppear { checkPermission() }
+        .onChange(of: breakfastReminder) { _, _ in scheduleAll() }
+        .onChange(of: lunchReminder) { _, _ in scheduleAll() }
+        .onChange(of: dinnerReminder) { _, _ in scheduleAll() }
+        .onChange(of: waterReminder) { _, _ in scheduleAll() }
+        .onChange(of: breakfastTime) { _, _ in scheduleAll() }
+        .onChange(of: lunchTime) { _, _ in scheduleAll() }
+        .onChange(of: dinnerTime) { _, _ in scheduleAll() }
+        .alert("Bildirim İzni", isPresented: $showPermissionAlert) {
+            Button("Ayarlar") {
+                if let url = URL(string: UIApplication.openSettingsURLString) {
+                    UIApplication.shared.open(url)
+                }
+            }
+            Button("İptal", role: .cancel) {}
+        } message: {
+            Text("Hatırlatıcılar için bildirim iznini Ayarlar'dan etkinleştirin.")
+        }
     }
+
+    private func checkPermission() {
+        UNUserNotificationCenter.current().getNotificationSettings { settings in
+            DispatchQueue.main.async {
+                notificationsAuthorized = settings.authorizationStatus == .authorized
+            }
+        }
+    }
+
+    private func requestPermission() {
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
+            DispatchQueue.main.async {
+                notificationsAuthorized = granted
+                if !granted { showPermissionAlert = true }
+                if granted { scheduleAll() }
+            }
+        }
+    }
+
+    private func scheduleAll() {
+        let center = UNUserNotificationCenter.current()
+        center.removeAllPendingNotificationRequests()
+
+        if breakfastReminder {
+            scheduleMealReminder(id: "breakfast", title: "Kahvaltı Zamanı", body: "Kahvaltını kaydetmeyi unutma!", time: breakfastTime)
+        }
+        if lunchReminder {
+            scheduleMealReminder(id: "lunch", title: "Öğle Yemeği", body: "Öğle yemeğini kaydetmeyi unutma!", time: lunchTime)
+        }
+        if dinnerReminder {
+            scheduleMealReminder(id: "dinner", title: "Akşam Yemeği", body: "Akşam yemeğini kaydetmeyi unutma!", time: dinnerTime)
+        }
+        if waterReminder {
+            scheduleWaterReminders()
+        }
+
+        savePreferencesToBackend()
+    }
+
+    private func scheduleMealReminder(id: String, title: String, body: String, time: Date) {
+        let content = UNMutableNotificationContent()
+        content.title = title
+        content.body = body
+        content.sound = .default
+
+        let calendar = Calendar.current
+        var dateComponents = DateComponents()
+        dateComponents.hour = calendar.component(.hour, from: time)
+        dateComponents.minute = calendar.component(.minute, from: time)
+
+        let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
+        let request = UNNotificationRequest(identifier: "meal_\(id)", content: content, trigger: trigger)
+
+        UNUserNotificationCenter.current().add(request)
+    }
+
+    private func scheduleWaterReminders() {
+        let content = UNMutableNotificationContent()
+        content.title = "Su İç"
+        content.body = "Bir bardak su içmeyi unutma!"
+        content.sound = .default
+
+        // Schedule every 60 min from 9:00 to 21:00
+        for hour in stride(from: 9, through: 21, by: 1) {
+            var dateComponents = DateComponents()
+            dateComponents.hour = hour
+            dateComponents.minute = 0
+
+            let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
+            let request = UNNotificationRequest(identifier: "water_\(hour)", content: content, trigger: trigger)
+
+            UNUserNotificationCenter.current().add(request)
+        }
+    }
+
+    private func savePreferencesToBackend() {
+        let calendar = Calendar.current
+        let prefs: [String: Any] = [
+            "breakfastReminder": breakfastReminder,
+            "breakfastTime": String(format: "%02d:%02d", calendar.component(.hour, from: breakfastTime), calendar.component(.minute, from: breakfastTime)),
+            "lunchReminder": lunchReminder,
+            "lunchTime": String(format: "%02d:%02d", calendar.component(.hour, from: lunchTime), calendar.component(.minute, from: lunchTime)),
+            "dinnerReminder": dinnerReminder,
+            "dinnerTime": String(format: "%02d:%02d", calendar.component(.hour, from: dinnerTime), calendar.component(.minute, from: dinnerTime)),
+            "waterReminder": waterReminder,
+        ]
+
+        Task {
+            do {
+                let _: [String: Any] = try await APIClient.shared.request(
+                    endpoint: "/api/v1/notifications/preferences",
+                    method: .PUT,
+                    body: prefs
+                )
+            } catch {
+                print("Bildirim tercihleri kaydedilemedi: \(error)")
+            }
+        }
+    }
+
+    private static func dateFrom(hour: Int, minute: Int) -> Date {
+        var components = DateComponents()
+        components.hour = hour
+        components.minute = minute
+        return Calendar.current.date(from: components) ?? Date()
+    }
+}
+
+private func dateFrom(hour: Int, minute: Int) -> Date {
+    var components = DateComponents()
+    components.hour = hour
+    components.minute = minute
+    return Calendar.current.date(from: components) ?? Date()
 }

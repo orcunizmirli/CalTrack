@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 
 router.use(authenticate);
 
-// GET /recipes/saved
+// GET /recipes/saved — must be before /:id to avoid conflict
 router.get('/saved', async (req: AuthRequest, res: Response, next) => {
   try {
     const saved = await prisma.userSavedRecipe.findMany({
@@ -17,6 +17,37 @@ router.get('/saved', async (req: AuthRequest, res: Response, next) => {
     });
 
     res.json(saved.map(s => s.recipe));
+  } catch (error) {
+    next(error);
+  }
+});
+
+// GET /recipes/:id
+router.get('/:id', async (req: AuthRequest, res: Response, next) => {
+  try {
+    const recipe = await prisma.recipe.findUnique({
+      where: { id: req.params.id },
+    });
+
+    if (!recipe) {
+      res.status(404).json({ error: 'Tarif bulunamadı' });
+      return;
+    }
+
+    // Check if user has saved this recipe
+    const saved = await prisma.userSavedRecipe.findUnique({
+      where: {
+        userId_recipeId: {
+          userId: req.userId!,
+          recipeId: req.params.id,
+        },
+      },
+    });
+
+    res.json({
+      ...recipe,
+      isSaved: !!saved,
+    });
   } catch (error) {
     next(error);
   }

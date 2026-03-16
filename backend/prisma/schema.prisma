@@ -22,6 +22,7 @@ model User {
   activityLevel String?  @map("activity_level") @db.VarChar(20)
   unitSystem    String   @default("metric") @map("unit_system") @db.VarChar(10)
   language      String   @default("tr") @db.VarChar(5)
+  notificationPrefs Json? @map("notification_prefs")
   createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz()
   updatedAt     DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
 

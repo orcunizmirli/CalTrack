@@ -36,5 +36,6 @@ export const config = {
   apple: {
     clientId: process.env.APPLE_CLIENT_ID || '',
     teamId: process.env.APPLE_TEAM_ID || '',
+    sharedSecret: process.env.APPLE_SHARED_SECRET || '',
   },
 };

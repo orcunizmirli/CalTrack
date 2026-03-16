@@ -4,6 +4,7 @@ import { PrismaClient } from '@prisma/client';
 import { generateTokens, verifyRefreshToken } from '../middleware/auth';
 import { registerSchema, loginSchema, refreshTokenSchema } from '../validators/auth';
 import { AppError } from '../middleware/errorHandler';
+import { config } from '../config';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -87,6 +88,69 @@ router.post('/apple', async (req: Request, res: Response, next) => {
           name: fullName
             ? `${fullName.givenName || ''} ${fullName.familyName || ''}`.trim()
             : 'Kullanıcı',
+        },
+      });
+    }
+
+    const tokens = generateTokens(user.id);
+
+    res.json({
+      user: { id: user.id, email: user.email, name: user.name },
+      ...tokens,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// POST /auth/google
+router.post('/google', async (req: Request, res: Response, next) => {
+  try {
+    const { idToken } = req.body;
+
+    if (!idToken) {
+      throw new AppError('Google ID token gerekli', 400);
+    }
+
+    // Verify Google ID token via Google's tokeninfo endpoint
+    const googleResponse = await fetch(
+      `https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(idToken)}`
+    );
+
+    if (!googleResponse.ok) {
+      throw new AppError('Geçersiz Google token', 401);
+    }
+
+    const payload = await googleResponse.json() as Record<string, any>;
+    const googleId = payload.sub;
+    const email = payload.email;
+    const name = payload.name || payload.given_name || 'Kullanıcı';
+
+    if (!googleId) {
+      throw new AppError('Google kimliği alınamadı', 401);
+    }
+
+    // Find or create user
+    let user = await prisma.user.findUnique({ where: { googleId } });
+
+    if (!user && email) {
+      // Check if email already exists (user might have registered with email)
+      user = await prisma.user.findUnique({ where: { email } });
+      if (user) {
+        // Link Google ID to existing account
+        user = await prisma.user.update({
+          where: { id: user.id },
+          data: { googleId },
+        });
+      }
+    }
+
+    if (!user) {
+      user = await prisma.user.create({
+        data: {
+          googleId,
+          email,
+          name,
         },
       });
     }

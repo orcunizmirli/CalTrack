@@ -14,6 +14,7 @@ import { recipeRouter } from './routes/recipes';
 import { subscriptionRouter } from './routes/subscriptions';
 import { weightRouter } from './routes/weight';
 import { healthSyncRouter } from './routes/healthSync';
+import { notificationRouter } from './routes/notifications';
 import { errorHandler } from './middleware/errorHandler';
 import { rateLimiter } from './middleware/rateLimiter';
 
@@ -47,6 +48,7 @@ app.use('/api/v1/recipes', recipeRouter);
 app.use('/api/v1/subscriptions', subscriptionRouter);
 app.use('/api/v1/weight', weightRouter);
 app.use('/api/v1/health-sync', healthSyncRouter);
+app.use('/api/v1/notifications', notificationRouter);
 
 // Error handler
 app.use(errorHandler);
