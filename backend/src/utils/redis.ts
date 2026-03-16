@@ -40,3 +40,47 @@ export async function getRedisClient(): Promise<RedisClientType | null> {
 export function isRedisConnected(): boolean {
   return isConnected;
 }
+
+/**
+ * Get cached value from Redis. Returns parsed JSON or null.
+ */
+export async function getCache<T>(key: string): Promise<T | null> {
+  const redis = await getRedisClient();
+  if (!redis) return null;
+  try {
+    const data = await redis.get(key);
+    return data ? JSON.parse(data) : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Set cache value in Redis with TTL in seconds.
+ */
+export async function setCache(key: string, value: unknown, ttlSeconds: number): Promise<void> {
+  const redis = await getRedisClient();
+  if (!redis) return;
+  try {
+    await redis.set(key, JSON.stringify(value), { EX: ttlSeconds });
+  } catch {
+    // Cache write failure is non-critical
+  }
+}
+
+/**
+ * Delete cache entries matching a pattern prefix.
+ * Used to invalidate cache when data changes.
+ */
+export async function invalidateCache(prefix: string): Promise<void> {
+  const redis = await getRedisClient();
+  if (!redis) return;
+  try {
+    const keys = await redis.keys(`${prefix}*`);
+    if (keys.length > 0) {
+      await redis.del(keys);
+    }
+  } catch {
+    // Cache invalidation failure is non-critical
+  }
+}

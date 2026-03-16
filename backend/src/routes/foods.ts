@@ -4,6 +4,7 @@ import { createCustomFoodSchema } from '../validators/meal';
 import { AppError } from '../middleware/errorHandler';
 import { t, getLocale } from '../i18n';
 import { prisma } from '../utils/prisma';
+import { getCache, setCache } from '../utils/redis';
 
 const router = Router();
 
@@ -15,6 +16,14 @@ router.get('/search', async (req: Request, res: Response, next) => {
     const query = req.query.q as string;
     if (!query || query.length < 2) {
       res.json([]);
+      return;
+    }
+
+    // Check cache for popular searches (5 min TTL)
+    const cacheKey = `food_search:${query.toLowerCase().trim()}`;
+    const cached = await getCache<unknown[]>(cacheKey);
+    if (cached) {
+      res.json(cached);
       return;
     }
 
@@ -32,6 +41,8 @@ router.get('/search', async (req: Request, res: Response, next) => {
         { name: 'asc' },
       ],
     });
+
+    await setCache(cacheKey, foods, 300);
 
     res.json(foods);
   } catch (error) {

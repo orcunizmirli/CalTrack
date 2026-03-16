@@ -2,13 +2,16 @@ import { Request, Response, NextFunction } from 'express';
 import { RateLimiterRedis, RateLimiterMemory, RateLimiterAbstract } from 'rate-limiter-flexible';
 import { getRedisClient } from '../utils/redis';
 import { t, getLocale } from '../i18n';
+import { AuthRequest } from './auth';
 
 let generalLimiter: RateLimiterAbstract | null = null;
-let aiLimiter: RateLimiterAbstract | null = null;
+let aiIpLimiter: RateLimiterAbstract | null = null;
+let aiUserLimiter: RateLimiterAbstract | null = null;
 
 const GENERAL_POINTS = 100; // requests
 const GENERAL_DURATION = 60; // per 60 seconds
-const AI_POINTS = 20;
+const AI_IP_POINTS = 20; // per IP
+const AI_USER_POINTS = 10; // per authenticated user (stricter)
 const AI_DURATION = 60;
 
 // In-memory fallbacks
@@ -17,8 +20,13 @@ const memoryGeneralLimiter = new RateLimiterMemory({
   duration: GENERAL_DURATION,
 });
 
-const memoryAiLimiter = new RateLimiterMemory({
-  points: AI_POINTS,
+const memoryAiIpLimiter = new RateLimiterMemory({
+  points: AI_IP_POINTS,
+  duration: AI_DURATION,
+});
+
+const memoryAiUserLimiter = new RateLimiterMemory({
+  points: AI_USER_POINTS,
   duration: AI_DURATION,
 });
 
@@ -38,30 +46,39 @@ export async function initRateLimiters(): Promise<void> {
       insuranceLimiter: memoryGeneralLimiter,
     });
 
-    aiLimiter = new RateLimiterRedis({
+    aiIpLimiter = new RateLimiterRedis({
       storeClient: redis,
-      keyPrefix: 'rl_ai',
-      points: AI_POINTS,
+      keyPrefix: 'rl_ai_ip',
+      points: AI_IP_POINTS,
       duration: AI_DURATION,
-      insuranceLimiter: memoryAiLimiter,
+      insuranceLimiter: memoryAiIpLimiter,
+    });
+
+    aiUserLimiter = new RateLimiterRedis({
+      storeClient: redis,
+      keyPrefix: 'rl_ai_user',
+      points: AI_USER_POINTS,
+      duration: AI_DURATION,
+      insuranceLimiter: memoryAiUserLimiter,
     });
 
     console.log('Rate limiters initialized with Redis backend');
   } else {
     generalLimiter = memoryGeneralLimiter;
-    aiLimiter = memoryAiLimiter;
+    aiIpLimiter = memoryAiIpLimiter;
+    aiUserLimiter = memoryAiUserLimiter;
     console.log('Rate limiters initialized with in-memory fallback');
   }
 }
 
-function getKey(req: Request): string {
+function getIpKey(req: Request): string {
   return req.ip || req.socket.remoteAddress || 'unknown';
 }
 
 export const rateLimiter = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const limiter = generalLimiter || memoryGeneralLimiter;
   try {
-    await limiter.consume(getKey(req));
+    await limiter.consume(getIpKey(req));
     next();
   } catch {
     const locale = getLocale(req);
@@ -69,13 +86,34 @@ export const rateLimiter = async (req: Request, res: Response, next: NextFunctio
   }
 };
 
+/**
+ * AI rate limiter: enforces both IP-based and user-based limits.
+ * This prevents a single user from exhausting the shared IP pool,
+ * and also prevents users behind shared IPs from affecting each other.
+ */
 export const aiRateLimiter = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  const limiter = aiLimiter || memoryAiLimiter;
+  const ipLimiter = aiIpLimiter || memoryAiIpLimiter;
+  const userLimiter = aiUserLimiter || memoryAiUserLimiter;
+  const locale = getLocale(req);
+
   try {
-    await limiter.consume(getKey(req));
-    next();
+    // Check IP-based limit
+    await ipLimiter.consume(getIpKey(req));
   } catch {
-    const locale = getLocale(req);
     res.status(429).json({ error: t('rate_limit.ai_limit_exceeded', locale) });
+    return;
   }
+
+  // Check user-based limit (if authenticated)
+  const userId = (req as AuthRequest).userId;
+  if (userId) {
+    try {
+      await userLimiter.consume(userId);
+    } catch {
+      res.status(429).json({ error: t('rate_limit.ai_limit_exceeded', locale) });
+      return;
+    }
+  }
+
+  next();
 };

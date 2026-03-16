@@ -1,10 +1,11 @@
 import { Router, Response } from 'express';
 import { authenticate, AuthRequest } from '../middleware/auth';
-import { updateProfileSchema, updateGoalsSchema } from '../validators/user';
+import { getUpdateProfileSchema, updateGoalsSchema } from '../validators/user';
 import { AppError } from '../middleware/errorHandler';
 import { calculateBMR, calculateTDEE, calculateNutritionPlan } from '../services/nutrition';
 import { t, getLocale } from '../i18n';
 import { prisma } from '../utils/prisma';
+import { getCache, setCache, invalidateCache } from '../utils/redis';
 
 const router = Router();
 
@@ -44,7 +45,8 @@ router.get('/me', async (req: AuthRequest, res: Response, next) => {
 // PUT /users/me
 router.put('/me', async (req: AuthRequest, res: Response, next) => {
   try {
-    const data = updateProfileSchema.parse(req.body);
+    const locale = getLocale(req);
+    const data = getUpdateProfileSchema(locale).parse(req.body);
 
     const user = await prisma.user.update({
       where: { id: req.userId },
@@ -54,6 +56,9 @@ router.put('/me', async (req: AuthRequest, res: Response, next) => {
         updatedAt: new Date(),
       },
     });
+
+    // Invalidate nutrition plan cache when profile changes
+    await invalidateCache(`nutrition_plan:${req.userId}`);
 
     res.json({
       id: user.id,
@@ -129,6 +134,14 @@ router.get('/me/stats', async (req: AuthRequest, res: Response, next) => {
 router.get('/me/nutrition-plan', async (req: AuthRequest, res: Response, next) => {
   try {
     const locale = getLocale(req);
+    const goalType = (req.query.goalType as string) || 'maintain';
+    const weeklyChange = req.query.weeklyChange ? parseFloat(req.query.weeklyChange as string) : 0.5;
+
+    // Cache nutrition plan per user+params (invalidated on profile update)
+    const cacheKey = `nutrition_plan:${req.userId}:${goalType}:${weeklyChange}`;
+    const cached = await getCache<unknown>(cacheKey);
+    if (cached) { res.json(cached); return; }
+
     const user = await prisma.user.findUnique({ where: { id: req.userId } });
     if (!user) throw new AppError(t('user.not_found', locale), 404);
 
@@ -144,13 +157,12 @@ router.get('/me/nutrition-plan', async (req: AuthRequest, res: Response, next) =
       activityLevel: user.activityLevel || 'moderate',
     };
 
-    const goalType = (req.query.goalType as string) || 'maintain';
-    const weeklyChange = req.query.weeklyChange ? parseFloat(req.query.weeklyChange as string) : 0.5;
-
     const plan = calculateNutritionPlan(metrics, {
       goalType: goalType as 'lose_weight' | 'gain_muscle' | 'burn_fat' | 'maintain',
       weeklyChange,
     });
+
+    await setCache(cacheKey, plan, 300);
 
     res.json(plan);
   } catch (error) {

@@ -1,6 +1,7 @@
 import { Router, Response } from 'express';
 import { authenticate, AuthRequest } from '../middleware/auth';
 import { prisma } from '../utils/prisma';
+import { getCache, setCache } from '../utils/redis';
 
 const router = Router();
 
@@ -11,6 +12,10 @@ router.get('/calories', async (req: AuthRequest, res: Response, next) => {
   try {
     const range = req.query.range as string || 'week';
     const days = range === 'week' ? 7 : range === 'month' ? 30 : 90;
+
+    const cacheKey = `analytics:calories:${req.userId}:${range}`;
+    const cached = await getCache<unknown[]>(cacheKey);
+    if (cached) { res.json(cached); return; }
 
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
@@ -26,10 +31,14 @@ router.get('/calories', async (req: AuthRequest, res: Response, next) => {
       orderBy: { date: 'asc' },
     });
 
-    res.json(meals.map(m => ({
+    const result = meals.map(m => ({
       date: m.date,
       calories: m._sum.calories || 0,
-    })));
+    }));
+
+    await setCache(cacheKey, result, 60);
+
+    res.json(result);
   } catch (error) {
     next(error);
   }
@@ -40,6 +49,10 @@ router.get('/macros', async (req: AuthRequest, res: Response, next) => {
   try {
     const range = req.query.range as string || 'week';
     const days = range === 'week' ? 7 : range === 'month' ? 30 : 90;
+
+    const cacheKey = `analytics:macros:${req.userId}:${range}`;
+    const cached = await getCache<unknown[]>(cacheKey);
+    if (cached) { res.json(cached); return; }
 
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
@@ -59,12 +72,16 @@ router.get('/macros', async (req: AuthRequest, res: Response, next) => {
       orderBy: { date: 'asc' },
     });
 
-    res.json(meals.map(m => ({
+    const result = meals.map(m => ({
       date: m.date,
       proteinG: m._sum.proteinG || 0,
       carbsG: m._sum.carbsG || 0,
       fatG: m._sum.fatG || 0,
-    })));
+    }));
+
+    await setCache(cacheKey, result, 60);
+
+    res.json(result);
   } catch (error) {
     next(error);
   }

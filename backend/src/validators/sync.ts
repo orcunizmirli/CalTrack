@@ -35,8 +35,13 @@ export const syncPushSchema = z.object({
   meals: z.array(syncMealSchema).optional(),
   waterEntries: z.array(syncWaterSchema).optional(),
   weightLogs: z.array(syncWeightSchema).optional(),
+  // Soft delete: arrays of server IDs to mark as deleted
+  deletedMealIds: z.array(z.string().uuid()).optional(),
+  deletedWaterIds: z.array(z.string().uuid()).optional(),
+  deletedWeightIds: z.array(z.string().uuid()).optional(),
 }).refine(
-  (data) => data.meals || data.waterEntries || data.weightLogs,
+  (data) => data.meals || data.waterEntries || data.weightLogs ||
+    data.deletedMealIds || data.deletedWaterIds || data.deletedWeightIds,
   { message: 'At least one data type must be provided' }
 );
 

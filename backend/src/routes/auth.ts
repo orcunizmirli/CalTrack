@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import { generateTokens, verifyRefreshToken } from '../middleware/auth';
-import { registerSchema, loginSchema, refreshTokenSchema } from '../validators/auth';
+import { getRegisterSchema, getLoginSchema, refreshTokenSchema } from '../validators/auth';
 import { AppError } from '../middleware/errorHandler';
 import { t, getLocale } from '../i18n';
 import { prisma } from '../utils/prisma';
@@ -14,7 +14,7 @@ const router = Router();
 router.post('/register', async (req: Request, res: Response, next) => {
   try {
     const locale = getLocale(req);
-    const data = registerSchema.parse(req.body);
+    const data = getRegisterSchema(locale).parse(req.body);
 
     const existingUser = await prisma.user.findUnique({ where: { email: data.email } });
     if (existingUser) {
@@ -46,7 +46,7 @@ router.post('/register', async (req: Request, res: Response, next) => {
 router.post('/login', async (req: Request, res: Response, next) => {
   try {
     const locale = getLocale(req);
-    const data = loginSchema.parse(req.body);
+    const data = getLoginSchema(locale).parse(req.body);
 
     const user = await prisma.user.findUnique({ where: { email: data.email } });
     if (!user || !user.passwordHash) {
