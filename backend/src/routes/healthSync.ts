@@ -2,6 +2,7 @@ import { Router, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { authenticate, AuthRequest } from '../middleware/auth';
 import { AppError } from '../middleware/errorHandler';
+import { t, getLocale } from '../i18n';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -102,11 +103,12 @@ router.post('/import', async (req: AuthRequest, res: Response, next) => {
  */
 router.post('/export', async (req: AuthRequest, res: Response, next) => {
   try {
+    const locale = getLocale(req);
     const { startDate, endDate } = req.body;
     const userId = req.userId!;
 
     if (!startDate) {
-      throw new AppError('startDate gerekli', 400);
+      throw new AppError(t('health_sync.start_date_required', locale), 400);
     }
 
     const start = new Date(startDate);

@@ -4,6 +4,7 @@ import { authenticate, AuthRequest } from '../middleware/auth';
 import { updateProfileSchema, updateGoalsSchema } from '../validators/user';
 import { AppError } from '../middleware/errorHandler';
 import { calculateBMR, calculateTDEE, calculateNutritionPlan } from '../services/nutrition';
+import { t, getLocale } from '../i18n';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -14,12 +15,13 @@ router.use(authenticate);
 // GET /users/me
 router.get('/me', async (req: AuthRequest, res: Response, next) => {
   try {
+    const locale = getLocale(req);
     const user = await prisma.user.findUnique({
       where: { id: req.userId },
       include: { goals: { where: { isActive: true }, take: 1 } },
     });
 
-    if (!user) throw new AppError('Kullanıcı bulunamadı', 404);
+    if (!user) throw new AppError(t('user.not_found', locale), 404);
 
     res.json({
       id: user.id,
@@ -127,11 +129,12 @@ router.get('/me/stats', async (req: AuthRequest, res: Response, next) => {
 // GET /users/me/nutrition-plan?goalType=lose_weight&weeklyChange=0.5
 router.get('/me/nutrition-plan', async (req: AuthRequest, res: Response, next) => {
   try {
+    const locale = getLocale(req);
     const user = await prisma.user.findUnique({ where: { id: req.userId } });
-    if (!user) throw new AppError('Kullanıcı bulunamadı', 404);
+    if (!user) throw new AppError(t('user.not_found', locale), 404);
 
     if (!user.gender || !user.heightCm || !user.weightKg || !user.birthDate) {
-      throw new AppError('Profil bilgilerinizi (boy, kilo, cinsiyet, doğum tarihi) doldurun', 400);
+      throw new AppError(t('user.profile_incomplete', locale), 400);
     }
 
     const metrics = {
@@ -159,8 +162,9 @@ router.get('/me/nutrition-plan', async (req: AuthRequest, res: Response, next) =
 // DELETE /users/me
 router.delete('/me', async (req: AuthRequest, res: Response, next) => {
   try {
+    const locale = getLocale(req);
     await prisma.user.delete({ where: { id: req.userId } });
-    res.json({ message: 'Hesap silindi' });
+    res.json({ message: t('user.account_deleted', locale) });
   } catch (error) {
     next(error);
   }

@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { t, getLocale } from '../i18n';
 
 export class AppError extends Error {
   statusCode: number;
@@ -14,7 +15,7 @@ export class AppError extends Error {
 
 export const errorHandler = (
   err: Error | AppError,
-  _req: Request,
+  req: Request,
   res: Response,
   _next: NextFunction
 ): void => {
@@ -28,8 +29,9 @@ export const errorHandler = (
 
   console.error('Unexpected error:', err);
 
+  const locale = getLocale(req);
   res.status(500).json({
-    error: 'Sunucu hatası',
+    error: t('error.server_error', locale),
     statusCode: 500,
   });
 };

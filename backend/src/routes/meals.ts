@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import { authenticate, AuthRequest } from '../middleware/auth';
 import { createMealSchema, updateMealSchema } from '../validators/meal';
 import { AppError } from '../middleware/errorHandler';
+import { t, getLocale } from '../i18n';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -101,13 +102,14 @@ router.post('/', async (req: AuthRequest, res: Response, next) => {
 // PUT /meals/:id
 router.put('/:id', async (req: AuthRequest, res: Response, next) => {
   try {
+    const locale = getLocale(req);
     const data = updateMealSchema.parse(req.body);
 
     const existing = await prisma.mealEntry.findFirst({
       where: { id: req.params.id, userId: req.userId! },
     });
 
-    if (!existing) throw new AppError('Öğün bulunamadı', 404);
+    if (!existing) throw new AppError(t('meal.not_found', locale), 404);
 
     const meal = await prisma.mealEntry.update({
       where: { id: req.params.id },
@@ -126,14 +128,15 @@ router.put('/:id', async (req: AuthRequest, res: Response, next) => {
 // DELETE /meals/:id
 router.delete('/:id', async (req: AuthRequest, res: Response, next) => {
   try {
+    const locale = getLocale(req);
     const existing = await prisma.mealEntry.findFirst({
       where: { id: req.params.id, userId: req.userId! },
     });
 
-    if (!existing) throw new AppError('Öğün bulunamadı', 404);
+    if (!existing) throw new AppError(t('meal.not_found', locale), 404);
 
     await prisma.mealEntry.delete({ where: { id: req.params.id } });
-    res.json({ message: 'Öğün silindi' });
+    res.json({ message: t('meal.deleted', locale) });
   } catch (error) {
     next(error);
   }

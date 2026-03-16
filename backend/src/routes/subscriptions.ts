@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import { authenticate, AuthRequest } from '../middleware/auth';
 import { AppError } from '../middleware/errorHandler';
 import { config } from '../config';
+import { t, getLocale } from '../i18n';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -13,13 +14,6 @@ router.use(authenticate);
 const APP_STORE_VERIFY_URL = config.isDev
   ? 'https://sandbox.itunes.apple.com/verifyReceipt'
   : 'https://buy.itunes.apple.com/verifyReceipt';
-
-// Plan durations in days
-const PLAN_DURATIONS: Record<string, number> = {
-  weekly: 7,
-  monthly: 30,
-  yearly: 365,
-};
 
 /**
  * Verify receipt with Apple App Store.
@@ -102,23 +96,24 @@ function extractSubscriptionInfo(receiptData: Record<string, any>): {
 // POST /subscriptions/verify-receipt
 router.post('/verify-receipt', async (req: AuthRequest, res: Response, next) => {
   try {
+    const locale = getLocale(req);
     const { receipt } = req.body;
 
     if (!receipt) {
-      throw new AppError('Receipt verisi gerekli', 400);
+      throw new AppError(t('subscription.receipt_required', locale), 400);
     }
 
     // Verify with Apple
     const receiptData = await verifyWithApple(receipt);
 
     if (!receiptData) {
-      throw new AppError('Geçersiz receipt. Abonelik doğrulanamadı.', 400);
+      throw new AppError(t('subscription.invalid_receipt', locale), 400);
     }
 
     const subInfo = extractSubscriptionInfo(receiptData);
 
     if (!subInfo) {
-      throw new AppError('Abonelik bilgisi bulunamadı', 400);
+      throw new AppError(t('subscription.info_not_found', locale), 400);
     }
 
     const subscription = await prisma.subscription.upsert({

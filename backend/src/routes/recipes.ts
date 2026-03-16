@@ -1,6 +1,7 @@
 import { Router, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { authenticate, AuthRequest } from '../middleware/auth';
+import { t, getLocale } from '../i18n';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -25,12 +26,13 @@ router.get('/saved', async (req: AuthRequest, res: Response, next) => {
 // GET /recipes/:id
 router.get('/:id', async (req: AuthRequest, res: Response, next) => {
   try {
+    const locale = getLocale(req);
     const recipe = await prisma.recipe.findUnique({
       where: { id: req.params.id },
     });
 
     if (!recipe) {
-      res.status(404).json({ error: 'Tarif bulunamadı' });
+      res.status(404).json({ error: t('recipe.not_found', locale) });
       return;
     }
 
@@ -56,6 +58,7 @@ router.get('/:id', async (req: AuthRequest, res: Response, next) => {
 // POST /recipes/:id/save
 router.post('/:id/save', async (req: AuthRequest, res: Response, next) => {
   try {
+    const locale = getLocale(req);
     const existing = await prisma.userSavedRecipe.findUnique({
       where: {
         userId_recipeId: {
@@ -66,7 +69,7 @@ router.post('/:id/save', async (req: AuthRequest, res: Response, next) => {
     });
 
     if (existing) {
-      res.json({ message: 'Zaten kaydedilmiş' });
+      res.json({ message: t('recipe.already_saved', locale) });
       return;
     }
 
@@ -77,7 +80,7 @@ router.post('/:id/save', async (req: AuthRequest, res: Response, next) => {
       },
     });
 
-    res.status(201).json({ message: 'Tarif kaydedildi' });
+    res.status(201).json({ message: t('recipe.saved', locale) });
   } catch (error) {
     next(error);
   }
@@ -86,6 +89,7 @@ router.post('/:id/save', async (req: AuthRequest, res: Response, next) => {
 // DELETE /recipes/:id/save
 router.delete('/:id/save', async (req: AuthRequest, res: Response, next) => {
   try {
+    const locale = getLocale(req);
     await prisma.userSavedRecipe.deleteMany({
       where: {
         userId: req.userId!,
@@ -93,7 +97,7 @@ router.delete('/:id/save', async (req: AuthRequest, res: Response, next) => {
       },
     });
 
-    res.json({ message: 'Kayıt silindi' });
+    res.json({ message: t('recipe.unsaved', locale) });
   } catch (error) {
     next(error);
   }

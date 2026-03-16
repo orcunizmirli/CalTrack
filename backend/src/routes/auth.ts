@@ -4,7 +4,7 @@ import { PrismaClient } from '@prisma/client';
 import { generateTokens, verifyRefreshToken } from '../middleware/auth';
 import { registerSchema, loginSchema, refreshTokenSchema } from '../validators/auth';
 import { AppError } from '../middleware/errorHandler';
-import { config } from '../config';
+import { t, getLocale } from '../i18n';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -12,11 +12,12 @@ const prisma = new PrismaClient();
 // POST /auth/register
 router.post('/register', async (req: Request, res: Response, next) => {
   try {
+    const locale = getLocale(req);
     const data = registerSchema.parse(req.body);
 
     const existingUser = await prisma.user.findUnique({ where: { email: data.email } });
     if (existingUser) {
-      throw new AppError('Bu email zaten kayıtlı', 409);
+      throw new AppError(t('auth.email_exists', locale), 409);
     }
 
     const passwordHash = await bcrypt.hash(data.password, 12);
@@ -43,16 +44,17 @@ router.post('/register', async (req: Request, res: Response, next) => {
 // POST /auth/login
 router.post('/login', async (req: Request, res: Response, next) => {
   try {
+    const locale = getLocale(req);
     const data = loginSchema.parse(req.body);
 
     const user = await prisma.user.findUnique({ where: { email: data.email } });
     if (!user || !user.passwordHash) {
-      throw new AppError('Geçersiz email veya şifre', 401);
+      throw new AppError(t('auth.invalid_credentials', locale), 401);
     }
 
     const isValid = await bcrypt.compare(data.password, user.passwordHash);
     if (!isValid) {
-      throw new AppError('Geçersiz email veya şifre', 401);
+      throw new AppError(t('auth.invalid_credentials', locale), 401);
     }
 
     const tokens = generateTokens(user.id);
@@ -69,6 +71,7 @@ router.post('/login', async (req: Request, res: Response, next) => {
 // POST /auth/apple
 router.post('/apple', async (req: Request, res: Response, next) => {
   try {
+    const locale = getLocale(req);
     // TODO: Verify Apple identity token with Apple's servers
     const { identityToken, fullName, email } = req.body;
 
@@ -87,7 +90,7 @@ router.post('/apple', async (req: Request, res: Response, next) => {
           email: email || `${appleId}@privaterelay.appleid.com`,
           name: fullName
             ? `${fullName.givenName || ''} ${fullName.familyName || ''}`.trim()
-            : 'Kullanıcı',
+            : t('auth.default_name', locale),
         },
       });
     }
@@ -106,10 +109,11 @@ router.post('/apple', async (req: Request, res: Response, next) => {
 // POST /auth/google
 router.post('/google', async (req: Request, res: Response, next) => {
   try {
+    const locale = getLocale(req);
     const { idToken } = req.body;
 
     if (!idToken) {
-      throw new AppError('Google ID token gerekli', 400);
+      throw new AppError(t('auth.google_token_required', locale), 400);
     }
 
     // Verify Google ID token via Google's tokeninfo endpoint
@@ -118,16 +122,16 @@ router.post('/google', async (req: Request, res: Response, next) => {
     );
 
     if (!googleResponse.ok) {
-      throw new AppError('Geçersiz Google token', 401);
+      throw new AppError(t('auth.invalid_google_token', locale), 401);
     }
 
     const payload = await googleResponse.json() as Record<string, any>;
     const googleId = payload.sub;
     const email = payload.email;
-    const name = payload.name || payload.given_name || 'Kullanıcı';
+    const name = payload.name || payload.given_name || t('auth.default_name', locale);
 
     if (!googleId) {
-      throw new AppError('Google kimliği alınamadı', 401);
+      throw new AppError(t('auth.google_id_failed', locale), 401);
     }
 
     // Find or create user
@@ -169,11 +173,12 @@ router.post('/google', async (req: Request, res: Response, next) => {
 // POST /auth/refresh
 router.post('/refresh', async (req: Request, res: Response, next) => {
   try {
+    const locale = getLocale(req);
     const { refreshToken } = refreshTokenSchema.parse(req.body);
     const userId = verifyRefreshToken(refreshToken);
 
     if (!userId) {
-      throw new AppError('Geçersiz refresh token', 401);
+      throw new AppError(t('auth.invalid_refresh_token', locale), 401);
     }
 
     const tokens = generateTokens(userId);
@@ -184,9 +189,10 @@ router.post('/refresh', async (req: Request, res: Response, next) => {
 });
 
 // POST /auth/logout
-router.post('/logout', (_req: Request, res: Response) => {
+router.post('/logout', (req: Request, res: Response) => {
+  const locale = getLocale(req);
   // In a more complete implementation, invalidate the refresh token in Redis
-  res.json({ message: 'Çıkış yapıldı' });
+  res.json({ message: t('auth.logout_success', locale) });
 });
 
 export { router as authRouter };

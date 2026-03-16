@@ -15,8 +15,9 @@ import { subscriptionRouter } from './routes/subscriptions';
 import { weightRouter } from './routes/weight';
 import { healthSyncRouter } from './routes/healthSync';
 import { notificationRouter } from './routes/notifications';
+import { syncRouter } from './routes/sync';
 import { errorHandler } from './middleware/errorHandler';
-import { rateLimiter } from './middleware/rateLimiter';
+import { rateLimiter, initRateLimiters } from './middleware/rateLimiter';
 
 const app = express();
 
@@ -49,13 +50,22 @@ app.use('/api/v1/subscriptions', subscriptionRouter);
 app.use('/api/v1/weight', weightRouter);
 app.use('/api/v1/health-sync', healthSyncRouter);
 app.use('/api/v1/notifications', notificationRouter);
+app.use('/api/v1/sync', syncRouter);
 
 // Error handler
 app.use(errorHandler);
 
-// Start server
-app.listen(config.port, () => {
-  console.log(`CalTrack API running on port ${config.port} [${config.nodeEnv}]`);
+// Initialize rate limiters (Redis) and start server
+initRateLimiters().then(() => {
+  app.listen(config.port, () => {
+    console.log(`CalTrack API running on port ${config.port} [${config.nodeEnv}]`);
+  });
+}).catch((err) => {
+  console.error('Failed to initialize rate limiters:', err);
+  // Start anyway with in-memory fallback
+  app.listen(config.port, () => {
+    console.log(`CalTrack API running on port ${config.port} [${config.nodeEnv}] (in-memory rate limiting)`);
+  });
 });
 
 export default app;

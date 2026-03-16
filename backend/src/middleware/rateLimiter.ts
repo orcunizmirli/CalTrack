@@ -1,52 +1,81 @@
 import { Request, Response, NextFunction } from 'express';
+import { RateLimiterRedis, RateLimiterMemory, RateLimiterAbstract } from 'rate-limiter-flexible';
+import { getRedisClient } from '../utils/redis';
+import { t, getLocale } from '../i18n';
 
-// Simple in-memory rate limiter (replace with Redis-based in production)
-const requestCounts = new Map<string, { count: number; resetTime: number }>();
+let generalLimiter: RateLimiterAbstract | null = null;
+let aiLimiter: RateLimiterAbstract | null = null;
 
-const WINDOW_MS = 60 * 1000; // 1 minute
-const MAX_REQUESTS = 100;
+const GENERAL_POINTS = 100; // requests
+const GENERAL_DURATION = 60; // per 60 seconds
+const AI_POINTS = 20;
+const AI_DURATION = 60;
 
-export const rateLimiter = (req: Request, res: Response, next: NextFunction): void => {
-  const ip = req.ip || req.socket.remoteAddress || 'unknown';
-  const now = Date.now();
+// In-memory fallbacks
+const memoryGeneralLimiter = new RateLimiterMemory({
+  points: GENERAL_POINTS,
+  duration: GENERAL_DURATION,
+});
 
-  const entry = requestCounts.get(ip);
+const memoryAiLimiter = new RateLimiterMemory({
+  points: AI_POINTS,
+  duration: AI_DURATION,
+});
 
-  if (!entry || now > entry.resetTime) {
-    requestCounts.set(ip, { count: 1, resetTime: now + WINDOW_MS });
+/**
+ * Initialize Redis-based rate limiters.
+ * Falls back to in-memory if Redis is unavailable.
+ */
+export async function initRateLimiters(): Promise<void> {
+  const redis = await getRedisClient();
+
+  if (redis) {
+    generalLimiter = new RateLimiterRedis({
+      storeClient: redis,
+      keyPrefix: 'rl_general',
+      points: GENERAL_POINTS,
+      duration: GENERAL_DURATION,
+      insuranceLimiter: memoryGeneralLimiter,
+    });
+
+    aiLimiter = new RateLimiterRedis({
+      storeClient: redis,
+      keyPrefix: 'rl_ai',
+      points: AI_POINTS,
+      duration: AI_DURATION,
+      insuranceLimiter: memoryAiLimiter,
+    });
+
+    console.log('Rate limiters initialized with Redis backend');
+  } else {
+    generalLimiter = memoryGeneralLimiter;
+    aiLimiter = memoryAiLimiter;
+    console.log('Rate limiters initialized with in-memory fallback');
+  }
+}
+
+function getKey(req: Request): string {
+  return req.ip || req.socket.remoteAddress || 'unknown';
+}
+
+export const rateLimiter = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  const limiter = generalLimiter || memoryGeneralLimiter;
+  try {
+    await limiter.consume(getKey(req));
     next();
-    return;
+  } catch {
+    const locale = getLocale(req);
+    res.status(429).json({ error: t('rate_limit.too_many_requests', locale) });
   }
-
-  if (entry.count >= MAX_REQUESTS) {
-    res.status(429).json({ error: 'Çok fazla istek. Lütfen bekleyin.' });
-    return;
-  }
-
-  entry.count++;
-  next();
 };
 
-// Stricter rate limiter for AI endpoints
-export const aiRateLimiter = (req: Request, res: Response, next: NextFunction): void => {
-  const ip = req.ip || req.socket.remoteAddress || 'unknown';
-  const key = `ai:${ip}`;
-  const now = Date.now();
-
-  const entry = requestCounts.get(key);
-  const AI_MAX = 20; // 20 requests per minute
-
-  if (!entry || now > entry.resetTime) {
-    requestCounts.set(key, { count: 1, resetTime: now + WINDOW_MS });
+export const aiRateLimiter = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  const limiter = aiLimiter || memoryAiLimiter;
+  try {
+    await limiter.consume(getKey(req));
     next();
-    return;
+  } catch {
+    const locale = getLocale(req);
+    res.status(429).json({ error: t('rate_limit.ai_limit_exceeded', locale) });
   }
-
-  if (entry.count >= AI_MAX) {
-    res.status(429).json({ error: 'AI istek limiti aşıldı. Lütfen bekleyin.' });
-    return;
-  }
-
-  entry.count++;
-  next();
 };

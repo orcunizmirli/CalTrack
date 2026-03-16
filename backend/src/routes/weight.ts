@@ -2,6 +2,7 @@ import { Router, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { authenticate, AuthRequest } from '../middleware/auth';
 import { z } from 'zod';
+import { t, getLocale } from '../i18n';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -111,6 +112,7 @@ router.post('/', async (req: AuthRequest, res: Response, next) => {
 // PUT /weight/:id
 router.put('/:id', async (req: AuthRequest, res: Response, next) => {
   try {
+    const locale = getLocale(req);
     const data = weightLogSchema.parse(req.body);
 
     const existing = await prisma.weightLog.findFirst({
@@ -118,7 +120,7 @@ router.put('/:id', async (req: AuthRequest, res: Response, next) => {
     });
 
     if (!existing) {
-      return res.status(404).json({ error: 'Kayıt bulunamadı' });
+      return res.status(404).json({ error: t('weight.not_found', locale) });
     }
 
     const log = await prisma.weightLog.update({
@@ -139,10 +141,11 @@ router.put('/:id', async (req: AuthRequest, res: Response, next) => {
 // DELETE /weight/:id
 router.delete('/:id', async (req: AuthRequest, res: Response, next) => {
   try {
+    const locale = getLocale(req);
     await prisma.weightLog.deleteMany({
       where: { id: req.params.id, userId: req.userId! },
     });
-    res.json({ message: 'Silindi' });
+    res.json({ message: t('weight.deleted', locale) });
   } catch (error) {
     next(error);
   }

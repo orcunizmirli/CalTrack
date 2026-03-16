@@ -7,6 +7,7 @@ import { recipeRequestSchema } from '../validators/meal';
 import { config } from '../config';
 import { AppError } from '../middleware/errorHandler';
 import { uploadToS3 } from '../utils/s3';
+import { t, getLocale } from '../i18n';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -17,8 +18,9 @@ router.use(authenticate);
 // POST /ai/analyze-food
 router.post('/analyze-food', aiRateLimiter, upload.single('image'), async (req: AuthRequest, res: Response, next) => {
   try {
+    const locale = getLocale(req);
     if (!req.file) {
-      throw new AppError('Fotoğraf gerekli', 400);
+      throw new AppError(t('ai.photo_required', locale), 400);
     }
 
     const startTime = Date.now();
@@ -38,7 +40,7 @@ router.post('/analyze-food', aiRateLimiter, upload.single('image'), async (req: 
     });
 
     if (!aiResponse.ok) {
-      throw new AppError('AI analiz servisi yanıt vermedi', 502);
+      throw new AppError(t('ai.service_unavailable', locale), 502);
     }
 
     const result = await aiResponse.json() as Record<string, any>;
@@ -79,6 +81,7 @@ router.post('/analyze-food', aiRateLimiter, upload.single('image'), async (req: 
 // POST /ai/generate-recipes
 router.post('/generate-recipes', aiRateLimiter, async (req: AuthRequest, res: Response, next) => {
   try {
+    const locale = getLocale(req);
     const data = recipeRequestSchema.parse(req.body);
 
     const aiResponse = await fetch(`${config.aiService.url}/api/v1/generate-recipes`, {
@@ -88,7 +91,7 @@ router.post('/generate-recipes', aiRateLimiter, async (req: AuthRequest, res: Re
     });
 
     if (!aiResponse.ok) {
-      throw new AppError('Tarif oluşturma servisi yanıt vermedi', 502);
+      throw new AppError(t('ai.recipe_service_unavailable', locale), 502);
     }
 
     const recipes = await aiResponse.json() as Record<string, any>[];
@@ -123,10 +126,11 @@ router.post('/generate-recipes', aiRateLimiter, async (req: AuthRequest, res: Re
 // POST /ai/submit-feedback
 router.post('/submit-feedback', async (req: AuthRequest, res: Response, next) => {
   try {
+    const locale = getLocale(req);
     const { corrections, scanId } = req.body;
 
     if (!corrections || !Array.isArray(corrections) || corrections.length === 0) {
-      throw new AppError('Düzeltme verisi gerekli', 400);
+      throw new AppError(t('ai.feedback_required', locale), 400);
     }
 
     const aiResponse = await fetch(`${config.aiService.url}/ai/submit-feedback`, {
@@ -140,7 +144,7 @@ router.post('/submit-feedback', async (req: AuthRequest, res: Response, next) =>
     });
 
     if (!aiResponse.ok) {
-      throw new AppError('Feedback servisi yanıt vermedi', 502);
+      throw new AppError(t('ai.feedback_service_unavailable', locale), 502);
     }
 
     const result = await aiResponse.json();
@@ -153,6 +157,7 @@ router.post('/submit-feedback', async (req: AuthRequest, res: Response, next) =>
 // POST /ai/recalculate-portions
 router.post('/recalculate-portions', async (req: AuthRequest, res: Response, next) => {
   try {
+    const locale = getLocale(req);
     const aiResponse = await fetch(`${config.aiService.url}/ai/recalculate-portions`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -160,7 +165,7 @@ router.post('/recalculate-portions', async (req: AuthRequest, res: Response, nex
     });
 
     if (!aiResponse.ok) {
-      throw new AppError('Hesaplama servisi yanıt vermedi', 502);
+      throw new AppError(t('ai.calculation_service_unavailable', locale), 502);
     }
 
     const result = await aiResponse.json();

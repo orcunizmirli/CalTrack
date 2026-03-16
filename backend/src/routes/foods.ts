@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import { authenticate, AuthRequest } from '../middleware/auth';
 import { createCustomFoodSchema } from '../validators/meal';
 import { AppError } from '../middleware/errorHandler';
+import { t, getLocale } from '../i18n';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -42,6 +43,7 @@ router.get('/search', async (req: Request, res: Response, next) => {
 // GET /foods/barcode/:code
 router.get('/barcode/:code', async (req: Request, res: Response, next) => {
   try {
+    const locale = getLocale(req);
     const { code } = req.params;
 
     let food = await prisma.food.findFirst({
@@ -83,7 +85,7 @@ router.get('/barcode/:code', async (req: Request, res: Response, next) => {
     }
 
     if (!food) {
-      throw new AppError('Ürün bulunamadı', 404);
+      throw new AppError(t('food.product_not_found', locale), 404);
     }
 
     res.json(food);
@@ -95,11 +97,12 @@ router.get('/barcode/:code', async (req: Request, res: Response, next) => {
 // GET /foods/:id
 router.get('/:id', async (req: Request, res: Response, next) => {
   try {
+    const locale = getLocale(req);
     const food = await prisma.food.findUnique({
       where: { id: req.params.id },
     });
 
-    if (!food) throw new AppError('Yemek bulunamadı', 404);
+    if (!food) throw new AppError(t('food.not_found', locale), 404);
     res.json(food);
   } catch (error) {
     next(error);
