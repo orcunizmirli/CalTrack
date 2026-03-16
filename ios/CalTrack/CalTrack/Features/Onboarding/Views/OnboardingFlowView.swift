@@ -6,9 +6,8 @@ struct OnboardingFlowView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Progress bar
-            ProgressView(value: Double(viewModel.currentStep + 1), total: Double(viewModel.totalSteps))
-                .tint(.ctAccent)
+            // Animated progress bar
+            AnimatedOnboardingProgress(current: viewModel.currentStep, total: viewModel.totalSteps)
                 .padding(.horizontal)
                 .padding(.top, 8)
 
@@ -82,6 +81,7 @@ struct OnboardingFlowView: View {
             .padding(.horizontal)
             .padding(.bottom, 32)
         }
+        .background(OnboardingStepGradient(step: viewModel.currentStep))
         .background(Color.ctBackground)
     }
 }

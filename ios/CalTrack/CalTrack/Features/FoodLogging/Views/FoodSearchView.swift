@@ -5,6 +5,7 @@ struct FoodSearchView: View {
     @State private var showBarcodeScan = false
     @State private var selectedFood: FoodItem?
     @State private var showAddFood = false
+    @State private var showFavorites = false
 
     var body: some View {
         NavigationStack {
@@ -31,6 +32,16 @@ struct FoodSearchView: View {
                     .padding(12)
                     .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                     .glassEffect(.regular)
+
+                    // Favorites button
+                    Button(action: { showFavorites.toggle() }) {
+                        Image(systemName: showFavorites ? "heart.fill" : "heart")
+                            .font(.title2)
+                            .foregroundStyle(showFavorites ? .ctError : .ctAccent)
+                            .frame(width: 44, height: 44)
+                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                            .glassEffect(.clear)
+                    }
 
                     // Barcode button
                     Button(action: { showBarcodeScan = true }) {
@@ -69,9 +80,9 @@ struct FoodSearchView: View {
 
                 // Content
                 if viewModel.isSearching {
-                    Spacer()
-                    ProgressView()
-                    Spacer()
+                    FoodSearchShimmerView()
+                } else if showFavorites {
+                    favoritesList
                 } else if !viewModel.searchQuery.isEmpty {
                     searchResultsList
                 } else {
@@ -114,6 +125,33 @@ struct FoodSearchView: View {
             }
         }
         .listStyle(.plain)
+    }
+
+    private var favoritesList: some View {
+        List {
+            if viewModel.favoriteFoods.isEmpty {
+                ContentUnavailableView(
+                    "Henüz favori yok",
+                    systemImage: "heart",
+                    description: Text("Yemek detayında kalp ikonuna dokunarak favorilere ekleyin")
+                )
+            } else {
+                Section("Favoriler") {
+                    ForEach(viewModel.favoriteFoods, id: \.id) { food in
+                        FoodSearchRow(food: food)
+                            .onTapGesture { selectedFood = food }
+                            .swipeActions(edge: .trailing) {
+                                Button(role: .destructive) {
+                                    viewModel.toggleFavorite(food)
+                                } label: {
+                                    Label("Favoriden Çıkar", systemImage: "heart.slash")
+                                }
+                            }
+                    }
+                }
+            }
+        }
+        .listStyle(.insetGrouped)
     }
 
     private var recentAndFrequentList: some View {
@@ -303,6 +341,15 @@ struct FoodDetailAddView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("İptal") { dismiss() }
+                }
+                ToolbarItem(placement: .primaryAction) {
+                    Button(action: {
+                        food.isFavorite.toggle()
+                        food.lastUsedAt = Date()
+                    }) {
+                        Image(systemName: food.isFavorite ? "heart.fill" : "heart")
+                            .foregroundStyle(food.isFavorite ? .ctError : .ctTextSecondary)
+                    }
                 }
             }
         }

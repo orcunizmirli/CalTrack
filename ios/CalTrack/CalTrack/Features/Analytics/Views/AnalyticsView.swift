@@ -26,8 +26,7 @@ struct AnalyticsView: View {
                         .padding(.horizontal)
 
                         if viewModel.isLoading {
-                            ProgressView()
-                                .padding(.vertical, 40)
+                            AnalyticsShimmerView()
                         } else {
                             // Streak
                             StreakView(

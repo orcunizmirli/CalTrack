@@ -21,20 +21,8 @@ struct WaterTrackerView: View {
                     .foregroundStyle(.ctTextSecondary)
             }
 
-            // Progress bar
-            GeometryReader { geo in
-                ZStack(alignment: .leading) {
-                    RoundedRectangle(cornerRadius: 6)
-                        .fill(Color.blue.opacity(0.15))
-                        .frame(height: 12)
-
-                    RoundedRectangle(cornerRadius: 6)
-                        .fill(Color.blue)
-                        .frame(width: geo.size.width * progress, height: 12)
-                        .animation(.easeInOut, value: totalWaterMl)
-                }
-            }
-            .frame(height: 12)
+            // Liquid wave progress bar
+            LiquidWaterProgress(progress: progress)
 
             // Quick add buttons
             HStack(spacing: 8) {

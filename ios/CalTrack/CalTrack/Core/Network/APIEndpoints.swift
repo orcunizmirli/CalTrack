@@ -22,6 +22,7 @@ enum APIEndpoints {
     static let foodCustom = "/api/v1/foods/custom"
     static let foodRecent = "/api/v1/foods/recent"
     static let foodFrequent = "/api/v1/foods/frequent"
+    static let foodFavorites = "/api/v1/foods/favorites"
 
     // MARK: - Meals
     static let mealsDaily = "/api/v1/meals/daily"
@@ -60,7 +61,7 @@ struct AppConfig {
     #if DEBUG
     static let apiBaseURL = "http://localhost:3000"
     #else
-    static let apiBaseURL = "https://api.caltrack.app"
+    static let apiBaseURL = "https://api.forkcast.app"
     #endif
 
     static let openAIAPIKey = "" // Set via environment/config

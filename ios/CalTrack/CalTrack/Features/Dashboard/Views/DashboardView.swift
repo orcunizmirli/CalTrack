@@ -17,57 +17,61 @@ struct DashboardView: View {
                             Task { await viewModel.loadData(context: modelContext) }
                         }
 
-                    // Calorie Ring
-                    CalorieRingView(
-                        consumed: viewModel.totalCalories,
-                        goal: viewModel.calorieGoal,
-                        burned: viewModel.activeCalories,
-                        remaining: viewModel.caloriesRemaining
-                    )
-                    .padding(.horizontal)
-
-                    // Macro Progress
-                    MacroProgressView(
-                        protein: viewModel.totalProtein,
-                        proteinGoal: viewModel.proteinGoal,
-                        carbs: viewModel.totalCarbs,
-                        carbsGoal: viewModel.carbsGoal,
-                        fat: viewModel.totalFat,
-                        fatGoal: viewModel.fatGoal
-                    )
-                    .padding(.horizontal)
-
-                    // Activity Summary
-                    if viewModel.selectedDate.isToday {
-                        HStack(spacing: 12) {
-                            ActivityCard(icon: "figure.walk", label: "Adım", value: "\(viewModel.todaySteps)")
-                            ActivityCard(icon: "flame.fill", label: "Yakılan", value: "\(Int(viewModel.activeCalories)) kcal")
-                        }
-                        .padding(.horizontal)
-                    }
-
-                    // Meals
-                    ForEach(MealType.allCases, id: \.self) { mealType in
-                        MealSectionView(
-                            mealType: mealType,
-                            meals: viewModel.mealsForType(mealType),
-                            totalCalories: viewModel.caloriesForMealType(mealType),
-                            onAdd: {
-                                selectedMealType = mealType
-                                showAddFood = true
-                            },
-                            onDelete: { meal in
-                                viewModel.deleteMeal(meal, context: modelContext)
-                            }
+                    if viewModel.isLoading {
+                        DashboardShimmerView()
+                    } else {
+                        // Calorie Ring
+                        CalorieRingView(
+                            consumed: viewModel.totalCalories,
+                            goal: viewModel.calorieGoal,
+                            burned: viewModel.activeCalories,
+                            remaining: viewModel.caloriesRemaining
                         )
                         .padding(.horizontal)
-                    }
 
-                    // Water Tracker
-                    WaterTrackerView()
+                        // Macro Progress
+                        MacroProgressView(
+                            protein: viewModel.totalProtein,
+                            proteinGoal: viewModel.proteinGoal,
+                            carbs: viewModel.totalCarbs,
+                            carbsGoal: viewModel.carbsGoal,
+                            fat: viewModel.totalFat,
+                            fatGoal: viewModel.fatGoal
+                        )
                         .padding(.horizontal)
 
-                    Spacer(minLength: 100)
+                        // Activity Summary
+                        if viewModel.selectedDate.isToday {
+                            HStack(spacing: 12) {
+                                ActivityCard(icon: "figure.walk", label: "Adım", value: "\(viewModel.todaySteps)")
+                                ActivityCard(icon: "flame.fill", label: "Yakılan", value: "\(Int(viewModel.activeCalories)) kcal")
+                            }
+                            .padding(.horizontal)
+                        }
+
+                        // Meals
+                        ForEach(MealType.allCases, id: \.self) { mealType in
+                            MealSectionView(
+                                mealType: mealType,
+                                meals: viewModel.mealsForType(mealType),
+                                totalCalories: viewModel.caloriesForMealType(mealType),
+                                onAdd: {
+                                    selectedMealType = mealType
+                                    showAddFood = true
+                                },
+                                onDelete: { meal in
+                                    viewModel.deleteMeal(meal, context: modelContext)
+                                }
+                            )
+                            .padding(.horizontal)
+                        }
+
+                        // Water Tracker
+                        WaterTrackerView()
+                            .padding(.horizontal)
+
+                        Spacer(minLength: 100)
+                    } // end if/else isLoading
                 }
                 .padding(.top, 8)
             } }
@@ -81,6 +85,13 @@ struct DashboardView: View {
             }
             .sheet(isPresented: $showAddFood) {
                 AddFoodView(mealType: selectedMealType)
+            }
+            .overlay {
+                GoalReachedOverlay(
+                    title: "Kalori Hedefine Ulaştın!",
+                    subtitle: "Bugünkü hedefini tamamladın, harika gidiyorsun!",
+                    isShowing: $viewModel.showGoalReached
+                )
             }
         }
     }

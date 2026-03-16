@@ -240,6 +240,7 @@ struct AIFoodScanView: View {
     }
 
     private func saveMeals() {
+        let imageData = viewModel.capturedImage?.jpegData(compressionQuality: 0.5)
         for item in viewModel.editableItems {
             let entry = MealEntry(
                 foodName: item.name,
@@ -251,6 +252,7 @@ struct AIFoodScanView: View {
                 fatG: item.fatG,
                 isAIScan: true
             )
+            entry.photoData = imageData
             modelContext.insert(entry)
         }
         dismiss()

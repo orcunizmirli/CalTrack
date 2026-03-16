@@ -10,6 +10,9 @@ class DashboardViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var todaySteps = 0
     @Published var activeCalories: Double = 0
+    @Published var showGoalReached = false
+    @Published var showWaterGoalReached = false
+    private var previousCalorieProgress: Double = 0
 
     let healthKit = HealthKitManager.shared
 
@@ -75,6 +78,14 @@ class DashboardViewModel: ObservableObject {
             activeCalories = await healthKit.getTodayActiveCalories()
         }
 
+        // Check if calorie goal just reached
+        let newProgress = calorieProgress
+        if previousCalorieProgress < 1.0 && newProgress >= 1.0 && selectedDate.isToday {
+            showGoalReached = true
+            HapticManager.success()
+        }
+        previousCalorieProgress = newProgress
+
         isLoading = false
     }
 
@@ -89,5 +100,33 @@ class DashboardViewModel: ObservableObject {
     func deleteMeal(_ meal: MealEntry, context: ModelContext) {
         context.delete(meal)
         Task { await loadData(context: context) }
+    }
+
+    func copyMealToToday(_ meal: MealEntry, context: ModelContext) {
+        let copy = meal.duplicate(toDate: Date())
+        context.insert(copy)
+        Task { await loadData(context: context) }
+    }
+
+    func copyMealsFromYesterday(mealType: MealType, context: ModelContext) async {
+        guard let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: selectedDate) else { return }
+        let startOfYesterday = yesterday.startOfDay
+        let endOfYesterday = yesterday.endOfDay
+        let mealTypeRaw = mealType.rawValue
+
+        let descriptor = FetchDescriptor<MealEntry>(
+            predicate: #Predicate<MealEntry> { entry in
+                entry.date >= startOfYesterday && entry.date <= endOfYesterday && entry.mealType == mealTypeRaw
+            }
+        )
+
+        guard let yesterdayMeals = try? context.fetch(descriptor), !yesterdayMeals.isEmpty else { return }
+
+        for meal in yesterdayMeals {
+            let copy = meal.duplicate(toDate: selectedDate, mealType: mealType)
+            context.insert(copy)
+        }
+
+        await loadData(context: context)
     }
 }

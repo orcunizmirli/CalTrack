@@ -8,9 +8,22 @@ struct PlanSummaryView: View {
             VStack(spacing: 24) {
                 // Success badge
                 VStack(spacing: 12) {
-                    Image(systemName: "checkmark.seal.fill")
-                        .font(.system(size: 64))
-                        .foregroundColor(.ctSuccess)
+                    ZStack {
+                        Circle()
+                            .fill(
+                                RadialGradient(
+                                    colors: [Color.ctSuccess.opacity(0.3), .clear],
+                                    center: .center,
+                                    startRadius: 10,
+                                    endRadius: 50
+                                )
+                            )
+                            .frame(width: 100, height: 100)
+
+                        Image(systemName: "checkmark.seal.fill")
+                            .font(.system(size: 64))
+                            .foregroundColor(.ctSuccess)
+                    }
 
                     Text("Planın Hazır!")
                         .font(.ctTitle)

@@ -7,6 +7,7 @@ class FoodSearchViewModel: ObservableObject {
     @Published var searchResults: [FoodItem] = []
     @Published var recentFoods: [FoodItem] = []
     @Published var frequentFoods: [FoodItem] = []
+    @Published var favoriteFoods: [FoodItem] = []
     @Published var isSearching = false
     @Published var selectedMealType: MealType = .lunch
     @Published var scannedBarcode: String?
@@ -74,6 +75,27 @@ class FoodSearchViewModel: ObservableObject {
             frequentFoods = results.map { $0.toFoodItem() }
         } catch {
             print("Load frequent error: \(error)")
+        }
+    }
+
+    func loadFavorites() async {
+        do {
+            let results: [FoodSearchResult] = try await APIClient.shared.request(
+                endpoint: APIEndpoints.foodFavorites
+            )
+            favoriteFoods = results.map { $0.toFoodItem() }
+        } catch {
+            print("Load favorites error: \(error)")
+        }
+    }
+
+    func toggleFavorite(_ food: FoodItem) {
+        food.isFavorite.toggle()
+        if food.isFavorite {
+            food.useCount += 1
+            favoriteFoods.insert(food, at: 0)
+        } else {
+            favoriteFoods.removeAll { $0.id == food.id }
         }
     }
 }
