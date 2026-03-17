@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt, { SignOptions } from 'jsonwebtoken';
 import { config } from '../config';
+import { t, getLocale } from '../i18n';
 
 export interface AuthRequest extends Request {
   userId?: string;
@@ -14,9 +15,10 @@ interface JWTPayload {
 
 export const authenticate = (req: AuthRequest, res: Response, next: NextFunction): void => {
   const authHeader = req.headers.authorization;
+  const locale = getLocale(req);
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    res.status(401).json({ error: 'Yetkilendirme gerekli' });
+    res.status(401).json({ error: t('auth.required', locale) });
     return;
   }
 
@@ -27,7 +29,7 @@ export const authenticate = (req: AuthRequest, res: Response, next: NextFunction
     req.userId = decoded.userId;
     next();
   } catch {
-    res.status(401).json({ error: 'Geçersiz veya süresi dolmuş token' });
+    res.status(401).json({ error: t('auth.invalid_token', locale) });
   }
 };
 

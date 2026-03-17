@@ -1,15 +1,24 @@
 import { z } from 'zod';
+import { t, Locale } from '../i18n';
 
-export const registerSchema = z.object({
-  email: z.string().email('Geçerli bir email giriniz'),
-  password: z.string().min(8, 'Şifre en az 8 karakter olmalı'),
-  name: z.string().min(1, 'İsim gerekli').max(100),
-});
+export function getRegisterSchema(locale: Locale = 'tr') {
+  return z.object({
+    email: z.string().email(t('validation.email_invalid', locale)),
+    password: z.string().min(8, t('validation.password_min', locale)),
+    name: z.string().min(1, t('validation.name_required', locale)).max(100),
+  });
+}
 
-export const loginSchema = z.object({
-  email: z.string().email('Geçerli bir email giriniz'),
-  password: z.string().min(1, 'Şifre gerekli'),
-});
+export function getLoginSchema(locale: Locale = 'tr') {
+  return z.object({
+    email: z.string().email(t('validation.email_invalid', locale)),
+    password: z.string().min(1, t('validation.password_required', locale)),
+  });
+}
+
+// Static schemas for type inference and non-localized contexts
+export const registerSchema = getRegisterSchema('tr');
+export const loginSchema = getLoginSchema('tr');
 
 export const appleAuthSchema = z.object({
   identityToken: z.string(),

@@ -1,16 +1,22 @@
 import { z } from 'zod';
+import { t, Locale } from '../i18n';
 
-export const updateProfileSchema = z.object({
-  name: z.string().min(1).max(100).optional(),
-  gender: z.enum(['male', 'female']).optional(),
-  birthDate: z.string().datetime().optional(),
-  heightCm: z.number().min(50).max(300).optional(),
-  weightKg: z.number().min(20).max(300).optional(),
-  bodyFatPct: z.number().min(1).max(70).nullable().optional(),
-  activityLevel: z.enum(['sedentary', 'light', 'moderate', 'active', 'very_active']).optional(),
-  unitSystem: z.enum(['metric', 'imperial']).optional(),
-  language: z.enum(['tr', 'en']).optional(),
-});
+export function getUpdateProfileSchema(locale: Locale = 'tr') {
+  return z.object({
+    name: z.string().min(1, t('validation.name_required', locale)).max(100).optional(),
+    gender: z.enum(['male', 'female']).optional(),
+    birthDate: z.string().datetime().optional(),
+    heightCm: z.number().min(50).max(300).optional(),
+    weightKg: z.number().min(20).max(300).optional(),
+    bodyFatPct: z.number().min(1).max(70).nullable().optional(),
+    activityLevel: z.enum(['sedentary', 'light', 'moderate', 'active', 'very_active']).optional(),
+    unitSystem: z.enum(['metric', 'imperial']).optional(),
+    language: z.enum(['tr', 'en']).optional(),
+  });
+}
+
+// Static schemas for type inference
+export const updateProfileSchema = getUpdateProfileSchema('tr');
 
 export const updateGoalsSchema = z.object({
   goalType: z.enum(['lose_weight', 'gain_muscle', 'burn_fat', 'maintain']),

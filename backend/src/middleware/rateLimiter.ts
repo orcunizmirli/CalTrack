@@ -1,52 +1,116 @@
 import { Request, Response, NextFunction } from 'express';
+import { RateLimiterRedis, RateLimiterMemory, RateLimiterAbstract } from 'rate-limiter-flexible';
+import { getRedisClient } from '../utils/redis';
+import { getClientIp } from '../utils/request';
+import { t, getLocale } from '../i18n';
+import { AuthRequest } from './auth';
 
-// Simple in-memory rate limiter (replace with Redis-based in production)
-const requestCounts = new Map<string, { count: number; resetTime: number }>();
+let generalLimiter: RateLimiterAbstract | null = null;
+let aiIpLimiter: RateLimiterAbstract | null = null;
+let aiUserLimiter: RateLimiterAbstract | null = null;
 
-const WINDOW_MS = 60 * 1000; // 1 minute
-const MAX_REQUESTS = 100;
+const GENERAL_POINTS = 100; // requests
+const GENERAL_DURATION = 60; // per 60 seconds
+const AI_IP_POINTS = 20; // per IP
+const AI_USER_POINTS = 10; // per authenticated user (stricter)
+const AI_DURATION = 60;
 
-export const rateLimiter = (req: Request, res: Response, next: NextFunction): void => {
-  const ip = req.ip || req.socket.remoteAddress || 'unknown';
-  const now = Date.now();
+// In-memory fallbacks
+const memoryGeneralLimiter = new RateLimiterMemory({
+  points: GENERAL_POINTS,
+  duration: GENERAL_DURATION,
+});
 
-  const entry = requestCounts.get(ip);
+const memoryAiIpLimiter = new RateLimiterMemory({
+  points: AI_IP_POINTS,
+  duration: AI_DURATION,
+});
 
-  if (!entry || now > entry.resetTime) {
-    requestCounts.set(ip, { count: 1, resetTime: now + WINDOW_MS });
+const memoryAiUserLimiter = new RateLimiterMemory({
+  points: AI_USER_POINTS,
+  duration: AI_DURATION,
+});
+
+/**
+ * Initialize Redis-based rate limiters.
+ * Falls back to in-memory if Redis is unavailable.
+ */
+export async function initRateLimiters(): Promise<void> {
+  const redis = await getRedisClient();
+
+  if (redis) {
+    generalLimiter = new RateLimiterRedis({
+      storeClient: redis,
+      keyPrefix: 'rl_general',
+      points: GENERAL_POINTS,
+      duration: GENERAL_DURATION,
+      insuranceLimiter: memoryGeneralLimiter,
+    });
+
+    aiIpLimiter = new RateLimiterRedis({
+      storeClient: redis,
+      keyPrefix: 'rl_ai_ip',
+      points: AI_IP_POINTS,
+      duration: AI_DURATION,
+      insuranceLimiter: memoryAiIpLimiter,
+    });
+
+    aiUserLimiter = new RateLimiterRedis({
+      storeClient: redis,
+      keyPrefix: 'rl_ai_user',
+      points: AI_USER_POINTS,
+      duration: AI_DURATION,
+      insuranceLimiter: memoryAiUserLimiter,
+    });
+
+    console.log('Rate limiters initialized with Redis backend');
+  } else {
+    generalLimiter = memoryGeneralLimiter;
+    aiIpLimiter = memoryAiIpLimiter;
+    aiUserLimiter = memoryAiUserLimiter;
+    console.log('Rate limiters initialized with in-memory fallback');
+  }
+}
+
+export const rateLimiter = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  const limiter = generalLimiter || memoryGeneralLimiter;
+  try {
+    await limiter.consume(getClientIp(req));
     next();
-    return;
+  } catch {
+    const locale = getLocale(req);
+    res.status(429).json({ error: t('rate_limit.too_many_requests', locale) });
   }
-
-  if (entry.count >= MAX_REQUESTS) {
-    res.status(429).json({ error: 'Çok fazla istek. Lütfen bekleyin.' });
-    return;
-  }
-
-  entry.count++;
-  next();
 };
 
-// Stricter rate limiter for AI endpoints
-export const aiRateLimiter = (req: Request, res: Response, next: NextFunction): void => {
-  const ip = req.ip || req.socket.remoteAddress || 'unknown';
-  const key = `ai:${ip}`;
-  const now = Date.now();
+/**
+ * AI rate limiter: enforces both IP-based and user-based limits.
+ * This prevents a single user from exhausting the shared IP pool,
+ * and also prevents users behind shared IPs from affecting each other.
+ */
+export const aiRateLimiter = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  const ipLimiter = aiIpLimiter || memoryAiIpLimiter;
+  const userLimiter = aiUserLimiter || memoryAiUserLimiter;
+  const locale = getLocale(req);
 
-  const entry = requestCounts.get(key);
-  const AI_MAX = 20; // 20 requests per minute
-
-  if (!entry || now > entry.resetTime) {
-    requestCounts.set(key, { count: 1, resetTime: now + WINDOW_MS });
-    next();
+  try {
+    // Check IP-based limit
+    await ipLimiter.consume(getClientIp(req));
+  } catch {
+    res.status(429).json({ error: t('rate_limit.ai_limit_exceeded', locale) });
     return;
   }
 
-  if (entry.count >= AI_MAX) {
-    res.status(429).json({ error: 'AI istek limiti aşıldı. Lütfen bekleyin.' });
-    return;
+  // Check user-based limit (if authenticated)
+  const userId = (req as AuthRequest).userId;
+  if (userId) {
+    try {
+      await userLimiter.consume(userId);
+    } catch {
+      res.status(429).json({ error: t('rate_limit.ai_limit_exceeded', locale) });
+      return;
+    }
   }
 
-  entry.count++;
   next();
 };

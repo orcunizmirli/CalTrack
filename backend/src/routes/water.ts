@@ -1,10 +1,10 @@
 import { Router, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
 import { authenticate, AuthRequest } from '../middleware/auth';
 import { z } from 'zod';
+import { t, getLocale } from '../i18n';
+import { prisma } from '../utils/prisma';
 
 const router = Router();
-const prisma = new PrismaClient();
 
 router.use(authenticate);
 
@@ -60,10 +60,11 @@ router.post('/', async (req: AuthRequest, res: Response, next) => {
 // DELETE /water/:id
 router.delete('/:id', async (req: AuthRequest, res: Response, next) => {
   try {
+    const locale = getLocale(req);
     await prisma.waterEntry.deleteMany({
       where: { id: req.params.id, userId: req.userId! },
     });
-    res.json({ message: 'Silindi' });
+    res.json({ message: t('water.deleted', locale) });
   } catch (error) {
     next(error);
   }

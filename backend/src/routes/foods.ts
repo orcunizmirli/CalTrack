@@ -1,11 +1,12 @@
 import { Router, Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
 import { authenticate, AuthRequest } from '../middleware/auth';
 import { createCustomFoodSchema } from '../validators/meal';
 import { AppError } from '../middleware/errorHandler';
+import { t, getLocale } from '../i18n';
+import { prisma } from '../utils/prisma';
+import { withCache } from '../utils/redis';
 
 const router = Router();
-const prisma = new PrismaClient();
 
 // GET /foods/search?q= — public (no auth required)
 router.get('/search', async (req: Request, res: Response, next) => {
@@ -16,20 +17,24 @@ router.get('/search', async (req: Request, res: Response, next) => {
       return;
     }
 
-    const foods = await prisma.food.findMany({
-      where: {
-        OR: [
-          { name: { contains: query, mode: 'insensitive' } },
-          { nameTr: { contains: query, mode: 'insensitive' } },
-          { brand: { contains: query, mode: 'insensitive' } },
+    const cacheKey = `food_search:${query.toLowerCase().trim()}`;
+
+    const foods = await withCache(cacheKey, 300, () =>
+      prisma.food.findMany({
+        where: {
+          OR: [
+            { name: { contains: query, mode: 'insensitive' } },
+            { nameTr: { contains: query, mode: 'insensitive' } },
+            { brand: { contains: query, mode: 'insensitive' } },
+          ],
+        },
+        take: 30,
+        orderBy: [
+          { isVerified: 'desc' },
+          { name: 'asc' },
         ],
-      },
-      take: 30,
-      orderBy: [
-        { isVerified: 'desc' },
-        { name: 'asc' },
-      ],
-    });
+      })
+    );
 
     res.json(foods);
   } catch (error) {
@@ -40,6 +45,7 @@ router.get('/search', async (req: Request, res: Response, next) => {
 // GET /foods/barcode/:code — public (no auth required)
 router.get('/barcode/:code', async (req: Request, res: Response, next) => {
   try {
+    const locale = getLocale(req);
     const { code } = req.params;
 
     let food = await prisma.food.findFirst({
@@ -81,7 +87,7 @@ router.get('/barcode/:code', async (req: Request, res: Response, next) => {
     }
 
     if (!food) {
-      throw new AppError('Ürün bulunamadı', 404);
+      throw new AppError(t('food.product_not_found', locale), 404);
     }
 
     res.json(food);
@@ -96,11 +102,12 @@ router.use(authenticate);
 // GET /foods/:id
 router.get('/:id', async (req: Request, res: Response, next) => {
   try {
+    const locale = getLocale(req);
     const food = await prisma.food.findUnique({
       where: { id: req.params.id },
     });
 
-    if (!food) throw new AppError('Yemek bulunamadı', 404);
+    if (!food) throw new AppError(t('food.not_found', locale), 404);
     res.json(food);
   } catch (error) {
     next(error);
