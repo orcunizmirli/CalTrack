@@ -49,6 +49,7 @@ final class MealEntry {
     var fatG: Double
     var fiberG: Double?
     var photoURL: String?
+    @Attribute(.externalStorage) var photoData: Data?
     var isAIScan: Bool
     var notes: String?
     var createdAt: Date
@@ -84,5 +85,26 @@ final class MealEntry {
 
     var mealTypeEnum: MealType {
         MealType(rawValue: mealType) ?? .snack
+    }
+
+    /// Create a copy of this meal for a different date
+    func duplicate(toDate date: Date = Date(), mealType: MealType? = nil) -> MealEntry {
+        let copy = MealEntry(
+            foodId: self.foodId,
+            foodName: self.foodName,
+            mealType: mealType ?? self.mealTypeEnum,
+            date: date,
+            quantityG: self.quantityG,
+            calories: self.calories,
+            proteinG: self.proteinG,
+            carbsG: self.carbsG,
+            fatG: self.fatG,
+            isAIScan: false,
+            photoURL: self.photoURL
+        )
+        copy.photoData = self.photoData
+        copy.fiberG = self.fiberG
+        copy.notes = self.notes
+        return copy
     }
 }

@@ -24,7 +24,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="CalTrack AI Service",
+    title="Forkcast AI Service",
     description="AI-powered food analysis and recipe generation service",
     version="1.0.0",
     lifespan=lifespan,
@@ -44,4 +44,4 @@ app.include_router(recipes.router, prefix="/ai", tags=["Recipes"])
 
 @app.get("/health")
 async def health_check():
-    return {"status": "healthy", "service": "caltrack-ai"}
+    return {"status": "healthy", "service": "forkcast-ai"}

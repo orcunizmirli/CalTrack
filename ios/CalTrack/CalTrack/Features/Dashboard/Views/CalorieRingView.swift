@@ -14,22 +14,13 @@ struct CalorieRingView: View {
     var body: some View {
         VStack(spacing: 16) {
             ZStack {
-                // Background ring
-                Circle()
-                    .stroke(Color.ctAccent.opacity(0.1), lineWidth: 20)
-                    .frame(width: 200, height: 200)
-
-                // Progress ring
-                Circle()
-                    .trim(from: 0, to: progress)
-                    .stroke(
-                        progress > 1.0 ? Color.ctError : Color.ctAccent,
-                        style: StrokeStyle(lineWidth: 20, lineCap: .round)
-                    )
-                    .frame(width: 200, height: 200)
-                    .rotationEffect(.degrees(-90))
-                    .animation(Animation.ctRing, value: progress)
-                    .shadow(color: .ctAccent.opacity(0.3), radius: 20)
+                // Gradient glow ring with animated trail
+                GradientGlowRing(
+                    progress: progress,
+                    lineWidth: 20,
+                    size: 200,
+                    isOverGoal: progress > 1.0
+                )
 
                 // Center text
                 VStack(spacing: 4) {

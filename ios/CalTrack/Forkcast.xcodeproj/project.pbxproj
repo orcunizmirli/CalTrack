@@ -1,0 +1,925 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0665FAF5285C6D85C180911B /* DashboardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50D907398EEE257D75953E39 /* DashboardViewModel.swift */; };
+		07D3CD9FAFF213C972559528 /* BarcodeScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9679BC7A691D5BE5BAEA1279 /* BarcodeScanner.swift */; };
+		092D712EF757D51D1743435A /* CalTrackApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1ABC1798D6FDB0D225037F8D /* CalTrackApp.swift */; };
+		1A49096BD7BBA5FB1793A519 /* FoodSearchViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04CC3D7B3C6C8BE16F5B0F1C /* FoodSearchViewModel.swift */; };
+		1AA06482CCE8F127970A5FA3 /* CameraManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 712CA3548F9149F34B68311A /* CameraManager.swift */; };
+		1ABB8B7FB75B188F5FCE8A1F /* SharedData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F292C5D99FDD88C83063E94 /* SharedData.swift */; };
+		275C18EAEF6539F58EEB6F2F /* MacroWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13C7C218860814CA2871A5C4 /* MacroWidget.swift */; };
+		2A45B7B5D0B657DFB684B784 /* CalorieCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEB9B55291A65FABAC3F1FDA /* CalorieCalculator.swift */; };
+		2DD36E1B84CFE5F954205E07 /* FoodItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17030C43D7416C6C8B10195D /* FoodItem.swift */; };
+		2F93A107C74E2F73272A39F1 /* BodyMetricsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13CF34588BEC7D1B4F7FD47C /* BodyMetricsView.swift */; };
+		2FC08AABBD8631DB52F18041 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7066EAC5F78FBD72E7DE9958 /* RootView.swift */; };
+		31C12881FAB48001683B585E /* GlassComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC62319876F7FB6A833A9AB3 /* GlassComponents.swift */; };
+		341D9781C7D0597A1906D413 /* PlanSummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8FCB23450E7FCD2F6F87ABD /* PlanSummaryView.swift */; };
+		34254A0271C2B20ABE885993 /* AppShortcutsProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8934129B9A04998F26BEBC42 /* AppShortcutsProvider.swift */; };
+		34C99309CBB1D8339677225F /* MicroNutrientView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D8BA2340ABD5E8E0C74019C /* MicroNutrientView.swift */; };
+		35040F2C1578F9ACD580E21E /* OnboardingFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AD8452D48424E994C58CA7C /* OnboardingFlowView.swift */; };
+		35FF98BABD251585D7B22929 /* CustomFoodEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45929745BB0D013360200B7C /* CustomFoodEntryView.swift */; };
+		4072775D66CB6BA7325B0211 /* ForkcastWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = E56AB46FABF294C7D5BFE1D4 /* ForkcastWidgetBundle.swift */; };
+		4399FD449075ACFD04E2E2BC /* AnalyticsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BE096F4997595596C830F4C /* AnalyticsView.swift */; };
+		446466D99C373264C1788E92 /* CalorieRingWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = B421BECC8C9851B5ED3B62F7 /* CalorieRingWidget.swift */; };
+		47234DD4B475513770A23C25 /* BodyFatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1693C30DA1E3586D344B8D64 /* BodyFatView.swift */; };
+		4C7BA193DEE996682D9F3708 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B594CF23A5F4E3CA57EA89F /* DashboardView.swift */; };
+		53A731DAC51A353D84DEF75D /* AIFoodScanViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B7412BEC1FFA31F5FF31702 /* AIFoodScanViewModel.swift */; };
+		584DE62CD926A7A56C4DABC2 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7970C0C948E72E5301E0BC9 /* SettingsView.swift */; };
+		65C7960ECB2F385C79FB2372 /* Color+Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BF907B9B55F14B43CF29371 /* Color+Theme.swift */; };
+		6E005F615C8DE81239EBE3E3 /* CalorieRingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEBDAE168EE6E3DCE39402A0 /* CalorieRingView.swift */; };
+		744ED1D2E4D6C7A0ACA91C94 /* AnimatedProgressBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = D28A5F72DF136F906CF91A3F /* AnimatedProgressBar.swift */; };
+		7BC84D8844714471C7872457 /* ForkcastWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 41EE5A4F2E8D07E557D2552F /* ForkcastWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		7DCC5AF78CBBA6AC919F97D9 /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CF19237730618E9EED5D694 /* WelcomeView.swift */; };
+		8105A54CB1B1E51C05A4D4D4 /* MealSectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5BD1ABFC034D24C6BE93ADA /* MealSectionView.swift */; };
+		832268FD2CE62D872B5F98B2 /* ActivityLevelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CD29C7AD45ABE0780B4A01A /* ActivityLevelView.swift */; };
+		89910B595CD97176CE3722EA /* AppLogoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6161B6318B36A6EEBCA76AF5 /* AppLogoView.swift */; };
+		8C61507134F4157C1ECF6828 /* ParallaxModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = E90EC9C45ACB35760DA24398 /* ParallaxModifier.swift */; };
+		8CDE21CE199FE3DB55BDF1A2 /* WaterWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEB6128789B7E2A21194EFF6 /* WaterWidget.swift */; };
+		9086360FE2866DB8818E1A69 /* UserDefaultsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C926265C2F6B1C2C3CD9D291 /* UserDefaultsManager.swift */; };
+		9191F20C7AA2BBFA404ED4C4 /* RulerPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D5721B72AB3A8B331468F10 /* RulerPicker.swift */; };
+		9B60E139E7D42869CAFA3389 /* WaterTrackerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EE0552BBC33FC990B823CBC /* WaterTrackerView.swift */; };
+		A3F8A7673B98C614966125C0 /* UserProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 130B67CFB60C1791D93E4269 /* UserProfile.swift */; };
+		A68E03C1622C3D600224EEE4 /* BlurTransitions.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDFA59FED47A56809E939DE9 /* BlurTransitions.swift */; };
+		A86857B56E879154B8CB07AA /* GoalsOverviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40ACB053865B8509FE4D7E88 /* GoalsOverviewView.swift */; };
+		B4122E00931A5EB4FA844CA8 /* SharedData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F292C5D99FDD88C83063E94 /* SharedData.swift */; };
+		B95C5135E3958844D51890BA /* InteractiveWaterWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0FCD08FF2ADEBF205B6F890 /* InteractiveWaterWidget.swift */; };
+		B962E0EC0EF9F940F8BF82B3 /* PersonalInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 064F9F771B91CAC148E8F8E1 /* PersonalInfoView.swift */; };
+		BA54DE16C0BFE4B101F6C6CB /* AIFoodAnalysis.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47E040990E35E5A2E4F1B6A1 /* AIFoodAnalysis.swift */; };
+		BB711375B0D048B0EFAF8923 /* MacroProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2C4A3D4A7673F549BD7418C /* MacroProgressView.swift */; };
+		C0CA99E6DB3F3DAC663DA39F /* MicroNutrient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E313E13A1EC785CBC75EE78 /* MicroNutrient.swift */; };
+		C478092696CA102D5889F301 /* RecipeListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E1E85E6CFA95DDD7079E4DC /* RecipeListView.swift */; };
+		CCFE425EE05821A16A640149 /* BodyFatEstimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98EC99DBA8ACBCC6FBE4AA90 /* BodyFatEstimator.swift */; };
+		CE2EBBA19031182C140353C4 /* OnboardingAnimations.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD9DE9165E96AE6BA41481BE /* OnboardingAnimations.swift */; };
+		CFE6BC1E7D533758105E22B0 /* GoalSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC40CFE29226C6B6515EE455 /* GoalSelectionView.swift */; };
+		D02EB6BAF076EFBED47BB0AB /* AnimatedGradientBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = 719B1B1ECE1FEDA9AF1C2976 /* AnimatedGradientBackground.swift */; };
+		D05F018AFD8ECF75C47B35C1 /* Recipe.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A43C1909B3ECCDBA883F8C2 /* Recipe.swift */; };
+		D1D26ACB023E89655B4F9823 /* FoodSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 249627A12D5EA16B43FD2A6B /* FoodSearchView.swift */; };
+		D7FDD0891E113F9DBC2649C2 /* DailyLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2924ECF8986A9D334FE5E05E /* DailyLog.swift */; };
+		DA965A937EF5C030F138259A /* HealthKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01EF432134FEEAA9BF40FFC9 /* HealthKitManager.swift */; };
+		E183AAC94FACF7F55C0E963B /* OnboardingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56C51C28348E328D7374F3DF /* OnboardingViewModel.swift */; };
+		E60524E6D20653BC56E06EBE /* APIEndpoints.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D968DE0DD9AF8038AD87DBD /* APIEndpoints.swift */; };
+		E695313730F2492D47AA6560 /* MacroSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21368D0614F03D0A77831501 /* MacroSetupView.swift */; };
+		E9A9FA8880DE5B7543837107 /* Date+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F464FC6EE73BDE8758373B1 /* Date+Extensions.swift */; };
+		EB35298ECCF86FA3B053B3BB /* MealEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24550E2596061E9D15F9D54D /* MealEntry.swift */; };
+		EBFA47DEF7E77890DF663C88 /* ConfettiView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08C1606B429C11D6D85A7B79 /* ConfettiView.swift */; };
+		EE3C142D071083844F5DC632 /* AIFoodScanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6E23B131667F699B4BB7A0E /* AIFoodScanView.swift */; };
+		F258693AEBAD94B4E3F28A19 /* AnalyticsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B40E1E60316DC732F1B643B /* AnalyticsViewModel.swift */; };
+		F31B318AAACB6322A63EA6D5 /* RecipeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 968E77EECC0C2B9B793C3552 /* RecipeViewModel.swift */; };
+		FB42EA5885DDE809A9147611 /* ShimmerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B99274D1790941407FABEEE2 /* ShimmerView.swift */; };
+		FC78A4403DA515B1C7E64ACE /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 747BDEDD184F57883D20735E /* APIClient.swift */; };
+		FCCE9C87D51D69488513E300 /* RecipeRequestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 717E0E50C42ABDEE00A5F2A7 /* RecipeRequestView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		41CE74DD4CA5D8E38C494281 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9ACF880373AC3D0A6AC7EFBC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 23F24F122E198029442EF444;
+			remoteInfo = ForkcastWidget;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		E7CA2BB4457615E25C1D7144 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				7BC84D8844714471C7872457 /* ForkcastWidget.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		01EF432134FEEAA9BF40FFC9 /* HealthKitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitManager.swift; sourceTree = "<group>"; };
+		04CC3D7B3C6C8BE16F5B0F1C /* FoodSearchViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodSearchViewModel.swift; sourceTree = "<group>"; };
+		064F9F771B91CAC148E8F8E1 /* PersonalInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersonalInfoView.swift; sourceTree = "<group>"; };
+		08C1606B429C11D6D85A7B79 /* ConfettiView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfettiView.swift; sourceTree = "<group>"; };
+		0B594CF23A5F4E3CA57EA89F /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
+		130B67CFB60C1791D93E4269 /* UserProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfile.swift; sourceTree = "<group>"; };
+		13C7C218860814CA2871A5C4 /* MacroWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacroWidget.swift; sourceTree = "<group>"; };
+		13CF34588BEC7D1B4F7FD47C /* BodyMetricsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BodyMetricsView.swift; sourceTree = "<group>"; };
+		1693C30DA1E3586D344B8D64 /* BodyFatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BodyFatView.swift; sourceTree = "<group>"; };
+		17030C43D7416C6C8B10195D /* FoodItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodItem.swift; sourceTree = "<group>"; };
+		1ABC1798D6FDB0D225037F8D /* CalTrackApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalTrackApp.swift; sourceTree = "<group>"; };
+		1CF19237730618E9EED5D694 /* WelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeView.swift; sourceTree = "<group>"; };
+		1D968DE0DD9AF8038AD87DBD /* APIEndpoints.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIEndpoints.swift; sourceTree = "<group>"; };
+		21368D0614F03D0A77831501 /* MacroSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacroSetupView.swift; sourceTree = "<group>"; };
+		24550E2596061E9D15F9D54D /* MealEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MealEntry.swift; sourceTree = "<group>"; };
+		249627A12D5EA16B43FD2A6B /* FoodSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodSearchView.swift; sourceTree = "<group>"; };
+		2924ECF8986A9D334FE5E05E /* DailyLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyLog.swift; sourceTree = "<group>"; };
+		2A43C1909B3ECCDBA883F8C2 /* Recipe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Recipe.swift; sourceTree = "<group>"; };
+		2AD8452D48424E994C58CA7C /* OnboardingFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingFlowView.swift; sourceTree = "<group>"; };
+		2B40E1E60316DC732F1B643B /* AnalyticsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsViewModel.swift; sourceTree = "<group>"; };
+		2BE096F4997595596C830F4C /* AnalyticsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsView.swift; sourceTree = "<group>"; };
+		2D8BA2340ABD5E8E0C74019C /* MicroNutrientView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicroNutrientView.swift; sourceTree = "<group>"; };
+		3CD29C7AD45ABE0780B4A01A /* ActivityLevelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityLevelView.swift; sourceTree = "<group>"; };
+		3E1E85E6CFA95DDD7079E4DC /* RecipeListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeListView.swift; sourceTree = "<group>"; };
+		3EE0552BBC33FC990B823CBC /* WaterTrackerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WaterTrackerView.swift; sourceTree = "<group>"; };
+		3F464FC6EE73BDE8758373B1 /* Date+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+Extensions.swift"; sourceTree = "<group>"; };
+		40ACB053865B8509FE4D7E88 /* GoalsOverviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoalsOverviewView.swift; sourceTree = "<group>"; };
+		41EE5A4F2E8D07E557D2552F /* ForkcastWidget.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = ForkcastWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		45929745BB0D013360200B7C /* CustomFoodEntryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomFoodEntryView.swift; sourceTree = "<group>"; };
+		47E040990E35E5A2E4F1B6A1 /* AIFoodAnalysis.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIFoodAnalysis.swift; sourceTree = "<group>"; };
+		4B7412BEC1FFA31F5FF31702 /* AIFoodScanViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIFoodScanViewModel.swift; sourceTree = "<group>"; };
+		4E313E13A1EC785CBC75EE78 /* MicroNutrient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicroNutrient.swift; sourceTree = "<group>"; };
+		50D907398EEE257D75953E39 /* DashboardViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardViewModel.swift; sourceTree = "<group>"; };
+		56C51C28348E328D7374F3DF /* OnboardingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingViewModel.swift; sourceTree = "<group>"; };
+		5D5721B72AB3A8B331468F10 /* RulerPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RulerPicker.swift; sourceTree = "<group>"; };
+		6161B6318B36A6EEBCA76AF5 /* AppLogoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLogoView.swift; sourceTree = "<group>"; };
+		7066EAC5F78FBD72E7DE9958 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		712CA3548F9149F34B68311A /* CameraManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraManager.swift; sourceTree = "<group>"; };
+		717E0E50C42ABDEE00A5F2A7 /* RecipeRequestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeRequestView.swift; sourceTree = "<group>"; };
+		719B1B1ECE1FEDA9AF1C2976 /* AnimatedGradientBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimatedGradientBackground.swift; sourceTree = "<group>"; };
+		7451EDF9A630A3B0EEB2804F /* CalTrack.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CalTrack.entitlements; sourceTree = "<group>"; };
+		747BDEDD184F57883D20735E /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
+		7BF907B9B55F14B43CF29371 /* Color+Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Theme.swift"; sourceTree = "<group>"; };
+		7F292C5D99FDD88C83063E94 /* SharedData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedData.swift; sourceTree = "<group>"; };
+		8934129B9A04998F26BEBC42 /* AppShortcutsProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppShortcutsProvider.swift; sourceTree = "<group>"; };
+		9679BC7A691D5BE5BAEA1279 /* BarcodeScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarcodeScanner.swift; sourceTree = "<group>"; };
+		968E77EECC0C2B9B793C3552 /* RecipeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeViewModel.swift; sourceTree = "<group>"; };
+		98EC99DBA8ACBCC6FBE4AA90 /* BodyFatEstimator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BodyFatEstimator.swift; sourceTree = "<group>"; };
+		B421BECC8C9851B5ED3B62F7 /* CalorieRingWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalorieRingWidget.swift; sourceTree = "<group>"; };
+		B6460E5CB2377633A6DF3C67 /* ForkcastWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ForkcastWidget.entitlements; sourceTree = "<group>"; };
+		B8FCB23450E7FCD2F6F87ABD /* PlanSummaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanSummaryView.swift; sourceTree = "<group>"; };
+		B99274D1790941407FABEEE2 /* ShimmerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShimmerView.swift; sourceTree = "<group>"; };
+		C0FCD08FF2ADEBF205B6F890 /* InteractiveWaterWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InteractiveWaterWidget.swift; sourceTree = "<group>"; };
+		C926265C2F6B1C2C3CD9D291 /* UserDefaultsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsManager.swift; sourceTree = "<group>"; };
+		CC40CFE29226C6B6515EE455 /* GoalSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoalSelectionView.swift; sourceTree = "<group>"; };
+		CD9DE9165E96AE6BA41481BE /* OnboardingAnimations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingAnimations.swift; sourceTree = "<group>"; };
+		D28A5F72DF136F906CF91A3F /* AnimatedProgressBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimatedProgressBar.swift; sourceTree = "<group>"; };
+		D2C4A3D4A7673F549BD7418C /* MacroProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacroProgressView.swift; sourceTree = "<group>"; };
+		D6337E748214480C3B4541B3 /* Forkcast.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Forkcast.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DEB6128789B7E2A21194EFF6 /* WaterWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WaterWidget.swift; sourceTree = "<group>"; };
+		DEB9B55291A65FABAC3F1FDA /* CalorieCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalorieCalculator.swift; sourceTree = "<group>"; };
+		E56AB46FABF294C7D5BFE1D4 /* ForkcastWidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForkcastWidgetBundle.swift; sourceTree = "<group>"; };
+		E5BD1ABFC034D24C6BE93ADA /* MealSectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MealSectionView.swift; sourceTree = "<group>"; };
+		E6E23B131667F699B4BB7A0E /* AIFoodScanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIFoodScanView.swift; sourceTree = "<group>"; };
+		E90EC9C45ACB35760DA24398 /* ParallaxModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParallaxModifier.swift; sourceTree = "<group>"; };
+		F4F34D57A445D168ADCF86DE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		F7970C0C948E72E5301E0BC9 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		FC62319876F7FB6A833A9AB3 /* GlassComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassComponents.swift; sourceTree = "<group>"; };
+		FDFA59FED47A56809E939DE9 /* BlurTransitions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlurTransitions.swift; sourceTree = "<group>"; };
+		FEBDAE168EE6E3DCE39402A0 /* CalorieRingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalorieRingView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		0158944E273F626FD4D3B23A /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				2BE096F4997595596C830F4C /* AnalyticsView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		04367D7F755F9BDCDC5B66F6 /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				84A5BAF8C1F7482E4BF1195F /* ViewModels */,
+				931A0D99573C16C4336D0977 /* Views */,
+			);
+			path = Onboarding;
+			sourceTree = "<group>";
+		};
+		0A81E587EC1B8157C3EA08AE /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				47E040990E35E5A2E4F1B6A1 /* AIFoodAnalysis.swift */,
+				2924ECF8986A9D334FE5E05E /* DailyLog.swift */,
+				17030C43D7416C6C8B10195D /* FoodItem.swift */,
+				24550E2596061E9D15F9D54D /* MealEntry.swift */,
+				4E313E13A1EC785CBC75EE78 /* MicroNutrient.swift */,
+				2A43C1909B3ECCDBA883F8C2 /* Recipe.swift */,
+				130B67CFB60C1791D93E4269 /* UserProfile.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		0B6A428C7D24DF6BA84F50B7 /* Camera */ = {
+			isa = PBXGroup;
+			children = (
+				9679BC7A691D5BE5BAEA1279 /* BarcodeScanner.swift */,
+				712CA3548F9149F34B68311A /* CameraManager.swift */,
+			);
+			path = Camera;
+			sourceTree = "<group>";
+		};
+		0EC8DE14C4A72E5AB92C8BEB /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				719B1B1ECE1FEDA9AF1C2976 /* AnimatedGradientBackground.swift */,
+				D28A5F72DF136F906CF91A3F /* AnimatedProgressBar.swift */,
+				6161B6318B36A6EEBCA76AF5 /* AppLogoView.swift */,
+				FDFA59FED47A56809E939DE9 /* BlurTransitions.swift */,
+				08C1606B429C11D6D85A7B79 /* ConfettiView.swift */,
+				CD9DE9165E96AE6BA41481BE /* OnboardingAnimations.swift */,
+				E90EC9C45ACB35760DA24398 /* ParallaxModifier.swift */,
+				5D5721B72AB3A8B331468F10 /* RulerPicker.swift */,
+				B99274D1790941407FABEEE2 /* ShimmerView.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		1A10E181B233BCF260C8EC90 /* Dashboard */ = {
+			isa = PBXGroup;
+			children = (
+				DCF363509C521E7EAC24D81D /* ViewModels */,
+				7BACB626B059992D678B16F1 /* Views */,
+			);
+			path = Dashboard;
+			sourceTree = "<group>";
+		};
+		2C5D27E1371535FB7798E4D9 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				968E77EECC0C2B9B793C3552 /* RecipeViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		341E0412E90D72578D05FE16 /* Features */ = {
+			isa = PBXGroup;
+			children = (
+				C872C737F68C78ADB2AC50BE /* Analytics */,
+				1A10E181B233BCF260C8EC90 /* Dashboard */,
+				6943D17E13BA90BCF2FF593E /* FoodLogging */,
+				59C29F7CC73534BBFF59E09A /* Goals */,
+				04367D7F755F9BDCDC5B66F6 /* Onboarding */,
+				F390B7372F7CDBE903253D4A /* Recipes */,
+				68C29954DB059258203E1B35 /* Settings */,
+			);
+			path = Features;
+			sourceTree = "<group>";
+		};
+		3935FE62DBA6D7B3558E473A /* Storage */ = {
+			isa = PBXGroup;
+			children = (
+				C926265C2F6B1C2C3CD9D291 /* UserDefaultsManager.swift */,
+			);
+			path = Storage;
+			sourceTree = "<group>";
+		};
+		474D41F604214C784E9A4E64 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				40ACB053865B8509FE4D7E88 /* GoalsOverviewView.swift */,
+				2D8BA2340ABD5E8E0C74019C /* MicroNutrientView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		52C1C3390EF7E3DF98B499D9 /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				98EC99DBA8ACBCC6FBE4AA90 /* BodyFatEstimator.swift */,
+				DEB9B55291A65FABAC3F1FDA /* CalorieCalculator.swift */,
+			);
+			path = Utils;
+			sourceTree = "<group>";
+		};
+		59C29F7CC73534BBFF59E09A /* Goals */ = {
+			isa = PBXGroup;
+			children = (
+				474D41F604214C784E9A4E64 /* Views */,
+			);
+			path = Goals;
+			sourceTree = "<group>";
+		};
+		5A1036D3FB59B262099E50DA /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				3E1E85E6CFA95DDD7079E4DC /* RecipeListView.swift */,
+				717E0E50C42ABDEE00A5F2A7 /* RecipeRequestView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		5A23C06E20B3E2999737D1F9 /* Intents */ = {
+			isa = PBXGroup;
+			children = (
+				8934129B9A04998F26BEBC42 /* AppShortcutsProvider.swift */,
+			);
+			path = Intents;
+			sourceTree = "<group>";
+		};
+		6010FF73C2370E05F90C6F33 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				7BF907B9B55F14B43CF29371 /* Color+Theme.swift */,
+				3F464FC6EE73BDE8758373B1 /* Date+Extensions.swift */,
+				FC62319876F7FB6A833A9AB3 /* GlassComponents.swift */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
+		68C29954DB059258203E1B35 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				76E4DDB0F681DE6E41CE5717 /* Views */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		6943D17E13BA90BCF2FF593E /* FoodLogging */ = {
+			isa = PBXGroup;
+			children = (
+				7FE8A10405B64E9B814EC312 /* ViewModels */,
+				DAE1D1B768CEC09897411349 /* Views */,
+			);
+			path = FoodLogging;
+			sourceTree = "<group>";
+		};
+		6C28F8C0D2AF147AB51D07FC /* ForkcastWidget */ = {
+			isa = PBXGroup;
+			children = (
+				B421BECC8C9851B5ED3B62F7 /* CalorieRingWidget.swift */,
+				B6460E5CB2377633A6DF3C67 /* ForkcastWidget.entitlements */,
+				E56AB46FABF294C7D5BFE1D4 /* ForkcastWidgetBundle.swift */,
+				C0FCD08FF2ADEBF205B6F890 /* InteractiveWaterWidget.swift */,
+				13C7C218860814CA2871A5C4 /* MacroWidget.swift */,
+				7F292C5D99FDD88C83063E94 /* SharedData.swift */,
+				DEB6128789B7E2A21194EFF6 /* WaterWidget.swift */,
+			);
+			path = ForkcastWidget;
+			sourceTree = "<group>";
+		};
+		6EE7480909823535C68906F7 /* HealthKit */ = {
+			isa = PBXGroup;
+			children = (
+				01EF432134FEEAA9BF40FFC9 /* HealthKitManager.swift */,
+			);
+			path = HealthKit;
+			sourceTree = "<group>";
+		};
+		76E4DDB0F681DE6E41CE5717 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				F7970C0C948E72E5301E0BC9 /* SettingsView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		793BE94B840541608CC132A6 /* CalTrack */ = {
+			isa = PBXGroup;
+			children = (
+				7451EDF9A630A3B0EEB2804F /* CalTrack.entitlements */,
+				1ABC1798D6FDB0D225037F8D /* CalTrackApp.swift */,
+				F4F34D57A445D168ADCF86DE /* Info.plist */,
+				7066EAC5F78FBD72E7DE9958 /* RootView.swift */,
+				D0820C1B9B5D1CB14EFDD3C9 /* Core */,
+				341E0412E90D72578D05FE16 /* Features */,
+				0A81E587EC1B8157C3EA08AE /* Models */,
+			);
+			path = CalTrack;
+			sourceTree = "<group>";
+		};
+		7BACB626B059992D678B16F1 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				FEBDAE168EE6E3DCE39402A0 /* CalorieRingView.swift */,
+				0B594CF23A5F4E3CA57EA89F /* DashboardView.swift */,
+				D2C4A3D4A7673F549BD7418C /* MacroProgressView.swift */,
+				E5BD1ABFC034D24C6BE93ADA /* MealSectionView.swift */,
+				3EE0552BBC33FC990B823CBC /* WaterTrackerView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		7FE8A10405B64E9B814EC312 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				4B7412BEC1FFA31F5FF31702 /* AIFoodScanViewModel.swift */,
+				04CC3D7B3C6C8BE16F5B0F1C /* FoodSearchViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		84A5BAF8C1F7482E4BF1195F /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				56C51C28348E328D7374F3DF /* OnboardingViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		931A0D99573C16C4336D0977 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				3CD29C7AD45ABE0780B4A01A /* ActivityLevelView.swift */,
+				1693C30DA1E3586D344B8D64 /* BodyFatView.swift */,
+				13CF34588BEC7D1B4F7FD47C /* BodyMetricsView.swift */,
+				CC40CFE29226C6B6515EE455 /* GoalSelectionView.swift */,
+				21368D0614F03D0A77831501 /* MacroSetupView.swift */,
+				2AD8452D48424E994C58CA7C /* OnboardingFlowView.swift */,
+				064F9F771B91CAC148E8F8E1 /* PersonalInfoView.swift */,
+				B8FCB23450E7FCD2F6F87ABD /* PlanSummaryView.swift */,
+				1CF19237730618E9EED5D694 /* WelcomeView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		ACF3805E3A6783B8C7E75F7D /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D6337E748214480C3B4541B3 /* Forkcast.app */,
+				41EE5A4F2E8D07E557D2552F /* ForkcastWidget.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		B7D66293AC44CF73566FC00B /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				2B40E1E60316DC732F1B643B /* AnalyticsViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		C872C737F68C78ADB2AC50BE /* Analytics */ = {
+			isa = PBXGroup;
+			children = (
+				B7D66293AC44CF73566FC00B /* ViewModels */,
+				0158944E273F626FD4D3B23A /* Views */,
+			);
+			path = Analytics;
+			sourceTree = "<group>";
+		};
+		D0820C1B9B5D1CB14EFDD3C9 /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				0B6A428C7D24DF6BA84F50B7 /* Camera */,
+				0EC8DE14C4A72E5AB92C8BEB /* Components */,
+				6010FF73C2370E05F90C6F33 /* Extensions */,
+				6EE7480909823535C68906F7 /* HealthKit */,
+				5A23C06E20B3E2999737D1F9 /* Intents */,
+				DE7CF642E36C6382539633AB /* Network */,
+				3935FE62DBA6D7B3558E473A /* Storage */,
+				52C1C3390EF7E3DF98B499D9 /* Utils */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+		DAE1D1B768CEC09897411349 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				E6E23B131667F699B4BB7A0E /* AIFoodScanView.swift */,
+				45929745BB0D013360200B7C /* CustomFoodEntryView.swift */,
+				249627A12D5EA16B43FD2A6B /* FoodSearchView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		DCF363509C521E7EAC24D81D /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				50D907398EEE257D75953E39 /* DashboardViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		DE7CF642E36C6382539633AB /* Network */ = {
+			isa = PBXGroup;
+			children = (
+				747BDEDD184F57883D20735E /* APIClient.swift */,
+				1D968DE0DD9AF8038AD87DBD /* APIEndpoints.swift */,
+			);
+			path = Network;
+			sourceTree = "<group>";
+		};
+		E14E453A8D233CF92CD07954 = {
+			isa = PBXGroup;
+			children = (
+				793BE94B840541608CC132A6 /* CalTrack */,
+				6C28F8C0D2AF147AB51D07FC /* ForkcastWidget */,
+				ACF3805E3A6783B8C7E75F7D /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		F390B7372F7CDBE903253D4A /* Recipes */ = {
+			isa = PBXGroup;
+			children = (
+				2C5D27E1371535FB7798E4D9 /* ViewModels */,
+				5A1036D3FB59B262099E50DA /* Views */,
+			);
+			path = Recipes;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		0B678678D4A582C54C404EBB /* Forkcast */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D3ECE01BD17A62B5C13D72A3 /* Build configuration list for PBXNativeTarget "Forkcast" */;
+			buildPhases = (
+				F2650C068A4A2CB56D5ADC28 /* Sources */,
+				E7CA2BB4457615E25C1D7144 /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				DAAC683202884CBBC76C78ED /* PBXTargetDependency */,
+			);
+			name = Forkcast;
+			packageProductDependencies = (
+			);
+			productName = Forkcast;
+			productReference = D6337E748214480C3B4541B3 /* Forkcast.app */;
+			productType = "com.apple.product-type.application";
+		};
+		23F24F122E198029442EF444 /* ForkcastWidget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F59C39520542628558389414 /* Build configuration list for PBXNativeTarget "ForkcastWidget" */;
+			buildPhases = (
+				DA17AD2362D133B61814B664 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ForkcastWidget;
+			packageProductDependencies = (
+			);
+			productName = ForkcastWidget;
+			productReference = 41EE5A4F2E8D07E557D2552F /* ForkcastWidget.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		9ACF880373AC3D0A6AC7EFBC /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 2600;
+				TargetAttributes = {
+					0B678678D4A582C54C404EBB = {
+						DevelopmentTeam = "";
+					};
+					23F24F122E198029442EF444 = {
+						DevelopmentTeam = "";
+					};
+				};
+			};
+			buildConfigurationList = CEDFB5782F2DDE115A5DC38D /* Build configuration list for PBXProject "Forkcast" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = E14E453A8D233CF92CD07954;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = ACF3805E3A6783B8C7E75F7D /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				0B678678D4A582C54C404EBB /* Forkcast */,
+				23F24F122E198029442EF444 /* ForkcastWidget */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		DA17AD2362D133B61814B664 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				446466D99C373264C1788E92 /* CalorieRingWidget.swift in Sources */,
+				4072775D66CB6BA7325B0211 /* ForkcastWidgetBundle.swift in Sources */,
+				B95C5135E3958844D51890BA /* InteractiveWaterWidget.swift in Sources */,
+				275C18EAEF6539F58EEB6F2F /* MacroWidget.swift in Sources */,
+				1ABB8B7FB75B188F5FCE8A1F /* SharedData.swift in Sources */,
+				8CDE21CE199FE3DB55BDF1A2 /* WaterWidget.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F2650C068A4A2CB56D5ADC28 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BA54DE16C0BFE4B101F6C6CB /* AIFoodAnalysis.swift in Sources */,
+				EE3C142D071083844F5DC632 /* AIFoodScanView.swift in Sources */,
+				53A731DAC51A353D84DEF75D /* AIFoodScanViewModel.swift in Sources */,
+				FC78A4403DA515B1C7E64ACE /* APIClient.swift in Sources */,
+				E60524E6D20653BC56E06EBE /* APIEndpoints.swift in Sources */,
+				832268FD2CE62D872B5F98B2 /* ActivityLevelView.swift in Sources */,
+				4399FD449075ACFD04E2E2BC /* AnalyticsView.swift in Sources */,
+				F258693AEBAD94B4E3F28A19 /* AnalyticsViewModel.swift in Sources */,
+				D02EB6BAF076EFBED47BB0AB /* AnimatedGradientBackground.swift in Sources */,
+				744ED1D2E4D6C7A0ACA91C94 /* AnimatedProgressBar.swift in Sources */,
+				89910B595CD97176CE3722EA /* AppLogoView.swift in Sources */,
+				34254A0271C2B20ABE885993 /* AppShortcutsProvider.swift in Sources */,
+				07D3CD9FAFF213C972559528 /* BarcodeScanner.swift in Sources */,
+				A68E03C1622C3D600224EEE4 /* BlurTransitions.swift in Sources */,
+				CCFE425EE05821A16A640149 /* BodyFatEstimator.swift in Sources */,
+				47234DD4B475513770A23C25 /* BodyFatView.swift in Sources */,
+				2F93A107C74E2F73272A39F1 /* BodyMetricsView.swift in Sources */,
+				092D712EF757D51D1743435A /* CalTrackApp.swift in Sources */,
+				2A45B7B5D0B657DFB684B784 /* CalorieCalculator.swift in Sources */,
+				6E005F615C8DE81239EBE3E3 /* CalorieRingView.swift in Sources */,
+				1AA06482CCE8F127970A5FA3 /* CameraManager.swift in Sources */,
+				65C7960ECB2F385C79FB2372 /* Color+Theme.swift in Sources */,
+				EBFA47DEF7E77890DF663C88 /* ConfettiView.swift in Sources */,
+				35FF98BABD251585D7B22929 /* CustomFoodEntryView.swift in Sources */,
+				D7FDD0891E113F9DBC2649C2 /* DailyLog.swift in Sources */,
+				4C7BA193DEE996682D9F3708 /* DashboardView.swift in Sources */,
+				0665FAF5285C6D85C180911B /* DashboardViewModel.swift in Sources */,
+				E9A9FA8880DE5B7543837107 /* Date+Extensions.swift in Sources */,
+				2DD36E1B84CFE5F954205E07 /* FoodItem.swift in Sources */,
+				D1D26ACB023E89655B4F9823 /* FoodSearchView.swift in Sources */,
+				1A49096BD7BBA5FB1793A519 /* FoodSearchViewModel.swift in Sources */,
+				31C12881FAB48001683B585E /* GlassComponents.swift in Sources */,
+				CFE6BC1E7D533758105E22B0 /* GoalSelectionView.swift in Sources */,
+				A86857B56E879154B8CB07AA /* GoalsOverviewView.swift in Sources */,
+				DA965A937EF5C030F138259A /* HealthKitManager.swift in Sources */,
+				BB711375B0D048B0EFAF8923 /* MacroProgressView.swift in Sources */,
+				E695313730F2492D47AA6560 /* MacroSetupView.swift in Sources */,
+				EB35298ECCF86FA3B053B3BB /* MealEntry.swift in Sources */,
+				8105A54CB1B1E51C05A4D4D4 /* MealSectionView.swift in Sources */,
+				C0CA99E6DB3F3DAC663DA39F /* MicroNutrient.swift in Sources */,
+				34C99309CBB1D8339677225F /* MicroNutrientView.swift in Sources */,
+				CE2EBBA19031182C140353C4 /* OnboardingAnimations.swift in Sources */,
+				35040F2C1578F9ACD580E21E /* OnboardingFlowView.swift in Sources */,
+				E183AAC94FACF7F55C0E963B /* OnboardingViewModel.swift in Sources */,
+				8C61507134F4157C1ECF6828 /* ParallaxModifier.swift in Sources */,
+				B962E0EC0EF9F940F8BF82B3 /* PersonalInfoView.swift in Sources */,
+				341D9781C7D0597A1906D413 /* PlanSummaryView.swift in Sources */,
+				D05F018AFD8ECF75C47B35C1 /* Recipe.swift in Sources */,
+				C478092696CA102D5889F301 /* RecipeListView.swift in Sources */,
+				FCCE9C87D51D69488513E300 /* RecipeRequestView.swift in Sources */,
+				F31B318AAACB6322A63EA6D5 /* RecipeViewModel.swift in Sources */,
+				2FC08AABBD8631DB52F18041 /* RootView.swift in Sources */,
+				9191F20C7AA2BBFA404ED4C4 /* RulerPicker.swift in Sources */,
+				584DE62CD926A7A56C4DABC2 /* SettingsView.swift in Sources */,
+				B4122E00931A5EB4FA844CA8 /* SharedData.swift in Sources */,
+				FB42EA5885DDE809A9147611 /* ShimmerView.swift in Sources */,
+				9086360FE2866DB8818E1A69 /* UserDefaultsManager.swift in Sources */,
+				A3F8A7673B98C614966125C0 /* UserProfile.swift in Sources */,
+				9B60E139E7D42869CAFA3389 /* WaterTrackerView.swift in Sources */,
+				7DCC5AF78CBBA6AC919F97D9 /* WelcomeView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		DAAC683202884CBBC76C78ED /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 23F24F122E198029442EF444 /* ForkcastWidget */;
+			targetProxy = 41CE74DD4CA5D8E38C494281 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		06A44056562F8A59563D845D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = CalTrack/CalTrack.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = CalTrack/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.forkcast.app;
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		5AF10BA9390654E8F4EA4107 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = ForkcastWidget/ForkcastWidget.entitlements;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Forkcast Widget";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.forkcast.app.widget;
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		C9CC916BDFF3B272310B93DC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGNING_ALLOWED = NO;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.9;
+			};
+			name = Release;
+		};
+		CFA01DDB8F61FA0D1E49A65C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = ForkcastWidget/ForkcastWidget.entitlements;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Forkcast Widget";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.forkcast.app.widget;
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		EC7F401C21E9FB9AB054266F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGNING_ALLOWED = NO;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.9;
+			};
+			name = Debug;
+		};
+		ED83C2FA738368B94B06E342 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = CalTrack/CalTrack.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = CalTrack/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.forkcast.app;
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		CEDFB5782F2DDE115A5DC38D /* Build configuration list for PBXProject "Forkcast" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EC7F401C21E9FB9AB054266F /* Debug */,
+				C9CC916BDFF3B272310B93DC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		D3ECE01BD17A62B5C13D72A3 /* Build configuration list for PBXNativeTarget "Forkcast" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				ED83C2FA738368B94B06E342 /* Debug */,
+				06A44056562F8A59563D845D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		F59C39520542628558389414 /* Build configuration list for PBXNativeTarget "ForkcastWidget" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CFA01DDB8F61FA0D1E49A65C /* Debug */,
+				5AF10BA9390654E8F4EA4107 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 9ACF880373AC3D0A6AC7EFBC /* Project object */;
+}

@@ -7,10 +7,13 @@ struct RootView: View {
         Group {
             if !appState.isAuthenticated {
                 WelcomeView()
+                    .transition(.blurFade)
             } else if !appState.isOnboardingComplete {
                 OnboardingFlowView()
+                    .transition(.blurFade)
             } else {
                 MainTabView()
+                    .transition(.blurFade)
             }
         }
         .animation(.ctSpring, value: appState.isAuthenticated)

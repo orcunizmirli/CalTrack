@@ -1,8 +1,8 @@
-# CalTrack - Proje Planı & Yazılım Mimarisi
+# Forkcast - Proje Planı & Yazılım Mimarisi
 
 ## 1. Proje Genel Bakış
 
-**CalTrack**, kullanıcıların günlük kalori ve besin takibini yapabildiği, yapay zeka destekli fotoğraf ile yemek tanıma özelliğine sahip, Apple Health entegrasyonlu bir iOS uygulamasıdır.
+**Forkcast**, kullanıcıların günlük kalori ve besin takibini yapabildiği, yapay zeka destekli fotoğraf ile yemek tanıma özelliğine sahip, Apple Health entegrasyonlu bir iOS uygulamasıdır.
 
 ### 1.1 Hedef Kitle
 - Kilo vermek, kas kazanmak veya sağlıklı beslenmek isteyen bireyler
@@ -204,8 +204,8 @@
 
 #### Proje Yapısı (iOS)
 ```
-CalTrack/
-├── CalTrackApp.swift                  # App entry point
+Forkcast/
+├── ForkcastApp.swift                  # App entry point
 ├── Info.plist
 ├── Assets.xcassets/
 ├── Core/

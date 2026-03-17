@@ -6,6 +6,8 @@ struct MealSectionView: View {
     let totalCalories: Double
     let onAdd: () -> Void
     let onDelete: (MealEntry) -> Void
+    var onCopyFromYesterday: (() -> Void)? = nil
+    var onCopyMeal: ((MealEntry) -> Void)? = nil
 
     var body: some View {
         VStack(spacing: 8) {
@@ -24,6 +26,14 @@ struct MealSectionView: View {
                     Text("\(Int(totalCalories)) kcal")
                         .font(.ctSubheadline)
                         .foregroundStyle(.ctTextSecondary)
+                }
+
+                if let onCopy = onCopyFromYesterday {
+                    Button(action: onCopy) {
+                        Image(systemName: "doc.on.doc")
+                            .font(.subheadline)
+                            .foregroundStyle(.ctTextSecondary)
+                    }
                 }
 
                 Button(action: onAdd) {
@@ -70,10 +80,18 @@ struct MealSectionView: View {
 struct MealItemRow: View {
     let meal: MealEntry
     let onDelete: () -> Void
+    var onCopy: (() -> Void)? = nil
 
     var body: some View {
         HStack(spacing: 12) {
-            if meal.isAIScan {
+            // Photo thumbnail or AI scan badge
+            if let photoData = meal.photoData, let uiImage = UIImage(data: photoData) {
+                Image(uiImage: uiImage)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(width: 36, height: 36)
+                    .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+            } else if meal.isAIScan {
                 Image(systemName: "camera.fill")
                     .foregroundStyle(.ctAccent)
                     .font(.caption)
@@ -114,6 +132,14 @@ struct MealItemRow: View {
         .swipeActions(edge: .trailing) {
             Button(role: .destructive, action: onDelete) {
                 Label("Sil", systemImage: "trash")
+            }
+        }
+        .swipeActions(edge: .leading) {
+            if let onCopy = onCopy {
+                Button(action: onCopy) {
+                    Label("Bugüne Ekle", systemImage: "doc.on.doc")
+                }
+                .tint(.ctAccent)
             }
         }
     }

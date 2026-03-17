@@ -6,42 +6,44 @@ struct WelcomeView: View {
     @State private var showEmailLogin = false
 
     var body: some View {
-        VStack(spacing: 32) {
-            Spacer()
+        ZStack {
+            // Floating food particles background
+            FloatingFoodParticlesView()
 
-            // Logo & Title
-            VStack(spacing: 16) {
-                Image(systemName: "fork.knife.circle.fill")
-                    .font(.system(size: 96))
-                    .foregroundStyle(Color.ctAccent)
+            VStack(spacing: 32) {
+                Spacer()
 
-                Text("CalTrack")
-                    .font(.ctLargeTitle)
+                // Animated Logo & Title
+                VStack(spacing: 16) {
+                    AppLogoView(size: 120)
 
-                Text("Yapay zeka destekli kalori takibi")
-                    .font(.ctBody)
-                    .foregroundStyle(.ctTextSecondary)
-            }
+                    Text("Forkcast")
+                        .font(.ctLargeTitle)
 
-            Spacer()
+                    Text("Smart Meal Tracking, Powered by AI")
+                        .font(.ctBody)
+                        .foregroundStyle(.ctTextSecondary)
+                }
 
-            // Features
-            VStack(alignment: .leading, spacing: 16) {
-                FeatureRow(icon: "camera.fill", title: "Fotoğraf ile Tarama",
-                          description: "Yemeğini çek, AI anında kaloriyi hesaplasın")
-                FeatureRow(icon: "chart.bar.fill", title: "Detaylı Takip",
-                          description: "Kalori, makro ve mikro besin takibi")
-                FeatureRow(icon: "heart.fill", title: "Apple Health",
-                          description: "Sağlık verilerinle otomatik senkronize")
-                FeatureRow(icon: "book.fill", title: "Akıllı Tarifler",
-                          description: "Hedefine uygun AI destekli yemek tarifleri")
-            }
-            .padding(.horizontal)
+                Spacer()
 
-            Spacer()
+                // Animated Features
+                VStack(alignment: .leading, spacing: 16) {
+                    AnimatedFeatureRow(icon: "camera.fill", title: "Fotoğraf ile Tarama",
+                              description: "Yemeğini çek, AI anında kaloriyi hesaplasın", index: 0)
+                    AnimatedFeatureRow(icon: "chart.bar.fill", title: "Detaylı Takip",
+                              description: "Kalori, makro ve mikro besin takibi", index: 1)
+                    AnimatedFeatureRow(icon: "heart.fill", title: "Apple Health",
+                              description: "Sağlık verilerinle otomatik senkronize", index: 2)
+                    AnimatedFeatureRow(icon: "book.fill", title: "Akıllı Tarifler",
+                              description: "Hedefine uygun AI destekli yemek tarifleri", index: 3)
+                }
+                .padding(.horizontal)
 
-            // Sign In Buttons
-            VStack(spacing: 12) {
+                Spacer()
+
+                // Sign In Buttons
+                VStack(spacing: 12) {
                 SignInWithAppleButton(.signIn) { request in
                     request.requestedScopes = [.fullName, .email]
                 } onCompletion: { result in
@@ -71,9 +73,11 @@ struct WelcomeView: View {
                 .foregroundStyle(.ctAccent)
                 .padding(.top, 4)
             }
-            .padding(.horizontal)
-            .padding(.bottom, 32)
-        }
+                .padding(.horizontal)
+                .padding(.bottom, 32)
+            } // end VStack(spacing: 32)
+        } // end ZStack
+        .background(AnimatedGradientBackground())
         .background(Color.ctBackground)
         .sheet(isPresented: $showEmailLogin) {
             EmailLoginView()

@@ -337,21 +337,32 @@ struct NotificationSettingsView: View {
         }
     }
 
+    private struct NotificationPrefs: Codable {
+        let breakfastReminder: Bool
+        let breakfastTime: String
+        let lunchReminder: Bool
+        let lunchTime: String
+        let dinnerReminder: Bool
+        let dinnerTime: String
+        let waterReminder: Bool
+    }
+
     private func savePreferencesToBackend() {
         let calendar = Calendar.current
-        let prefs: [String: Any] = [
-            "breakfastReminder": breakfastReminder,
-            "breakfastTime": String(format: "%02d:%02d", calendar.component(.hour, from: breakfastTime), calendar.component(.minute, from: breakfastTime)),
-            "lunchReminder": lunchReminder,
-            "lunchTime": String(format: "%02d:%02d", calendar.component(.hour, from: lunchTime), calendar.component(.minute, from: lunchTime)),
-            "dinnerReminder": dinnerReminder,
-            "dinnerTime": String(format: "%02d:%02d", calendar.component(.hour, from: dinnerTime), calendar.component(.minute, from: dinnerTime)),
-            "waterReminder": waterReminder,
-        ]
+        let prefs = NotificationPrefs(
+            breakfastReminder: breakfastReminder,
+            breakfastTime: String(format: "%02d:%02d", calendar.component(.hour, from: breakfastTime), calendar.component(.minute, from: breakfastTime)),
+            lunchReminder: lunchReminder,
+            lunchTime: String(format: "%02d:%02d", calendar.component(.hour, from: lunchTime), calendar.component(.minute, from: lunchTime)),
+            dinnerReminder: dinnerReminder,
+            dinnerTime: String(format: "%02d:%02d", calendar.component(.hour, from: dinnerTime), calendar.component(.minute, from: dinnerTime)),
+            waterReminder: waterReminder
+        )
 
         Task {
             do {
-                let _: [String: Any] = try await APIClient.shared.request(
+                struct Ack: Decodable {}
+                let _: Ack = try await APIClient.shared.request(
                     endpoint: "/api/v1/notifications/preferences",
                     method: .PUT,
                     body: prefs

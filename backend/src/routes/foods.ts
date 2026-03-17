@@ -8,9 +8,7 @@ import { withCache } from '../utils/redis';
 
 const router = Router();
 
-router.use(authenticate);
-
-// GET /foods/search?q=
+// GET /foods/search?q= — public (no auth required)
 router.get('/search', async (req: Request, res: Response, next) => {
   try {
     const query = req.query.q as string;
@@ -44,7 +42,7 @@ router.get('/search', async (req: Request, res: Response, next) => {
   }
 });
 
-// GET /foods/barcode/:code
+// GET /foods/barcode/:code — public (no auth required)
 router.get('/barcode/:code', async (req: Request, res: Response, next) => {
   try {
     const locale = getLocale(req);
@@ -97,6 +95,9 @@ router.get('/barcode/:code', async (req: Request, res: Response, next) => {
     next(error);
   }
 });
+
+// Auth required for remaining routes
+router.use(authenticate);
 
 // GET /foods/:id
 router.get('/:id', async (req: Request, res: Response, next) => {

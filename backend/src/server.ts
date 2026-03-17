@@ -61,7 +61,7 @@ app.use(helmet({
   referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
 }));
 app.use(cors({
-  origin: config.isDev ? '*' : ['https://caltrack.app'],
+  origin: config.isDev ? '*' : ['https://forkcast.app'],
   credentials: true,
 }));
 app.use(express.json({ limit: '10mb' }));
@@ -124,13 +124,13 @@ app.use(errorHandler);
 // Initialize rate limiters (Redis) and start server
 initRateLimiters().then(() => {
   app.listen(config.port, () => {
-    console.log(`CalTrack API running on port ${config.port} [${config.nodeEnv}]`);
+    console.log(`Forkcast API running on port ${config.port} [${config.nodeEnv}]`);
   });
 }).catch((err) => {
   console.error('Failed to initialize rate limiters:', err);
   // Start anyway with in-memory fallback
   app.listen(config.port, () => {
-    console.log(`CalTrack API running on port ${config.port} [${config.nodeEnv}] (in-memory rate limiting)`);
+    console.log(`Forkcast API running on port ${config.port} [${config.nodeEnv}] (in-memory rate limiting)`);
   });
 });
 
