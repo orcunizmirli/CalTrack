@@ -133,19 +133,20 @@ struct GoalReachedOverlay: View {
     var body: some View {
         if isShowing {
             ZStack {
-                Color.black.opacity(0.4)
+                Color.black.opacity(0.5)
                     .ignoresSafeArea()
+                    .onTapGesture {
+                        withAnimation { isShowing = false }
+                    }
 
-                VStack(spacing: 20) {
-                    ConfettiView()
-                        .frame(height: 200)
-
+                VStack(spacing: 16) {
                     Image(systemName: "trophy.fill")
-                        .font(.system(size: 56))
+                        .font(.system(size: 48))
                         .foregroundStyle(.ctWarning)
 
                     Text(title)
                         .font(.ctTitle)
+                        .foregroundStyle(.ctTextPrimary)
                         .multilineTextAlignment(.center)
 
                     Text(subtitle)
@@ -158,10 +159,18 @@ struct GoalReachedOverlay: View {
                     }
                     .buttonStyle(.ctPrimary)
                     .padding(.horizontal, 40)
-                    .padding(.top, 8)
+                    .padding(.top, 4)
                 }
-                .padding()
+                .padding(28)
+                .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                .glassEffect(.regular)
+                .overlay {
+                    ConfettiView()
+                        .allowsHitTesting(false)
+                }
+                .padding(.horizontal, 32)
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .transition(.opacity)
         }
     }

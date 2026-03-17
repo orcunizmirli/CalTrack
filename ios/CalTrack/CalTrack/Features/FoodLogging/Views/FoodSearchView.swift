@@ -1,10 +1,13 @@
 import SwiftUI
+import SwiftData
 
 struct FoodSearchView: View {
+    var initialMealType: MealType = .lunch
     @StateObject private var viewModel = FoodSearchViewModel()
+    @Environment(\.modelContext) private var modelContext
     @State private var showBarcodeScan = false
     @State private var selectedFood: FoodItem?
-    @State private var showAddFood = false
+    @State private var showAddCustomFood = false
     @State private var showFavorites = false
 
     var body: some View {
@@ -19,7 +22,7 @@ struct FoodSearchView: View {
                             .textFieldStyle(.plain)
                             .autocapitalization(.none)
                             .onChange(of: viewModel.searchQuery) { _, _ in
-                                viewModel.search()
+                                viewModel.search(context: modelContext)
                             }
 
                         if !viewModel.searchQuery.isEmpty {
@@ -99,12 +102,22 @@ struct FoodSearchView: View {
                     Task { await viewModel.searchByBarcode(code) }
                 }
             }
-            .sheet(item: $selectedFood) { food in
-                FoodDetailAddView(food: food, mealType: viewModel.selectedMealType)
+            .sheet(item: $selectedFood, onDismiss: {
+                viewModel.loadFavorites(context: modelContext)
+            }) { food in
+                FoodDetailAddView(food: food, initialMealType: viewModel.selectedMealType)
+            }
+            .sheet(isPresented: $showAddCustomFood, onDismiss: {
+                viewModel.loadRecentFromLocal(context: modelContext)
+                viewModel.loadCustomFoods(context: modelContext)
+            }) {
+                CustomFoodEntryView(mealType: viewModel.selectedMealType)
             }
             .task {
-                await viewModel.loadRecent()
-                await viewModel.loadFrequent()
+                viewModel.selectedMealType = initialMealType
+                viewModel.loadRecentFromLocal(context: modelContext)
+                viewModel.loadCustomFoods(context: modelContext)
+                viewModel.loadFavorites(context: modelContext)
             }
         }
     }
@@ -142,7 +155,7 @@ struct FoodSearchView: View {
                             .onTapGesture { selectedFood = food }
                             .swipeActions(edge: .trailing) {
                                 Button(role: .destructive) {
-                                    viewModel.toggleFavorite(food)
+                                    viewModel.toggleFavorite(food, context: modelContext)
                                 } label: {
                                     Label("Favoriden Çıkar", systemImage: "heart.slash")
                                 }
@@ -156,18 +169,30 @@ struct FoodSearchView: View {
 
     private var recentAndFrequentList: some View {
         List {
-            if !viewModel.recentFoods.isEmpty {
-                Section("Son Yenenler") {
-                    ForEach(viewModel.recentFoods, id: \.id) { food in
-                        FoodSearchRow(food: food)
-                            .onTapGesture { selectedFood = food }
+            if !viewModel.recentMeals.isEmpty {
+                Section("Son Eklenenler") {
+                    ForEach(viewModel.recentMeals) { meal in
+                        RecentMealRow(meal: meal)
+                            .onTapGesture {
+                                // Create a FoodItem from the recent meal to reuse
+                                let food = FoodItem(
+                                    id: UUID().uuidString,
+                                    name: meal.foodName,
+                                    servingSizeG: meal.quantityG,
+                                    calories: meal.calories,
+                                    proteinG: meal.proteinG,
+                                    carbsG: meal.carbsG,
+                                    fatG: meal.fatG
+                                )
+                                selectedFood = food
+                            }
                     }
                 }
             }
 
-            if !viewModel.frequentFoods.isEmpty {
-                Section("Sık Yenenler") {
-                    ForEach(viewModel.frequentFoods, id: \.id) { food in
+            if !viewModel.customFoods.isEmpty {
+                Section("Özel Yemeklerim") {
+                    ForEach(viewModel.customFoods, id: \.id) { food in
                         FoodSearchRow(food: food)
                             .onTapGesture { selectedFood = food }
                     }
@@ -175,7 +200,7 @@ struct FoodSearchView: View {
             }
 
             Section {
-                Button(action: { showAddFood = true }) {
+                Button(action: { showAddCustomFood = true }) {
                     HStack {
                         Image(systemName: "plus.circle.fill")
                             .foregroundStyle(.ctAccent)
@@ -238,16 +263,18 @@ struct FoodSearchRow: View {
 
 struct FoodDetailAddView: View {
     let food: FoodItem
-    let mealType: MealType
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     @State private var quantityG: Double
     @State private var servingCount: Double = 1.0
+    @State private var selectedMealType: MealType
+    @State private var isFavorited: Bool = false
 
-    init(food: FoodItem, mealType: MealType) {
+    init(food: FoodItem, initialMealType: MealType) {
         self.food = food
-        self.mealType = mealType
         self._quantityG = State(initialValue: food.servingSizeG)
+        self._selectedMealType = State(initialValue: initialMealType)
+        self._isFavorited = State(initialValue: food.isFavorite)
     }
 
     private var nutrition: NutritionInfo {
@@ -269,6 +296,26 @@ struct FoodDetailAddView: View {
                         }
                     }
                     .padding(.top, 20)
+
+                    // Meal type selector
+                    HStack(spacing: 8) {
+                        ForEach(MealType.allCases, id: \.self) { type in
+                            Button(action: { selectedMealType = type }) {
+                                HStack(spacing: 4) {
+                                    Image(systemName: type.icon)
+                                        .font(.caption2)
+                                    Text(type.displayName)
+                                        .font(.ctCaption)
+                                }
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 8)
+                                .frame(maxWidth: .infinity)
+                                .background(selectedMealType == type ? Color.ctAccent : Color.ctSurfaceElevated)
+                                .foregroundStyle(selectedMealType == type ? .black : .ctTextPrimary)
+                                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                            }
+                        }
+                    }
 
                     // Serving selector
                     VStack(spacing: 12) {
@@ -323,7 +370,7 @@ struct FoodDetailAddView: View {
                     Button(action: addMeal) {
                         HStack {
                             Image(systemName: "plus.circle.fill")
-                            Text("\(mealType.displayName)'ne Ekle")
+                            Text("\(selectedMealType.displayName)'ne Ekle")
                         }
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 16)
@@ -344,22 +391,59 @@ struct FoodDetailAddView: View {
                 }
                 ToolbarItem(placement: .primaryAction) {
                     Button(action: {
-                        food.isFavorite.toggle()
-                        food.lastUsedAt = Date()
+                        toggleFavorite()
                     }) {
-                        Image(systemName: food.isFavorite ? "heart.fill" : "heart")
-                            .foregroundStyle(food.isFavorite ? .ctError : .ctTextSecondary)
+                        Image(systemName: isFavorited ? "heart.fill" : "heart")
+                            .foregroundStyle(isFavorited ? .ctError : .ctTextSecondary)
                     }
+                }
+            }
+            .task {
+                if let existing = findExistingFood() {
+                    isFavorited = existing.isFavorite
                 }
             }
         }
     }
 
+    /// Find existing FoodItem in SwiftData by id, then by name as fallback
+    private func findExistingFood() -> FoodItem? {
+        guard let allFoods = try? modelContext.fetch(FetchDescriptor<FoodItem>()) else { return nil }
+        if let match = allFoods.first(where: { $0.id == food.id }) { return match }
+        let name = (food.nameTr ?? food.name).lowercased()
+        return allFoods.first(where: { ($0.nameTr ?? $0.name).lowercased() == name })
+    }
+
+    private func toggleFavorite() {
+        if let existing = findExistingFood() {
+            existing.isFavorite.toggle()
+            existing.lastUsedAt = Date()
+            isFavorited = existing.isFavorite
+        } else {
+            food.isFavorite = true
+            food.lastUsedAt = Date()
+            food.useCount += 1
+            modelContext.insert(food)
+            isFavorited = true
+        }
+    }
+
     private func addMeal() {
+        // Save FoodItem to SwiftData if not already there
+        let existingFood = findExistingFood()
+        if let existingFood {
+            existingFood.lastUsedAt = Date()
+            existingFood.useCount += 1
+        } else {
+            food.lastUsedAt = Date()
+            food.useCount += 1
+            modelContext.insert(food)
+        }
+
         let entry = MealEntry(
             foodId: food.id,
             foodName: food.nameTr ?? food.name,
-            mealType: mealType,
+            mealType: selectedMealType,
             quantityG: quantityG,
             calories: nutrition.calories,
             proteinG: nutrition.proteinG,
@@ -394,13 +478,53 @@ struct NutritionRow: View {
     }
 }
 
+struct RecentMealRow: View {
+    let meal: RecentMealItem
+
+    var body: some View {
+        HStack(spacing: 12) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(meal.foodName)
+                    .font(.ctBody)
+                    .lineLimit(1)
+                Text("\(Int(meal.quantityG))g")
+                    .font(.ctCaption)
+                    .foregroundStyle(.ctTextSecondary)
+            }
+
+            Spacer()
+
+            VStack(alignment: .trailing, spacing: 2) {
+                Text("\(Int(meal.calories)) kcal")
+                    .font(.ctSubheadline)
+                    .fontWeight(.medium)
+
+                HStack(spacing: 4) {
+                    Text("P:\(Int(meal.proteinG))")
+                        .foregroundColor(.ctProtein)
+                    Text("K:\(Int(meal.carbsG))")
+                        .foregroundColor(.ctCarbs)
+                    Text("Y:\(Int(meal.fatG))")
+                        .foregroundColor(.ctFat)
+                }
+                .font(.system(size: 10))
+            }
+
+            Image(systemName: "chevron.right")
+                .font(.caption)
+                .foregroundStyle(.ctTextSecondary)
+        }
+        .padding(.vertical, 4)
+    }
+}
+
 struct AddFoodView: View {
     let mealType: MealType
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         NavigationStack {
-            FoodSearchView()
+            FoodSearchView(initialMealType: mealType)
                 .navigationTitle("\(mealType.displayName) - Yemek Ekle")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {

@@ -83,7 +83,9 @@ struct DashboardView: View {
             .task {
                 await viewModel.loadData(context: modelContext)
             }
-            .sheet(isPresented: $showAddFood) {
+            .sheet(isPresented: $showAddFood, onDismiss: {
+                Task { await viewModel.loadData(context: modelContext) }
+            }) {
                 AddFoodView(mealType: selectedMealType)
             }
             .overlay {

@@ -21,10 +21,19 @@ class DashboardViewModel: ObservableObject {
     var carbsGoal: Int { UserDefaultsManager.shared.carbsGoal }
     var fatGoal: Int { UserDefaultsManager.shared.fatGoal }
 
-    var totalCalories: Double { dailyLog?.totalCalories ?? 0 }
-    var totalProtein: Double { dailyLog?.totalProteinG ?? 0 }
-    var totalCarbs: Double { dailyLog?.totalCarbsG ?? 0 }
-    var totalFat: Double { dailyLog?.totalFatG ?? 0 }
+    // Calculate totals from actual meal entries, not stored DailyLog values
+    var totalCalories: Double {
+        meals.values.flatMap { $0 }.reduce(0) { $0 + $1.calories }
+    }
+    var totalProtein: Double {
+        meals.values.flatMap { $0 }.reduce(0) { $0 + $1.proteinG }
+    }
+    var totalCarbs: Double {
+        meals.values.flatMap { $0 }.reduce(0) { $0 + $1.carbsG }
+    }
+    var totalFat: Double {
+        meals.values.flatMap { $0 }.reduce(0) { $0 + $1.fatG }
+    }
 
     var caloriesRemaining: Double {
         Double(calorieGoal) - totalCalories + activeCalories
@@ -78,11 +87,16 @@ class DashboardViewModel: ObservableObject {
             activeCalories = await healthKit.getTodayActiveCalories()
         }
 
-        // Check if calorie goal just reached
+        // Check if calorie goal just reached (show once per day)
         let newProgress = calorieProgress
         if previousCalorieProgress < 1.0 && newProgress >= 1.0 && selectedDate.isToday {
-            showGoalReached = true
-            HapticManager.success()
+            let lastShownKey = "goalReachedLastShownDate"
+            let todayString = selectedDate.formatted(.iso8601.year().month().day())
+            if UserDefaults.standard.string(forKey: lastShownKey) != todayString {
+                showGoalReached = true
+                UserDefaults.standard.set(todayString, forKey: lastShownKey)
+                HapticManager.success()
+            }
         }
         previousCalorieProgress = newProgress
 

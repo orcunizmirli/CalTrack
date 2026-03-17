@@ -7,9 +7,7 @@ import { AppError } from '../middleware/errorHandler';
 const router = Router();
 const prisma = new PrismaClient();
 
-router.use(authenticate);
-
-// GET /foods/search?q=
+// GET /foods/search?q= — public (no auth required)
 router.get('/search', async (req: Request, res: Response, next) => {
   try {
     const query = req.query.q as string;
@@ -39,7 +37,7 @@ router.get('/search', async (req: Request, res: Response, next) => {
   }
 });
 
-// GET /foods/barcode/:code
+// GET /foods/barcode/:code — public (no auth required)
 router.get('/barcode/:code', async (req: Request, res: Response, next) => {
   try {
     const { code } = req.params;
@@ -91,6 +89,9 @@ router.get('/barcode/:code', async (req: Request, res: Response, next) => {
     next(error);
   }
 });
+
+// Auth required for remaining routes
+router.use(authenticate);
 
 // GET /foods/:id
 router.get('/:id', async (req: Request, res: Response, next) => {
