@@ -13,7 +13,6 @@ class FoodItem(BaseModel):
     plate_fraction: float | None = None  # fraction of plate covered
     depth_cm: float | None = None  # estimated depth on plate
     confidence: float = 0.8
-    matched_food_id: str | None = None  # DB match from RAG
     # Portion calibration fields
     standard_portion_g: float | None = None  # known standard portion
     standard_portion_label: str | None = None  # e.g. "1 adet", "1 porsiyon"
@@ -53,17 +52,6 @@ class FoodAnalysisResponse(BaseModel):
     processing_ms: int
     # Indicates items need user portion confirmation
     needs_portion_review: bool = True
-
-
-class PortionUpdateRequest(BaseModel):
-    """User adjusts portion after AI analysis."""
-    items: list["PortionAdjustment"]
-
-
-class PortionAdjustment(BaseModel):
-    name: str
-    adjusted_portion_g: float
-    matched_food_id: str | None = None
 
 
 class RecipeRequest(BaseModel):

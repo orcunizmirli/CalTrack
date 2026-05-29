@@ -1,33 +1,16 @@
 import logging
-from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.routers import food_analysis, recipes
 from app.config import settings
-from app.db import init_db, close_pool
 
 logger = logging.getLogger(__name__)
 
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    # Startup
-    if settings.DATABASE_URL:
-        try:
-            await init_db()
-            logger.info("Database initialized with pgvector support")
-        except Exception as e:
-            logger.warning(f"Database init failed (non-fatal): {e}")
-    yield
-    # Shutdown
-    await close_pool()
-
-
 app = FastAPI(
     title="Forkcast AI Service",
-    description="AI-powered food analysis and recipe generation service",
-    version="1.0.0",
-    lifespan=lifespan,
+    description="Lightweight AI-powered food analysis and recipe generation (API-only, no self-hosted models)",
+    version="2.0.0",
+    docs_url="/docs",
 )
 
 app.add_middleware(
@@ -44,4 +27,4 @@ app.include_router(recipes.router, prefix="/ai", tags=["Recipes"])
 
 @app.get("/health")
 async def health_check():
-    return {"status": "healthy", "service": "forkcast-ai"}
+    return {"status": "healthy", "service": "forkcast-ai", "version": "2.0.0"}
